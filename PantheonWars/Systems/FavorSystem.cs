@@ -1,6 +1,7 @@
 using System;
 using PantheonWars.Models;
 using Vintagestory.API.Common;
+using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 
 namespace PantheonWars.Systems
@@ -45,8 +46,7 @@ namespace PantheonWars.Systems
             // Check if death was caused by another player (PvP)
             if (damageSource?.SourceEntity is EntityPlayer attackerEntity)
             {
-                var attackerPlayer = _sapi.World.PlayerByUid(attackerEntity.PlayerUID);
-                if (attackerPlayer != null && attackerPlayer != deadPlayer)
+                if (_sapi.World.PlayerByUid(attackerEntity.PlayerUID) is IServerPlayer attackerPlayer && attackerPlayer != deadPlayer)
                 {
                     ProcessPvPKill(attackerPlayer, deadPlayer);
                 }

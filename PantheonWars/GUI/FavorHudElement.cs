@@ -50,17 +50,17 @@ namespace PantheonWars.GUI
 
             if (deityText != null)
             {
-                deityText.SetNewText($"Deity: {_deityName}");
+                deityText.SetValue($"Deity: {_deityName}");
             }
 
             if (favorText != null)
             {
-                favorText.SetNewText($"Favor: {_currentFavor}");
+                favorText.SetValue($"Favor: {_currentFavor}");
             }
 
             if (rankText != null)
             {
-                rankText.SetNewText($"Rank: {_devotionRank}");
+                rankText.SetValue($"Rank: {_devotionRank}");
             }
         }
 
