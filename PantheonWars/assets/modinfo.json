@@ -1,0 +1,15 @@
+{
+  "type": "code",
+  "modid": "pantheonwars",
+  "name": "Pantheon Wars",
+  "author": "YourName",
+  "description": "A religious-themed PvP mod featuring competing deities with unique abilities and favor-based progression system.",
+  "version": "0.1.0",
+  "dependencies": {
+    "game": "1.21.0",
+    "survival": ""
+  },
+  "side": "Universal",
+  "requiredOnClient": true,
+  "requiredOnServer": true
+}

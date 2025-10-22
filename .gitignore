@@ -1,0 +1,42 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio / Rider
+.vs/
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Cake
+tools/
+.dotnet/
+
+# Server data
+.server/
+
+# Compiled files
+*.dll
+*.exe
+*.pdb
+
+# Release packages
+Release/*.zip
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# User-specific files
+*.suo
+*.user
+*.sln.docstates
