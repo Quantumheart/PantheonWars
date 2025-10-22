@@ -2,7 +2,7 @@
   "type": "code",
   "modid": "pantheonwars",
   "name": "Pantheon Wars",
-  "author": "YourName",
+  "author": "Valinnar",
   "description": "A religious-themed PvP mod featuring competing deities with unique abilities and favor-based progression system.",
   "version": "0.1.0",
   "dependencies": {
