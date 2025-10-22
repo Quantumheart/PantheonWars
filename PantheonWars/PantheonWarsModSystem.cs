@@ -14,6 +14,7 @@ namespace PantheonWars
         public const string NETWORK_CHANNEL = "pantheonwars";
 
         // Server-side systems
+        private ICoreServerAPI? _sapi;
         private DeityRegistry? _deityRegistry;
         private PlayerDataManager? _playerDataManager;
         private FavorSystem? _favorSystem;
@@ -39,6 +40,7 @@ namespace PantheonWars
         public override void StartServerSide(ICoreServerAPI api)
         {
             base.StartServerSide(api);
+            _sapi = api;
             api.Logger.Notification("[PantheonWars] Initializing server-side systems...");
 
             // Initialize deity registry
@@ -108,7 +110,7 @@ namespace PantheonWars
 
         private void SendPlayerDataToClient(IServerPlayer player)
         {
-            if (_playerDataManager == null || _deityRegistry == null) return;
+            if (_playerDataManager == null || _deityRegistry == null || _sapi == null) return;
 
             var playerData = _playerDataManager.GetOrCreatePlayerData(player);
             var deity = _deityRegistry.GetDeity(playerData.DeityType);
@@ -121,7 +123,7 @@ namespace PantheonWars
                 deityName
             );
 
-            var channel = player.Entity.Api.Network.GetChannel(NETWORK_CHANNEL);
+            var channel = _sapi.Network.GetChannel(NETWORK_CHANNEL);
             channel.SendPacket(packet, player);
         }
 

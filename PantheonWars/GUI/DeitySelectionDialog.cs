@@ -17,7 +17,7 @@ namespace PantheonWars.GUI
         private readonly Action<DeityType> _onDeitySelected;
         private DeityType _selectedDeity = DeityType.None;
 
-        public override string ToggleKeyCombinationCode => null;
+        public override string? ToggleKeyCombinationCode => null;
 
         public DeitySelectionDialog(ICoreClientAPI capi, DeityRegistry deityRegistry, Action<DeityType> onDeitySelected)
             : base(capi)
@@ -38,7 +38,6 @@ namespace PantheonWars.GUI
 
             // Calculate dialog dimensions
             double dialogWidth = 600;
-            double dialogHeight = 400;
 
             var bgBounds = ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.CenterMiddle);
             var dialogBounds = ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.CenterMiddle)
@@ -78,9 +77,10 @@ namespace PantheonWars.GUI
         {
             var bounds = ElementBounds.Fixed(10, yPos, dialogWidth - 60, 60);
 
-            // Radio button
+            // Radio button with lambda to capture deity type
             var radioBounds = ElementBounds.Fixed(10, yPos + 15, 20, 20);
-            composer.AddToggleButton("", CairoFont.WhiteSmallText(), OnDeityToggle, radioBounds, deity.Type.ToString().ToLower());
+            var deityType = deity.Type; // Capture for lambda
+            composer.AddToggleButton("", CairoFont.WhiteSmallText(), (on) => OnDeityToggle(on, deityType), radioBounds, deity.Type.ToString().ToLower());
 
             // Deity name and domain
             var nameBounds = ElementBounds.Fixed(40, yPos, 200, 25);
@@ -97,9 +97,9 @@ namespace PantheonWars.GUI
             yPos += 70;
         }
 
-        private void OnDeityToggle(bool on, string deityTypeStr)
+        private void OnDeityToggle(bool on, DeityType deityType)
         {
-            if (on && Enum.TryParse<DeityType>(deityTypeStr, true, out var deityType))
+            if (on)
             {
                 _selectedDeity = deityType;
 
@@ -117,7 +117,7 @@ namespace PantheonWars.GUI
                     }
                 }
             }
-            else if (!on)
+            else
             {
                 _selectedDeity = DeityType.None;
             }
