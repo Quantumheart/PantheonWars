@@ -1,0 +1,13 @@
+{
+  "type": "code",
+  "modid": "pantheonwars",
+  "name": "Pantheon Wars",
+  "authors": [
+    "Valinnar"
+  ],
+  "description": "A mod for wars between pantheons.",
+  "version": "1.0.0",
+  "dependencies": {
+    "game": ""
+  }
+}

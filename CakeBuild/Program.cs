@@ -112,7 +112,7 @@ public sealed class PackageTask : FrostingTask<BuildContext>
         context.CreateDirectory(tempDir);
         
         // Copy mod files
-        var buildOutput = $"./PantheonWars/bin/{context.BuildConfiguration}/net7.0";
+        var buildOutput = $"./PantheonWars/bin/{context.BuildConfiguration}";
         context.CopyFile($"{buildOutput}/PantheonWars.dll", $"{tempDir}/PantheonWars.dll");
         context.CopyFile($"{buildOutput}/PantheonWars.pdb", $"{tempDir}/PantheonWars.pdb");
         

@@ -2,14 +2,14 @@
   "profiles": {
     "Vintage Story Client": {
       "commandName": "Executable",
-      "executablePath": "$(VINTAGE_STORY)/Vintagestory.exe",
-      "commandLineArgs": "--addModPath \"$(ProjectDir)bin/$(Configuration)\" --addOrigin \"$(ProjectDir)assets\"",
+      "executablePath": "dotnet",
+      "commandLineArgs": "\"$(VINTAGE_STORY)/Vintagestory.dll\" --tracelog --addModPath \"$(ProjectDir)/bin/$(Configuration)/Mods\" --addOrigin \"$(ProjectDir)/assets\"",
       "workingDirectory": "$(VINTAGE_STORY)"
     },
     "Vintage Story Server": {
       "commandName": "Executable",
-      "executablePath": "$(VINTAGE_STORY)/VintagestoryServer.exe",
-      "commandLineArgs": "--addModPath \"$(ProjectDir)bin/$(Configuration)\" --addOrigin \"$(ProjectDir)assets\" --dataPath \"$(ProjectDir).server\"",
+      "executablePath": "dotnet",
+      "commandLineArgs": "\"$(VINTAGE_STORY)/VintagestoryServer.dll\" --tracelog --addModPath \"$(ProjectDir)/bin/$(Configuration)/Mods\" --addOrigin \"$(ProjectDir)/assets\"",
       "workingDirectory": "$(VINTAGE_STORY)"
     }
   }
