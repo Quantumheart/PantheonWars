@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Cairo;
 using PantheonWars.Models;
 using PantheonWars.Systems;
 using Vintagestory.API.Client;
-using Vintagestory.API.Config;
 
 namespace PantheonWars.GUI
 {
@@ -34,67 +34,91 @@ namespace PantheonWars.GUI
 
         private void ComposeDialog()
         {
+            const int titleBarHeight = 30;
+            const double contentWidth = 660;
+            const double verticalSpacing = 95;
+
             var deities = _deityRegistry.GetAllDeities().ToList();
 
-            // Calculate dialog dimensions
-            double dialogWidth = 600;
+            // Pre-calculate all element bounds with relative positioning
+            var textBounds = ElementBounds.Fixed(0, 0, contentWidth, 60);
 
-            var bgBounds = ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.CenterMiddle);
-            var dialogBounds = ElementStdBounds.AutosizedMainDialog.WithAlignment(EnumDialogArea.CenterMiddle)
-                .WithFixedPadding(GuiStyle.ElementToDialogPadding);
+            // Create bounds for each deity option
+            var deityBoundsList = new List<ElementBounds>();
+            double yPos = 75; // Start below intro text
+
+            foreach (var deity in deities)
+            {
+                var deityBounds = ElementBounds.Fixed(10, yPos, contentWidth - 20, 80);
+                deityBoundsList.Add(deityBounds);
+                yPos += verticalSpacing;
+            }
+
+            // Confirm button (centered)
+            var buttonBounds = ElementBounds.Fixed(contentWidth / 2 - 100, yPos + 15, 200, 30);
+
+            // Create bgBounds with Fill pattern and register all children
+            var bgBounds = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
+            bgBounds.BothSizing = ElementSizing.FitToChildren;
+            bgBounds.WithChildren(new[] { textBounds, buttonBounds }.Concat(deityBoundsList).ToArray());
+            bgBounds.fixedOffsetY = titleBarHeight;  // CRITICAL: Shifts content below title bar
+
+            // Auto-sized dialog at center of screen
+            var dialogBounds = ElementStdBounds.AutosizedMainDialog
+                .WithAlignment(EnumDialogArea.CenterMiddle);
+
+            SingleComposer?.Dispose();
 
             SingleComposer = capi.Gui
                 .CreateCompo("deityselection", dialogBounds)
-                .AddShadedDialogBG(bgBounds, true)
+                .AddShadedDialogBG(ElementBounds.Fill)  // Use Fill, not custom bounds
                 .AddDialogTitleBar("Choose Your Deity", OnTitleBarCloseClicked)
-                .BeginChildElements(bgBounds);
+                .BeginChildElements(bgBounds);  // bgBounds has fixedOffsetY set
 
             var composer = SingleComposer;
 
             // Introduction text
-            var textBounds = ElementBounds.Fixed(0, 30, dialogWidth - 40, 40);
             composer.AddStaticText(
                 "Pledge yourself to a deity and gain access to their divine powers. Choose wisely, for this decision shapes your path.",
                 CairoFont.WhiteSmallText(),
                 textBounds
             );
 
-            // Deity list
-            double yPos = 80;
-            foreach (var deity in deities)
+            // Add deity options using pre-calculated bounds
+            for (int i = 0; i < deities.Count; i++)
             {
-                AddDeityOption(composer, deity, ref yPos, dialogWidth);
+                AddDeityOption(composer, deities[i], deityBoundsList[i]);
             }
 
             // Confirm button
-            var buttonBounds = ElementBounds.Fixed(dialogWidth / 2 - 100, yPos + 20, 200, 30);
             composer.AddSmallButton("Confirm Selection", OnConfirmClicked, buttonBounds, EnumButtonStyle.Normal, "confirmButton");
 
             composer.EndChildElements().Compose();
         }
 
-        private void AddDeityOption(GuiComposer composer, Deity deity, ref double yPos, double dialogWidth)
+        private void AddDeityOption(GuiComposer composer, Deity deity, ElementBounds containerBounds)
         {
-            var bounds = ElementBounds.Fixed(10, yPos, dialogWidth - 60, 60);
+            // Add inset container for visual separation
+            composer.AddInset(containerBounds, 2);
+
+            // Inner padding for content
+            double innerPadding = 8;
+            double baseX = containerBounds.fixedX + innerPadding;
+            double baseY = containerBounds.fixedY + innerPadding;
+            double contentWidth = containerBounds.fixedWidth - (innerPadding * 2);
 
             // Radio button with lambda to capture deity type
-            var radioBounds = ElementBounds.Fixed(10, yPos + 15, 20, 20);
+            var radioBounds = ElementBounds.Fixed(baseX, baseY + 5, 20, 20);
             var deityType = deity.Type; // Capture for lambda
             composer.AddToggleButton("", CairoFont.WhiteSmallText(), (on) => OnDeityToggle(on, deityType), radioBounds, deity.Type.ToString().ToLower());
 
-            // Deity name and domain
-            var nameBounds = ElementBounds.Fixed(40, yPos, 200, 25);
-            composer.AddStaticText($"{deity.Name} - {deity.Domain}", CairoFont.WhiteDetailText(), nameBounds);
+            // Deity name and domain (header)
+            var nameBounds = ElementBounds.Fixed(baseX + 30, baseY, contentWidth - 30, 25);
+            composer.AddStaticText($"{deity.Name} - {deity.Domain}", CairoFont.WhiteDetailText().WithWeight(FontWeight.Bold).WithFontSize(20), nameBounds);
 
-            // Deity description
-            var descBounds = ElementBounds.Fixed(40, yPos + 25, dialogWidth - 80, 30);
+            // Deity description (below name)
+            var descBounds = ElementBounds.Fixed(baseX + 30, baseY + 28, contentWidth - 30, 40);
             composer.AddStaticText(deity.Description, CairoFont.WhiteSmallText(), descBounds);
-
-            // Playstyle
-            var styleBounds = ElementBounds.Fixed(250, yPos, dialogWidth - 280, 25);
-            composer.AddStaticText($"Style: {deity.Playstyle}", CairoFont.WhiteSmallishText(), styleBounds);
-
-            yPos += 70;
         }
 
         private void OnDeityToggle(bool on, DeityType deityType)
