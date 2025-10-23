@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using PantheonWars.Models;
+using PantheonWars.Systems.BuffSystem;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
@@ -11,7 +13,7 @@ namespace PantheonWars.Abilities.Lysa
     public class SwiftFeetAbility : Ability
     {
         private const float DURATION = 8f;
-        private const float SPEED_MULTIPLIER = 1.5f; // 50% faster movement
+        private const float SPEED_BOOST = 0.5f; // 50% faster movement
 
         public SwiftFeetAbility() : base(
             id: "lysa_swift_feet",
@@ -25,16 +27,33 @@ namespace PantheonWars.Abilities.Lysa
             MinimumRank = DevotionRank.Initiate;
         }
 
-        public override bool Execute(IServerPlayer caster, ICoreServerAPI sapi)
+        public override bool Execute(IServerPlayer caster, ICoreServerAPI sapi, BuffManager buffManager = null)
         {
             var casterEntity = caster.Entity;
             if (casterEntity == null) return false;
 
-            // Apply speed boost (simplified for MVP)
-            // In a full implementation, this would modify actual movement speed stats
+            // Apply movement speed buff
+            if (buffManager != null)
+            {
+                Dictionary<string, float> statModifiers = new Dictionary<string, float>
+                {
+                    { "walkspeed", SPEED_BOOST }
+                };
+
+                buffManager.ApplyEffect(
+                    casterEntity,
+                    "swift_feet_buff",
+                    DURATION,
+                    Id,
+                    caster.PlayerUID,
+                    statModifiers,
+                    true
+                );
+            }
+
             caster.SendMessage(
                 GlobalConstants.GeneralChatGroup,
-                "[Swift Feet] Lysa blesses you with incredible agility! (+50% movement speed)",
+                $"[Swift Feet] Lysa blesses you with incredible agility for {DURATION} seconds! (+50% movement speed)",
                 EnumChatType.Notification
             );
 

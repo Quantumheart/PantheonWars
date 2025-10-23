@@ -1,7 +1,11 @@
+using System.Collections.Generic;
 using PantheonWars.Models;
+using PantheonWars.Systems.BuffSystem;
 using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
+using Vintagestory.GameContent;
 
 namespace PantheonWars.Abilities.Khoras
 {
@@ -11,12 +15,12 @@ namespace PantheonWars.Abilities.Khoras
     public class LastStandAbility : Ability
     {
         private const float DURATION = 12f;
-        private const float DAMAGE_REDUCTION = 0.5f; // 50% damage reduction
+        private const float DAMAGE_REDUCTION = 0.5f; // Multiply incoming damage by 0.5 (50% reduction)
 
         public LastStandAbility() : base(
             id: "khoras_last_stand",
             name: "Last Stand",
-            description: $"Channel Khoras's indomitable will, gaining 50% damage resistance for {DURATION} seconds.",
+            description: $"Channel Khoras's indomitable will, gaining 50% damage resistance for {DURATION} seconds. (Requires <30% health)",
             deity: DeityType.Khoras,
             type: AbilityType.Defensive)
         {
@@ -34,11 +38,18 @@ namespace PantheonWars.Abilities.Khoras
                 return false;
             }
 
-            // Optional: Require low health to use (30% or less)
-            var healthPercent = casterEntity.Health / casterEntity.MaxHealth;
+            // Require low health to use (30% or less)
+            var healthBehavior = casterEntity.GetBehavior<EntityBehaviorHealth>();
+            if (healthBehavior == null)
+            {
+                failureReason = "Health system not found";
+                return false;
+            }
+
+            var healthPercent = healthBehavior.Health / healthBehavior.MaxHealth;
             if (healthPercent > 0.3f)
             {
-                failureReason = "Last Stand can only be used when your health is below 30%";
+                failureReason = $"Last Stand can only be used when your health is below 30% (current: {healthPercent * 100:F0}%)";
                 return false;
             }
 
@@ -46,16 +57,33 @@ namespace PantheonWars.Abilities.Khoras
             return true;
         }
 
-        public override bool Execute(IServerPlayer caster, ICoreServerAPI sapi)
+        public override bool Execute(IServerPlayer caster, ICoreServerAPI sapi, BuffManager buffManager = null)
         {
             var casterEntity = caster.Entity;
             if (casterEntity == null) return false;
 
-            // Apply damage resistance (simplified for MVP)
-            // In a full implementation, this would use the entity stats system
+            // Apply damage resistance buff
+            if (buffManager != null)
+            {
+                Dictionary<string, float> statModifiers = new Dictionary<string, float>
+                {
+                    { "receivedDamageMultiplier", DAMAGE_REDUCTION }
+                };
+
+                buffManager.ApplyEffect(
+                    casterEntity,
+                    "last_stand_buff",
+                    DURATION,
+                    Id,
+                    caster.PlayerUID,
+                    statModifiers,
+                    true
+                );
+            }
+
             caster.SendMessage(
                 GlobalConstants.GeneralChatGroup,
-                "[Last Stand] You refuse to fall! Khoras grants you unbreakable resolve! (50% damage resistance)",
+                $"[Last Stand] You refuse to fall! Khoras grants you unbreakable resolve for {DURATION} seconds! (50% damage resistance)",
                 EnumChatType.Notification
             );
 

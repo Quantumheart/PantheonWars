@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using PantheonWars.Models;
+using PantheonWars.Systems.BuffSystem;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
@@ -14,7 +16,7 @@ namespace PantheonWars.Abilities.Lysa
     {
         private const float RANGE = 20f;
         private const float DURATION = 20f;
-        private const float DAMAGE_MULTIPLIER = 1.25f; // 25% extra damage
+        private const float DAMAGE_AMPLIFICATION = 0.25f; // 25% extra damage taken
 
         public HuntersMarkAbility() : base(
             id: "lysa_hunters_mark",
@@ -28,7 +30,7 @@ namespace PantheonWars.Abilities.Lysa
             MinimumRank = DevotionRank.Initiate;
         }
 
-        public override bool Execute(IServerPlayer caster, ICoreServerAPI sapi)
+        public override bool Execute(IServerPlayer caster, ICoreServerAPI sapi, BuffManager buffManager = null)
         {
             var casterEntity = caster.Entity;
             if (casterEntity == null) return false;
@@ -77,14 +79,48 @@ namespace PantheonWars.Abilities.Lysa
                 return false;
             }
 
-            // Apply mark (simplified for MVP - just a notification)
+            // Apply debuff using BuffManager
+            if (buffManager != null)
+            {
+                Dictionary<string, float> statModifiers = new Dictionary<string, float>
+                {
+                    { "receivedDamageAmplification", DAMAGE_AMPLIFICATION }
+                };
+
+                buffManager.ApplyEffect(
+                    target,
+                    "hunters_mark_debuff",
+                    DURATION,
+                    Id,
+                    caster.PlayerUID,
+                    statModifiers,
+                    false // This is a debuff
+                );
+            }
+
+            // Notify caster
+            string targetName = target is EntityPlayer targetPlayer
+                ? sapi.World.PlayerByUid(targetPlayer.PlayerUID)?.PlayerName ?? "Unknown"
+                : target.GetName();
+
             caster.SendMessage(
                 GlobalConstants.GeneralChatGroup,
-                $"[Hunter's Mark] You mark your prey! Target will take 25% extra damage for {DURATION} seconds.",
+                $"[Hunter's Mark] You mark {targetName}! Target will take 25% extra damage for {DURATION} seconds.",
                 EnumChatType.Notification
             );
 
-            sapi.Logger.Debug($"[PantheonWars] {caster.PlayerName} marked target with Hunter's Mark");
+            // Notify the marked target if they're a player
+            if (target is EntityPlayer markedPlayer)
+            {
+                var player = sapi.World.PlayerByUid(markedPlayer.PlayerUID) as IServerPlayer;
+                player?.SendMessage(
+                    GlobalConstants.GeneralChatGroup,
+                    $"[Hunter's Mark] You have been marked by {caster.PlayerName}!",
+                    EnumChatType.Notification
+                );
+            }
+
+            sapi.Logger.Debug($"[PantheonWars] {caster.PlayerName} marked {targetName} with Hunter's Mark");
             return true;
         }
     }

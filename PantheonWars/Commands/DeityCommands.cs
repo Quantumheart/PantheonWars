@@ -52,12 +52,6 @@ namespace PantheonWars.Commands
                     .HandleWith(OnDeityStatus)
                 .EndSubCommand();
 
-            _sapi.ChatCommands.Create("favor")
-                .WithDescription("Check your current divine favor")
-                .RequiresPlayer()
-                .RequiresPrivilege(Privilege.chat)
-                .HandleWith(OnCheckFavor);
-
             _sapi.Logger.Notification("[PantheonWars] Deity commands registered");
         }
 

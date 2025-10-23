@@ -1,4 +1,5 @@
 using PantheonWars.Models;
+using PantheonWars.Systems.BuffSystem;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
@@ -27,7 +28,7 @@ namespace PantheonWars.Abilities.Lysa
             MinimumRank = DevotionRank.Disciple;
         }
 
-        public override bool Execute(IServerPlayer caster, ICoreServerAPI sapi)
+        public override bool Execute(IServerPlayer caster, ICoreServerAPI sapi, BuffManager buffManager = null)
         {
             var casterEntity = caster.Entity;
             if (casterEntity == null) return false;

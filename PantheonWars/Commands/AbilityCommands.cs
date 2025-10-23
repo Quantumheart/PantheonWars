@@ -33,6 +33,7 @@ namespace PantheonWars.Commands
             _sapi.ChatCommands.Create("ability")
                 .WithDescription("Manage and use your deity's abilities")
                 .RequiresPlayer()
+                .RequiresPrivilege(Privilege.chat)
                 .BeginSubCommand("list")
                     .WithDescription("List your available abilities")
                     .HandleWith(OnListAbilities)
