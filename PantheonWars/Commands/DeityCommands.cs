@@ -32,6 +32,7 @@ namespace PantheonWars.Commands
             _sapi.ChatCommands.Create("deity")
                 .WithDescription("Manage your deity and divine favor")
                 .RequiresPlayer()
+                .RequiresPrivilege(Privilege.chat)
                 .BeginSubCommand("list")
                     .WithDescription("List all available deities")
                     .HandleWith(OnListDeities)
@@ -54,6 +55,7 @@ namespace PantheonWars.Commands
             _sapi.ChatCommands.Create("favor")
                 .WithDescription("Check your current divine favor")
                 .RequiresPlayer()
+                .RequiresPrivilege(Privilege.chat)
                 .HandleWith(OnCheckFavor);
 
             _sapi.Logger.Notification("[PantheonWars] Deity commands registered");

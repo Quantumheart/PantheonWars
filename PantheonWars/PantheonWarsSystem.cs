@@ -24,6 +24,8 @@ namespace PantheonWars
         private ICoreClientAPI _capi;
         private FavorHudElement _favorHud;
         private DeityRegistry _clientDeityRegistry;
+        private IServerNetworkChannel _serverChannel;
+        private IClientNetworkChannel _clientChannel;
 
         public string ModName => "pantheonwars";
 
@@ -32,7 +34,7 @@ namespace PantheonWars
             base.Start(api);
             api.Logger.Notification("[PantheonWars] Mod loaded!");
 
-            // Register network channel
+            // Register network channel and message types
             api.Network.RegisterChannel(NETWORK_CHANNEL)
                 .RegisterMessageType<PlayerDataPacket>();
         }
@@ -59,7 +61,9 @@ namespace PantheonWars
             _deityCommands = new DeityCommands(api, _deityRegistry, _playerDataManager);
             _deityCommands.RegisterCommands();
 
-            // Setup network handlers
+            // Setup network channel and handlers
+            _serverChannel = api.Network.GetChannel(NETWORK_CHANNEL);
+            _serverChannel.SetMessageHandler<PlayerDataPacket>(OnServerMessageReceived);
             SetupServerNetworking(api);
 
             // Hook player join to send initial data
@@ -96,10 +100,15 @@ namespace PantheonWars
 
         private void SetupServerNetworking(ICoreServerAPI api)
         {
-            var channel = api.Network.GetChannel(NETWORK_CHANNEL);
+            // Channel already registered and handlers set in StartServerSide
+            // Add any additional server-side packet handlers here if needed
+        }
 
-            // Handle deity selection from client (future implementation)
-            // channel.SetMessageHandler<DeitySelectionPacket>(OnClientDeitySelection);
+        private void OnServerMessageReceived(IServerPlayer fromPlayer, PlayerDataPacket packet)
+        {
+            // Handle any client-to-server messages here
+            // Currently not used, but necessary for channel setup
+            // Future implementation: Handle deity selection from client dialog
         }
 
         private void OnPlayerJoin(IServerPlayer player)
@@ -110,7 +119,7 @@ namespace PantheonWars
 
         private void SendPlayerDataToClient(IServerPlayer player)
         {
-            if (_playerDataManager == null || _deityRegistry == null || _sapi == null) return;
+            if (_playerDataManager == null || _deityRegistry == null || _serverChannel == null) return;
 
             var playerData = _playerDataManager.GetOrCreatePlayerData(player);
             var deity = _deityRegistry.GetDeity(playerData.DeityType);
@@ -123,8 +132,7 @@ namespace PantheonWars
                 deityName
             );
 
-            var channel = _sapi.Network.GetChannel(NETWORK_CHANNEL);
-            channel.SendPacket(packet, player);
+            _serverChannel.SendPacket(packet, player);
         }
 
         #endregion
@@ -133,8 +141,9 @@ namespace PantheonWars
 
         private void SetupClientNetworking(ICoreClientAPI api)
         {
-            var channel = api.Network.GetChannel(NETWORK_CHANNEL);
-            channel.SetMessageHandler<PlayerDataPacket>(OnServerPlayerDataUpdate);
+            _clientChannel = api.Network.GetChannel(NETWORK_CHANNEL);
+            _clientChannel.SetMessageHandler<PlayerDataPacket>(OnServerPlayerDataUpdate);
+            _clientChannel.RegisterMessageType(typeof(PlayerDataPacket));
         }
 
         private void OnServerPlayerDataUpdate(PlayerDataPacket packet)
