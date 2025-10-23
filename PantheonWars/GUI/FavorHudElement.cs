@@ -21,17 +21,19 @@ namespace PantheonWars.GUI
             SetupDialog(bounds);
         }
 
-        private void SetupDialog(ElementBounds bounds)
+        private void SetupDialog(ElementBounds dialogBounds)
         {
-            var bgBounds = ElementBounds.Fill.WithFixedPadding(GuiStyle.ElementToDialogPadding);
-            bgBounds.BothSizing = ElementSizing.FitToChildren;
+            var insetBounds = ElementBounds.Fixed(0, 0, 210, 75);
 
             SingleComposer = capi.Gui
-                .CreateCompo("pantheonwars_favorhud", bounds)
-                .AddShadedDialogBG(bgBounds, false)
-                .AddStaticText("Deity: None", CairoFont.WhiteSmallText(), ElementBounds.Fixed(5, 5, 200, 20), "deityText")
-                .AddStaticText("Favor: 0", CairoFont.WhiteSmallText(), ElementBounds.Fixed(5, 25, 200, 20), "favorText")
-                .AddStaticText("Rank: Initiate", CairoFont.WhiteSmallText(), ElementBounds.Fixed(5, 45, 200, 20), "rankText")
+                .CreateCompo("pantheonwars_favorhud", dialogBounds)
+                .AddInset(insetBounds, 2)
+                .AddStaticText("Deity: None", CairoFont.WhiteSmallText(),
+                    ElementBounds.Fixed(10, 10, 190, 15), "deityText")
+                .AddStaticText("Favor: 0", CairoFont.WhiteSmallText(),
+                    ElementBounds.Fixed(10, 30, 190, 15), "favorText")
+                .AddStaticText("Rank: Initiate", CairoFont.WhiteSmallText(),
+                    ElementBounds.Fixed(10, 50, 190, 15), "rankText")
                 .Compose();
         }
 

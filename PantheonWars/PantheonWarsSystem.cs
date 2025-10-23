@@ -9,23 +9,23 @@ using Vintagestory.API.Client;
 
 namespace PantheonWars
 {
-    public class PantheonWarsModSystem : ModSystem
+    public class PantheonWarsSystem : ModSystem
     {
         public const string NETWORK_CHANNEL = "pantheonwars";
 
         // Server-side systems
-        private ICoreServerAPI? _sapi;
-        private DeityRegistry? _deityRegistry;
-        private PlayerDataManager? _playerDataManager;
-        private FavorSystem? _favorSystem;
-        private DeityCommands? _deityCommands;
+        private ICoreServerAPI _sapi;
+        private DeityRegistry _deityRegistry;
+        private PlayerDataManager _playerDataManager;
+        private FavorSystem _favorSystem;
+        private DeityCommands _deityCommands;
 
         // Client-side systems
-        private ICoreClientAPI? _capi;
-        private FavorHudElement? _favorHud;
-        private DeityRegistry? _clientDeityRegistry;
+        private ICoreClientAPI _capi;
+        private FavorHudElement _favorHud;
+        private DeityRegistry _clientDeityRegistry;
 
-        public string ModName => "Pantheon Wars";
+        public string ModName => "pantheonwars";
 
         public override void Start(ICoreAPI api)
         {
@@ -86,7 +86,7 @@ namespace PantheonWars
             _favorHud.TryOpen();
 
             // Register deity selection dialog opener command
-            api.Input.RegisterHotKey("opendeityselection", "Open Deity Selection", GlKeys.P, HotkeyType.GUIOrOtherControls);
+            api.Input.RegisterHotKey("opendeityselection", "Open Deity Selection", GlKeys.K, HotkeyType.GUIOrOtherControls);
             api.Input.SetHotKeyHandler("opendeityselection", OpenDeitySelectionDialog);
 
             api.Logger.Notification("[PantheonWars] Client-side initialization complete");

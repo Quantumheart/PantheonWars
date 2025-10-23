@@ -1,0 +1,14 @@
+{
+  "type": "code",
+  "name": "Pantheon Wars",
+  "modid": "pantheonwars",
+  "version": "0.1.0",
+  "authors": [
+    "Valinnar"
+  ],
+  "description": "A mod for god fearing warriors.",
+  "side": "Universal",
+  "dependencies": {
+    "game": "1.21.0"
+  }
+}

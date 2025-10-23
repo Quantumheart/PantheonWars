@@ -7,7 +7,9 @@ using Cake.Common.Tools.DotNet.Publish;
 using Cake.Core;
 using Cake.Core.IO;
 using Cake.Frosting;
+using Cake.Json;
 using Newtonsoft.Json.Linq;
+using Vintagestory.API.Common;
 
 public static class Program
 {
@@ -21,28 +23,22 @@ public static class Program
 
 public class BuildContext : FrostingContext
 {
+    public const string ProjectName = "PantheonWars";
     public string BuildConfiguration { get; set; }
     public string Version { get; set; }
     public string ModId { get; set; }
-    
+    public string Name { get; }
+
+    public bool SkipJsonValidation { get; set; }
+
     public BuildContext(ICakeContext context)
         : base(context)
     {
         BuildConfiguration = context.Argument("configuration", "Release");
-        
-        // Read modinfo.json to get version and modid
-        var modinfoPath = "./PantheonWars/assets/modinfo.json";
-        if (System.IO.File.Exists(modinfoPath))
-        {
-            var modinfo = JObject.Parse(System.IO.File.ReadAllText(modinfoPath));
-            Version = modinfo["version"]?.ToString() ?? "0.1.0";
-            ModId = modinfo["modid"]?.ToString() ?? "pantheonwars";
-        }
-        else
-        {
-            Version = "0.1.0";
-            ModId = "pantheonwars";
-        }
+        SkipJsonValidation = context.Argument("skipJsonValidation", false);
+        var modInfo = context.DeserializeJsonFromFile<ModInfo>($"../{ProjectName}/{ProjectName}/modinfo.json");
+        Version = modInfo.Version;
+        Name = modInfo.ModID;
     }
 }
 
@@ -52,10 +48,10 @@ public sealed class ValidateJsonTask : FrostingTask<BuildContext>
     public override void Run(BuildContext context)
     {
         context.Information("Validating JSON files...");
-        
+
         var jsonFiles = context.GetFiles("./PantheonWars/assets/**/*.json");
         var hasErrors = false;
-        
+
         foreach (var file in jsonFiles)
         {
             try
@@ -70,12 +66,12 @@ public sealed class ValidateJsonTask : FrostingTask<BuildContext>
                 hasErrors = true;
             }
         }
-        
+
         if (hasErrors)
         {
             throw new Exception("JSON validation failed!");
         }
-        
+
         context.Information("All JSON files are valid!");
     }
 }
@@ -87,7 +83,7 @@ public sealed class BuildTask : FrostingTask<BuildContext>
     public override void Run(BuildContext context)
     {
         context.Information($"Building PantheonWars in {context.BuildConfiguration} mode...");
-        
+
         context.DotNetBuild("./PantheonWars/PantheonWars.csproj", new DotNetBuildSettings
         {
             Configuration = context.BuildConfiguration
@@ -101,35 +97,14 @@ public sealed class PackageTask : FrostingTask<BuildContext>
 {
     public override void Run(BuildContext context)
     {
-        context.Information("Packaging mod...");
-        
-        var releaseDir = "./Release";
-        var tempDir = $"{releaseDir}/temp";
-        var outputZip = $"{releaseDir}/{context.ModId}_{context.Version}.zip";
-        
-        // Clean and create directories
-        context.CleanDirectory(releaseDir);
-        context.CreateDirectory(tempDir);
-        
-        // Copy mod files
-        var buildOutput = $"./PantheonWars/bin/{context.BuildConfiguration}";
-        context.CopyFile($"{buildOutput}/PantheonWars.dll", $"{tempDir}/PantheonWars.dll");
-        context.CopyFile($"{buildOutput}/PantheonWars.pdb", $"{tempDir}/PantheonWars.pdb");
-        
-        // Copy assets
-        context.CopyDirectory("./PantheonWars/assets", $"{tempDir}/assets");
-        
-        // Create zip
-        context.Zip(tempDir, outputZip);
-        
-        // Clean temp directory
-        context.DeleteDirectory(tempDir, new DeleteDirectorySettings
-        {
-            Recursive = true,
-            Force = true
-        });
-        
-        context.Information($"✓ Package created: {outputZip}");
+        context.EnsureDirectoryExists("../Releases");
+        context.CleanDirectory("../Releases");
+        context.EnsureDirectoryExists($"../Releases/{context.Name}");
+        context.CopyFiles($"../{BuildContext.ProjectName}/bin/{context.BuildConfiguration}/Mods/mod/publish/*",
+            $"../Releases/{context.Name}");
+        context.CopyDirectory($"../{BuildContext.ProjectName}/{BuildContext.ProjectName}/assets", $"../Releases/{context.Name}/assets");
+        context.CopyFile($"../{BuildContext.ProjectName}/{BuildContext.ProjectName}/modinfo.json", $"../Releases/{context.Name}/modinfo.json");
+        context.Zip($"../Releases/{context.Name}", $"../Releases/{context.Name}_{context.Version}.zip");
     }
 }
 
