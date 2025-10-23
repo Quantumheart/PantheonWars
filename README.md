@@ -28,7 +28,7 @@ Pantheon Wars introduces a comprehensive deity worship system where players pled
 ## Development Setup
 
 ### Prerequisites
-- .NET 7 SDK or later
+- .NET 8 SDK or later
 - Vintage Story 1.21.0 or later
 - Visual Studio 2022, VS Code, or JetBrains Rider
 
@@ -68,6 +68,19 @@ Open `PantheonWars.sln` in your IDE and select either:
 - **Vintage Story Client** - Launch client with mod loaded
 - **Vintage Story Server** - Launch dedicated server with mod loaded
 
+### Controls
+
+- **K** - Open deity selection dialog
+
+## Documentation
+
+For detailed information about the mod's systems and mechanics, see:
+
+- **[Implementation Guide](docs/implementation_guide.md)** - Development roadmap and phase breakdown
+- **[Deity Reference](docs/deity_reference.md)** - Complete deity information, relationships, and lore
+- **[Favor System Guide](docs/favor_reference.md)** - How favor works, earning methods, and devotion ranks
+- **[Ability Reference](docs/ability_reference.md)** - Detailed ability mechanics, costs, and usage tips
+
 ## Project Structure
 
 ```
@@ -75,6 +88,11 @@ PantheonWars/
 ├── CakeBuild/              # Build system
 │   ├── Program.cs          # Build tasks and packaging
 │   └── CakeBuild.csproj
+├── docs/                   # Documentation
+│   ├── implementation_guide.md
+│   ├── deity_reference.md
+│   ├── favor_reference.md
+│   └── ability_reference.md
 ├── PantheonWars/           # Main mod project
 │   ├── Abilities/          # Deity abilities
 │   │   ├── Khoras/         # War god abilities
@@ -142,47 +160,32 @@ The mod is currently **fully playable** with the following implemented features:
 - ✅ **HUD Display:** Always-visible deity, favor, and rank display
 - ✅ **PvP Integration:** Favor rewards on kills, penalties on death
 
-## Implementation Phases
+## Development Roadmap
 
-### Phase 1: Foundation (MVP) - ✅ COMPLETE
-- [x] Project structure setup
-- [x] Deity registration system
-- [x] Player deity selection GUI
-- [x] Basic favor tracking
-- [x] Data persistence
-- [x] 1-2 deities with basic abilities
+**Current Status:** Phase 1 Complete, Phase 2 In Progress (3/4)
 
-**Delivered:** Complete deity worship system with 2 fully playable deities (Khoras and Lysa), each with 4 unique abilities. Includes favor tracking, cooldown management, data persistence, GUI, HUD, and comprehensive command system.
+- ✅ **Phase 1:** Foundation (MVP) - Complete
+- 🟡 **Phase 2:** Combat Integration - In Progress (75% complete)
+- 🔲 **Phase 3:** Full Ability System - Planned
+- 🔲 **Phase 4:** World Integration - Planned
+- 🔲 **Phase 5:** Advanced Features - Planned
 
-**Commands Available:**
-- `/deity list`, `/deity info <deity>`, `/deity select <deity>`, `/deity status`, `/favor`
-- `/ability list`, `/ability info <ability>`, `/ability use <ability>`, `/ability cooldowns`
+For detailed phase breakdowns, tasks, and timeline, see the **[Implementation Guide](docs/implementation_guide.md)**.
 
-### Phase 2: Combat Integration - In Progress (3/4)
-- [ ] Damage system hooks *(abilities need to actually modify damage/stats)*
-- [x] Death penalties/favor loss
-- [x] Rival deity bonuses
-- [x] Ability execution framework
+### Available Commands
 
-**Status:** Core framework complete, but abilities currently use MVP placeholder effects (chat notifications) rather than actual damage/stat modifications. Abilities execute and have proper cooldowns/costs, but don't yet hook into Vintage Story's combat and entity stat systems.
+**Deity Management:**
+- `/deity list` - Show all available deities
+- `/deity info <deity>` - Get detailed deity information
+- `/deity select <deity>` - Pledge to a deity
+- `/deity status` - View your current deity status and stats
 
-### Phase 3: Full Ability System
-- [ ] All 8 deities implemented
-- [ ] Complete ability sets
-- [ ] Visual effects
-- [ ] Devotion progression
-
-### Phase 4: World Integration
-- [ ] Shrine blocks
-- [ ] Temple world generation
-- [ ] Sacred ground system
-- [ ] Temple capture mechanics
-
-### Phase 5: Advanced Features
-- [ ] Divine duels
-- [ ] Crusade events
-- [ ] Relic system
-- [ ] Apostate mechanics
+**Favor & Abilities:**
+- `/favor` - Check your current divine favor
+- `/ability list` - Show your available abilities
+- `/ability info <ability>` - Get detailed ability information
+- `/ability use <ability>` - Activate an ability
+- `/ability cooldowns` - Check all ability cooldown status
 
 ## Contributing
 
@@ -190,7 +193,16 @@ This mod is currently in early development. Contributions, suggestions, and feed
 
 ## License
 
-[Choose appropriate license]
+This project is licensed under the [Creative Commons Attribution 4.0 International License](LICENSE) (CC BY 4.0).
+
+You are free to:
+- **Share** — copy and redistribute the material in any medium or format
+- **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
+
+Under the following terms:
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
+
+See the [LICENSE](LICENSE) file for full details.
 
 ## Credits
 
