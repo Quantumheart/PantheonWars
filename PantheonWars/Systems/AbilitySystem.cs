@@ -1,5 +1,7 @@
 using System;
 using PantheonWars.Models;
+using PantheonWars.Systems.BuffSystem;
+using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 
@@ -14,18 +16,26 @@ namespace PantheonWars.Systems
         private readonly AbilityRegistry _abilityRegistry;
         private readonly PlayerDataManager _playerDataManager;
         private readonly AbilityCooldownManager _cooldownManager;
+        private readonly BuffManager _buffManager;
 
         public AbilitySystem(
             ICoreServerAPI sapi,
             AbilityRegistry abilityRegistry,
             PlayerDataManager playerDataManager,
-            AbilityCooldownManager cooldownManager)
+            AbilityCooldownManager cooldownManager,
+            BuffManager buffManager = null)
         {
             _sapi = sapi;
             _abilityRegistry = abilityRegistry;
             _playerDataManager = playerDataManager;
             _cooldownManager = cooldownManager;
+            _buffManager = buffManager;
         }
+
+        /// <summary>
+        /// Gets the BuffManager instance (for abilities to use)
+        /// </summary>
+        public BuffManager BuffManager => _buffManager;
 
         /// <summary>
         /// Initializes the ability system
@@ -139,7 +149,7 @@ namespace PantheonWars.Systems
             bool success = false;
             try
             {
-                success = ability.Execute(player, _sapi);
+                success = ability.Execute(player, _sapi, _buffManager);
             }
             catch (Exception ex)
             {

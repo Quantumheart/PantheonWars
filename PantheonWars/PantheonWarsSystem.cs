@@ -3,6 +3,7 @@ using PantheonWars.GUI;
 using PantheonWars.Models;
 using PantheonWars.Network;
 using PantheonWars.Systems;
+using PantheonWars.Systems.BuffSystem;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 using Vintagestory.API.Client;
@@ -21,8 +22,10 @@ namespace PantheonWars
         private AbilityCooldownManager _cooldownManager;
         private FavorSystem _favorSystem;
         private AbilitySystem _abilitySystem;
+        private BuffManager _buffManager;
         private DeityCommands _deityCommands;
         private AbilityCommands _abilityCommands;
+        private FavorCommands _favorCommands;
 
         // Client-side systems
         private ICoreClientAPI _capi;
@@ -49,6 +52,9 @@ namespace PantheonWars
             _sapi = api;
             api.Logger.Notification("[PantheonWars] Initializing server-side systems...");
 
+            // Register entity behaviors
+            api.RegisterEntityBehaviorClass("PantheonWarsBuffTracker", typeof(EntityBehaviorBuffTracker));
+
             // Initialize deity registry
             _deityRegistry = new DeityRegistry(api);
             _deityRegistry.Initialize();
@@ -65,12 +71,15 @@ namespace PantheonWars
             _cooldownManager = new AbilityCooldownManager(api);
             _cooldownManager.Initialize();
 
+            // Initialize buff manager
+            _buffManager = new BuffManager(api);
+
             // Initialize favor system
             _favorSystem = new FavorSystem(api, _playerDataManager, _deityRegistry);
             _favorSystem.Initialize();
 
-            // Initialize ability system
-            _abilitySystem = new AbilitySystem(api, _abilityRegistry, _playerDataManager, _cooldownManager);
+            // Initialize ability system (pass buff manager to it)
+            _abilitySystem = new AbilitySystem(api, _abilityRegistry, _playerDataManager, _cooldownManager, _buffManager);
             _abilitySystem.Initialize();
 
             // Register commands
@@ -79,6 +88,9 @@ namespace PantheonWars
 
             _abilityCommands = new AbilityCommands(api, _abilitySystem, _playerDataManager);
             _abilityCommands.RegisterCommands();
+            
+            _favorCommands = new FavorCommands(api, _deityRegistry, _playerDataManager);
+            _favorCommands.RegisterCommands();
 
             // Setup network channel and handlers
             _serverChannel = api.Network.GetChannel(NETWORK_CHANNEL);

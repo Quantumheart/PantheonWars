@@ -1,3 +1,4 @@
+using PantheonWars.Systems.BuffSystem;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
@@ -63,8 +64,9 @@ namespace PantheonWars.Models
         /// </summary>
         /// <param name="caster">The player using the ability</param>
         /// <param name="sapi">Server API for accessing game state</param>
+        /// <param name="buffManager">BuffManager for applying buffs/debuffs (optional for MVP abilities)</param>
         /// <returns>True if ability executed successfully, false otherwise</returns>
-        public abstract bool Execute(IServerPlayer caster, ICoreServerAPI sapi);
+        public abstract bool Execute(IServerPlayer caster, ICoreServerAPI sapi, BuffManager buffManager = null);
 
         /// <summary>
         /// Validates if the ability can be used (override for custom validation logic)

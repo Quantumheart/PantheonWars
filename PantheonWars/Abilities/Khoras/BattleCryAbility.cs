@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using PantheonWars.Models;
+using PantheonWars.Systems.BuffSystem;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
@@ -11,7 +13,7 @@ namespace PantheonWars.Abilities.Khoras
     public class BattleCryAbility : Ability
     {
         private const float DURATION = 10f;
-        private const float SPEED_MULTIPLIER = 1.3f; // 30% faster attacks
+        private const float SPEED_BOOST = 0.3f; // 30% faster attacks
 
         public BattleCryAbility() : base(
             id: "khoras_battlecry",
@@ -25,16 +27,34 @@ namespace PantheonWars.Abilities.Khoras
             MinimumRank = DevotionRank.Initiate;
         }
 
-        public override bool Execute(IServerPlayer caster, ICoreServerAPI sapi)
+        public override bool Execute(IServerPlayer caster, ICoreServerAPI sapi, BuffManager buffManager = null)
         {
             var casterEntity = caster.Entity;
             if (casterEntity == null) return false;
 
-            // Apply attack speed buff (simplified for MVP)
-            // In a full implementation, this would modify actual attack speed stats
+            // Apply attack speed buff
+            if (buffManager != null)
+            {
+                Dictionary<string, float> statModifiers = new Dictionary<string, float>
+                {
+                    { "meleeWeaponsSpeed", SPEED_BOOST },
+                    { "rangedWeaponsSpeed", SPEED_BOOST }
+                };
+
+                buffManager.ApplyEffect(
+                    casterEntity,
+                    "battle_cry_buff",
+                    DURATION,
+                    Id,
+                    caster.PlayerUID,
+                    statModifiers,
+                    true
+                );
+            }
+
             caster.SendMessage(
                 GlobalConstants.GeneralChatGroup,
-                "[Battle Cry] You unleash a fierce war cry! Your attacks strike with furious speed! (+30% attack speed)",
+                $"[Battle Cry] You unleash a fierce war cry! Your attacks strike with furious speed for {DURATION} seconds! (+30% attack speed)",
                 EnumChatType.Notification
             );
 
