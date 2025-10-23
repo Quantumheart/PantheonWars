@@ -158,13 +158,13 @@ The mod is currently **fully playable** with the following implemented features:
 - `/deity list`, `/deity info <deity>`, `/deity select <deity>`, `/deity status`, `/favor`
 - `/ability list`, `/ability info <ability>`, `/ability use <ability>`, `/ability cooldowns`
 
-### Phase 2: Combat Integration - ✅ COMPLETE
-- [ ] Damage system hooks *(deferred to Phase 3)*
+### Phase 2: Combat Integration - In Progress (3/4)
+- [ ] Damage system hooks *(abilities need to actually modify damage/stats)*
 - [x] Death penalties/favor loss
 - [x] Rival deity bonuses
 - [x] Ability execution framework
 
-**Note:** Phase 2 core features were implemented as part of Phase 1 MVP. Damage system hooks will be enhanced in Phase 3.
+**Status:** Core framework complete, but abilities currently use MVP placeholder effects (chat notifications) rather than actual damage/stat modifications. Abilities execute and have proper cooldowns/costs, but don't yet hook into Vintage Story's combat and entity stat systems.
 
 ### Phase 3: Full Ability System
 - [ ] All 8 deities implemented
