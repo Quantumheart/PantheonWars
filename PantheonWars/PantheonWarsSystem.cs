@@ -16,9 +16,13 @@ namespace PantheonWars
         // Server-side systems
         private ICoreServerAPI _sapi;
         private DeityRegistry _deityRegistry;
+        private AbilityRegistry _abilityRegistry;
         private PlayerDataManager _playerDataManager;
+        private AbilityCooldownManager _cooldownManager;
         private FavorSystem _favorSystem;
+        private AbilitySystem _abilitySystem;
         private DeityCommands _deityCommands;
+        private AbilityCommands _abilityCommands;
 
         // Client-side systems
         private ICoreClientAPI _capi;
@@ -49,17 +53,32 @@ namespace PantheonWars
             _deityRegistry = new DeityRegistry(api);
             _deityRegistry.Initialize();
 
+            // Initialize ability registry
+            _abilityRegistry = new AbilityRegistry(api);
+            _abilityRegistry.Initialize();
+
             // Initialize player data manager
             _playerDataManager = new PlayerDataManager(api);
             _playerDataManager.Initialize();
+
+            // Initialize ability cooldown manager
+            _cooldownManager = new AbilityCooldownManager(api);
+            _cooldownManager.Initialize();
 
             // Initialize favor system
             _favorSystem = new FavorSystem(api, _playerDataManager, _deityRegistry);
             _favorSystem.Initialize();
 
+            // Initialize ability system
+            _abilitySystem = new AbilitySystem(api, _abilityRegistry, _playerDataManager, _cooldownManager);
+            _abilitySystem.Initialize();
+
             // Register commands
             _deityCommands = new DeityCommands(api, _deityRegistry, _playerDataManager);
             _deityCommands.RegisterCommands();
+
+            _abilityCommands = new AbilityCommands(api, _abilitySystem, _playerDataManager);
+            _abilityCommands.RegisterCommands();
 
             // Setup network channel and handlers
             _serverChannel = api.Network.GetChannel(NETWORK_CHANNEL);
