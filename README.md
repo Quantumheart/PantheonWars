@@ -28,7 +28,7 @@ Pantheon Wars introduces a comprehensive deity worship system where players pled
 ## Development Setup
 
 ### Prerequisites
-- .NET 7 SDK or later
+- .NET 8 SDK or later
 - Vintage Story 1.21.0 or later
 - Visual Studio 2022, VS Code, or JetBrains Rider
 
@@ -68,6 +68,19 @@ Open `PantheonWars.sln` in your IDE and select either:
 - **Vintage Story Client** - Launch client with mod loaded
 - **Vintage Story Server** - Launch dedicated server with mod loaded
 
+### Controls
+
+- **K** - Open deity selection dialog
+
+## Documentation
+
+For detailed information about the mod's systems and mechanics, see:
+
+- **[Implementation Guide](docs/implementation_guide.md)** - Development roadmap and phase breakdown
+- **[Deity Reference](docs/deity_reference.md)** - Complete deity information, relationships, and lore
+- **[Favor System Guide](docs/favor_reference.md)** - How favor works, earning methods, and devotion ranks
+- **[Ability Reference](docs/ability_reference.md)** - Detailed ability mechanics, costs, and usage tips
+
 ## Project Structure
 
 ```
@@ -75,13 +88,43 @@ PantheonWars/
 ├── CakeBuild/              # Build system
 │   ├── Program.cs          # Build tasks and packaging
 │   └── CakeBuild.csproj
+├── docs/                   # Documentation
+│   ├── implementation_guide.md
+│   ├── deity_reference.md
+│   ├── favor_reference.md
+│   └── ability_reference.md
 ├── PantheonWars/           # Main mod project
+│   ├── Abilities/          # Deity abilities
+│   │   ├── Khoras/         # War god abilities
+│   │   └── Lysa/           # Hunt goddess abilities
+│   ├── Commands/           # Chat commands
+│   │   ├── DeityCommands.cs
+│   │   └── AbilityCommands.cs
+│   ├── Data/               # Data models for persistence
+│   │   ├── PlayerDeityData.cs
+│   │   └── PlayerAbilityData.cs
+│   ├── GUI/                # User interface
+│   │   ├── DeitySelectionDialog.cs
+│   │   └── FavorHudElement.cs
+│   ├── Models/             # Core data models
+│   │   ├── Deity.cs
+│   │   ├── Ability.cs
+│   │   └── Enums (DeityType, AbilityType, etc.)
+│   ├── Network/            # Client-server networking
+│   │   └── PlayerDataPacket.cs
+│   ├── Systems/            # Core game systems
+│   │   ├── DeityRegistry.cs
+│   │   ├── AbilityRegistry.cs
+│   │   ├── PlayerDataManager.cs
+│   │   ├── AbilityCooldownManager.cs
+│   │   ├── FavorSystem.cs
+│   │   └── AbilitySystem.cs
 │   ├── Properties/
 │   │   └── launchSettings.json
 │   ├── assets/
 │   │   └── modinfo.json    # Mod metadata
 │   ├── PantheonWars.csproj
-│   └── PantheonWarsModSystem.cs
+│   └── PantheonWarsSystem.cs
 ├── Release/                # Build output
 ├── .gitignore
 ├── build.ps1               # Windows build script
@@ -90,39 +133,59 @@ PantheonWars/
 └── README.md
 ```
 
-## Implementation Phases
+## Current Features (v0.1.0)
 
-### Phase 1: Foundation (MVP) - In Progress
-- [x] Project structure setup
-- [ ] Deity registration system
-- [ ] Player deity selection GUI
-- [ ] Basic favor tracking
-- [ ] Data persistence
-- [ ] 1-2 deities with basic abilities
+The mod is currently **fully playable** with the following implemented features:
 
-### Phase 2: Combat Integration
-- [ ] Damage system hooks
-- [ ] Death penalties/favor loss
-- [ ] Rival deity bonuses
-- [ ] Ability execution framework
+### Playable Deities (2/8)
+- **Khoras (God of War)** - Aggressive melee combat deity
+  - War Banner: AoE damage buff for allies
+  - Battle Cry: Attack speed increase
+  - Blade Storm: Spin attack dealing damage to nearby enemies
+  - Last Stand: Damage resistance when health is low
 
-### Phase 3: Full Ability System
-- [ ] All 8 deities implemented
-- [ ] Complete ability sets
-- [ ] Visual effects
-- [ ] Devotion progression
+- **Lysa (Goddess of the Hunt)** - Mobile ranged combat deity
+  - Hunter's Mark: Mark target to take extra damage
+  - Swift Feet: Movement speed boost
+  - Arrow Rain: AoE ranged damage
+  - Predator Instinct: Enhanced perception and critical hit chance
 
-### Phase 4: World Integration
-- [ ] Shrine blocks
-- [ ] Temple world generation
-- [ ] Sacred ground system
-- [ ] Temple capture mechanics
+### Core Systems
+- ✅ **Deity Selection:** GUI dialog (hotkey: K) and commands
+- ✅ **Divine Favor:** Earned through PvP kills, spent on abilities
+- ✅ **Devotion Ranks:** Progress from Initiate to Avatar based on total favor earned
+- ✅ **Ability System:** 8 unique abilities with cooldowns (20-60s) and favor costs (8-20 favor)
+- ✅ **Deity Relationships:** Allied deities give 0.5x favor, rivals give 2x favor from kills
+- ✅ **Data Persistence:** All progress saves automatically
+- ✅ **HUD Display:** Always-visible deity, favor, and rank display
+- ✅ **PvP Integration:** Favor rewards on kills, penalties on death
 
-### Phase 5: Advanced Features
-- [ ] Divine duels
-- [ ] Crusade events
-- [ ] Relic system
-- [ ] Apostate mechanics
+## Development Roadmap
+
+**Current Status:** Phase 1 Complete, Phase 2 In Progress (3/4)
+
+- ✅ **Phase 1:** Foundation (MVP) - Complete
+- 🟡 **Phase 2:** Combat Integration - In Progress (75% complete)
+- 🔲 **Phase 3:** Full Ability System - Planned
+- 🔲 **Phase 4:** World Integration - Planned
+- 🔲 **Phase 5:** Advanced Features - Planned
+
+For detailed phase breakdowns, tasks, and timeline, see the **[Implementation Guide](docs/implementation_guide.md)**.
+
+### Available Commands
+
+**Deity Management:**
+- `/deity list` - Show all available deities
+- `/deity info <deity>` - Get detailed deity information
+- `/deity select <deity>` - Pledge to a deity
+- `/deity status` - View your current deity status and stats
+
+**Favor & Abilities:**
+- `/favor` - Check your current divine favor
+- `/ability list` - Show your available abilities
+- `/ability info <ability>` - Get detailed ability information
+- `/ability use <ability>` - Activate an ability
+- `/ability cooldowns` - Check all ability cooldown status
 
 ## Contributing
 
@@ -130,7 +193,16 @@ This mod is currently in early development. Contributions, suggestions, and feed
 
 ## License
 
-[Choose appropriate license]
+This project is licensed under the [Creative Commons Attribution 4.0 International License](LICENSE) (CC BY 4.0).
+
+You are free to:
+- **Share** — copy and redistribute the material in any medium or format
+- **Adapt** — remix, transform, and build upon the material for any purpose, even commercially
+
+Under the following terms:
+- **Attribution** — You must give appropriate credit, provide a link to the license, and indicate if changes were made
+
+See the [LICENSE](LICENSE) file for full details.
 
 ## Credits
 

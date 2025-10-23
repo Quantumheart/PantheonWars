@@ -2,12 +2,16 @@
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
-        <Nullable>enable</Nullable>
         <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-        <RootNamespace>PantheonWars</RootNamespace>
-        <AssemblyName>PantheonWars</AssemblyName>
+        <OutputPath>bin\$(Configuration)\Mods\mod</OutputPath>
+        <Configurations>Debug;Release</Configurations>
+        <AssemblyName>pantheonwars</AssemblyName>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <Optimize>True</Optimize>
+    </PropertyGroup>
+    
     <PropertyGroup>
         <PlatformTarget>AnyCPU</PlatformTarget>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
@@ -15,6 +19,22 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Reference Include="0Harmony">
+            <HintPath>$(VINTAGE_STORY)/Lib/0Harmony.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="cairo-sharp">
+            <HintPath>$(VINTAGE_STORY)/Lib/cairo-sharp.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="Newtonsoft.Json">
+            <HintPath>$(VINTAGE_STORY)/Lib/Newtonsoft.Json.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+        <Reference Include="protobuf-net">
+            <HintPath>$(VINTAGE_STORY)/Lib/protobuf-net.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
         <Reference Include="VintagestoryAPI">
             <HintPath>$(VINTAGE_STORY)/VintagestoryAPI.dll</HintPath>
             <Private>false</Private>
@@ -33,8 +53,13 @@
         <Content Include="assets\**">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+
         <Content Include="modinfo.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="assets\" />
     </ItemGroup>
 </Project>
