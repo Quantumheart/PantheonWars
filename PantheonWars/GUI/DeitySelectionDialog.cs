@@ -17,8 +17,9 @@ namespace PantheonWars.GUI
         private readonly Action<DeityType> _onDeitySelected;
         private DeityType _selectedDeity = DeityType.None;
 
-        public override string? ToggleKeyCombinationCode => null;
+        public override string ToggleKeyCombinationCode => null;
 
+        // ReSharper disable once ConvertToPrimaryConstructor
         public DeitySelectionDialog(ICoreClientAPI capi, DeityRegistry deityRegistry, Action<DeityType> onDeitySelected)
             : base(capi)
         {

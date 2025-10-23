@@ -48,8 +48,7 @@ namespace PantheonWars.Abilities.Khoras
                     // In a full implementation, this would use a proper buff system
                     affectedCount++;
 
-                    var player = sapi.World.PlayerByUid(playerEntity.PlayerUID);
-                    if (player != null)
+                    if (sapi.World.PlayerByUid(playerEntity.PlayerUID) is IServerPlayer player)
                     {
                         player.SendMessage(
                             GlobalConstants.GeneralChatGroup,

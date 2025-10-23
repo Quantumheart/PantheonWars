@@ -52,12 +52,6 @@ namespace PantheonWars.Commands
                     .HandleWith(OnDeityStatus)
                 .EndSubCommand();
 
-            _sapi.ChatCommands.Create("favor")
-                .WithDescription("Check your current divine favor")
-                .RequiresPlayer()
-                .RequiresPrivilege(Privilege.chat)
-                .HandleWith(OnCheckFavor);
-
             _sapi.Logger.Notification("[PantheonWars] Deity commands registered");
         }
 
@@ -188,26 +182,6 @@ namespace PantheonWars.Commands
             }
 
             return TextCommandResult.Success(sb.ToString());
-        }
-
-        private TextCommandResult OnCheckFavor(TextCommandCallingArgs args)
-        {
-            var player = args.Caller.Player as IServerPlayer;
-            if (player == null) return TextCommandResult.Error("Command must be used by a player");
-
-            var playerData = _playerDataManager.GetOrCreatePlayerData(player);
-
-            if (!playerData.HasDeity())
-            {
-                return TextCommandResult.Success("You have not pledged to any deity yet.");
-            }
-
-            var deity = _deityRegistry.GetDeity(playerData.DeityType);
-            string deityName = deity?.Name ?? playerData.DeityType.ToString();
-
-            return TextCommandResult.Success(
-                $"You have {playerData.DivineFavor} favor with {deityName} (Rank: {playerData.DevotionRank})"
-            );
         }
     }
 }

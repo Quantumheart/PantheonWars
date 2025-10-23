@@ -11,7 +11,7 @@ namespace PantheonWars.Abilities.Lysa
     public class SwiftFeetAbility : Ability
     {
         private const float DURATION = 8f;
-        private const float SPEED_MULTIPLIER = 1.5f; // 50% faster movement
+        private const float SPEED_MULTIPLIER = 1.2f; // 20% faster movement
 
         public SwiftFeetAbility() : base(
             id: "lysa_swift_feet",
@@ -32,9 +32,12 @@ namespace PantheonWars.Abilities.Lysa
 
             // Apply speed boost (simplified for MVP)
             // In a full implementation, this would modify actual movement speed stats
+            var playerStats = casterEntity.Stats;
+            if (playerStats == null) return false;
+            playerStats.Set("walkspeed", "lysa_swift_feet", SPEED_MULTIPLIER, false);
             caster.SendMessage(
                 GlobalConstants.GeneralChatGroup,
-                "[Swift Feet] Lysa blesses you with incredible agility! (+50% movement speed)",
+                "[Swift Feet] Lysa blesses you with incredible agility! (+20% movement speed)",
                 EnumChatType.Notification
             );
 

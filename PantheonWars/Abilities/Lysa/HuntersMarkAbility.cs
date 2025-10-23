@@ -34,7 +34,7 @@ namespace PantheonWars.Abilities.Lysa
             if (casterEntity == null) return false;
 
             // Find target the player is looking at
-            EntityAgent? target = null;
+            EntityAgent target = null;
             var lookVec = casterEntity.SidedPos.GetViewVector();
             var startPos = casterEntity.SidedPos.XYZ.Add(0, casterEntity.LocalEyePos.Y, 0);
 

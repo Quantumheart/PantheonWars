@@ -2,6 +2,7 @@ using PantheonWars.Models;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
+using Vintagestory.GameContent;
 
 namespace PantheonWars.Abilities.Khoras
 {
@@ -34,8 +35,14 @@ namespace PantheonWars.Abilities.Khoras
                 return false;
             }
 
+            var casterHealth = casterEntity.GetBehavior("health") as EntityBehaviorHealth;
+            if (casterHealth == null)
+            {
+                failureReason = "Health behavior not found";
+                return false;
+            }
             // Optional: Require low health to use (30% or less)
-            var healthPercent = casterEntity.Health / casterEntity.MaxHealth;
+            var healthPercent = casterHealth.Health / casterHealth.MaxHealth;
             if (healthPercent > 0.3f)
             {
                 failureReason = "Last Stand can only be used when your health is below 30%";

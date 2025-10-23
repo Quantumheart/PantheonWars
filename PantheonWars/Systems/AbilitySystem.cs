@@ -1,5 +1,6 @@
 using System;
 using PantheonWars.Models;
+using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 
@@ -166,7 +167,7 @@ namespace PantheonWars.Systems
         /// <summary>
         /// Gets ability information for a player
         /// </summary>
-        public Ability? GetAbility(string abilityId)
+        public Ability GetAbility(string abilityId)
         {
             return _abilityRegistry.GetAbility(abilityId);
         }

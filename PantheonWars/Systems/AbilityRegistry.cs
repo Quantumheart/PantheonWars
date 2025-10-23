@@ -69,9 +69,9 @@ namespace PantheonWars.Systems
         /// <summary>
         /// Gets an ability by its ID
         /// </summary>
-        public Ability? GetAbility(string abilityId)
+        public Ability GetAbility(string abilityId)
         {
-            return _abilities.TryGetValue(abilityId, out var ability) ? ability : null;
+            return _abilities.GetValueOrDefault(abilityId);
         }
 
         /// <summary>

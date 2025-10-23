@@ -59,9 +59,9 @@ namespace PantheonWars.Systems
         /// <summary>
         /// Gets a deity by type
         /// </summary>
-        public Deity? GetDeity(DeityType type)
+        public Deity GetDeity(DeityType type)
         {
-            return _deities.TryGetValue(type, out var deity) ? deity : null;
+            return _deities.GetValueOrDefault(type);
         }
 
         /// <summary>

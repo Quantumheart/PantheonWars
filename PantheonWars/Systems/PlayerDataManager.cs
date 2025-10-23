@@ -161,7 +161,7 @@ namespace PantheonWars.Systems
         {
             try
             {
-                byte[]? data = _sapi.WorldManager.SaveGame.GetData($"{DATA_KEY}_{playerUID}");
+                byte[] data = _sapi.WorldManager.SaveGame.GetData($"{DATA_KEY}_{playerUID}");
                 if (data != null)
                 {
                     var playerData = SerializerUtil.Deserialize<PlayerDeityData>(data);

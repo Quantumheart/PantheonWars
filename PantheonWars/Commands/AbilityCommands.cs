@@ -15,6 +15,7 @@ namespace PantheonWars.Commands
         private readonly AbilitySystem _abilitySystem;
         private readonly PlayerDataManager _playerDataManager;
 
+        // ReSharper disable once ConvertToPrimaryConstructor
         public AbilityCommands(
             ICoreServerAPI sapi,
             AbilitySystem abilitySystem,
@@ -33,6 +34,7 @@ namespace PantheonWars.Commands
             _sapi.ChatCommands.Create("ability")
                 .WithDescription("Manage and use your deity's abilities")
                 .RequiresPlayer()
+                .RequiresPrivilege(Privilege.chat)
                 .BeginSubCommand("list")
                     .WithDescription("List your available abilities")
                     .HandleWith(OnListAbilities)

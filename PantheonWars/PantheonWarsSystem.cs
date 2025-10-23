@@ -23,6 +23,7 @@ namespace PantheonWars
         private AbilitySystem _abilitySystem;
         private DeityCommands _deityCommands;
         private AbilityCommands _abilityCommands;
+        private FavorCommands _favorCommands;
 
         // Client-side systems
         private ICoreClientAPI _capi;
@@ -79,6 +80,9 @@ namespace PantheonWars
 
             _abilityCommands = new AbilityCommands(api, _abilitySystem, _playerDataManager);
             _abilityCommands.RegisterCommands();
+
+            _favorCommands = new FavorCommands(api, _deityRegistry, _playerDataManager);
+            _favorCommands.RegisterCommands();
 
             // Setup network channel and handlers
             _serverChannel = api.Network.GetChannel(NETWORK_CHANNEL);
