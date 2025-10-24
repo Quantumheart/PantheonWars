@@ -25,6 +25,8 @@ namespace PantheonWars
         private BuffManager _buffManager;
         private ReligionManager _religionManager;
         private PlayerReligionDataManager _playerReligionDataManager;
+        private ReligionPrestigeManager _religionPrestigeManager;
+        private PvPManager _pvpManager;
         private DeityCommands _deityCommands;
         private AbilityCommands _abilityCommands;
         private FavorCommands _favorCommands;
@@ -85,12 +87,18 @@ namespace PantheonWars
             _abilitySystem = new AbilitySystem(api, _abilityRegistry, _playerDataManager, _cooldownManager, _buffManager);
             _abilitySystem.Initialize();
 
-            // Initialize religion systems (Phase 3.1)
+            // Initialize religion systems (Phase 3.1 & 3.2)
             _religionManager = new ReligionManager(api);
             _religionManager.Initialize();
 
             _playerReligionDataManager = new PlayerReligionDataManager(api, _religionManager);
             _playerReligionDataManager.Initialize();
+
+            _religionPrestigeManager = new ReligionPrestigeManager(api, _religionManager);
+            _religionPrestigeManager.Initialize();
+
+            _pvpManager = new PvPManager(api, _playerReligionDataManager, _religionManager, _religionPrestigeManager, _deityRegistry);
+            _pvpManager.Initialize();
 
             // Register commands
             _deityCommands = new DeityCommands(api, _deityRegistry, _playerDataManager);
