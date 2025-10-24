@@ -27,8 +27,12 @@ namespace PantheonWars.Systems
         {
             _api.Logger.Notification("[PantheonWars] Initializing Perk Registry...");
 
-            // Register sample perks for testing (Khoras)
-            RegisterSamplePerks();
+            // Register all perks from PerkDefinitions (Phase 3.4)
+            var allPerks = PerkDefinitions.GetAllPerks();
+            foreach (var perk in allPerks)
+            {
+                RegisterPerk(perk);
+            }
 
             _api.Logger.Notification($"[PantheonWars] Perk Registry initialized with {_perks.Count} perks");
         }
