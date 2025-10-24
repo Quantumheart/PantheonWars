@@ -14,9 +14,8 @@ This guide outlines the development roadmap for Pantheon Wars, broken down into 
 |-------|--------|-----------|-------|
 | Phase 1 | ✅ Complete | 6/6 | Foundation (MVP) |
 | Phase 2 | ✅ Complete | 4/4 | Combat Integration |
-| Phase 3 | 🔲 Planned | 0/5 | Full Ability System |
-| Phase 4 | 🔲 Planned | 0/4 | World Integration |
-| Phase 5 | 🔲 Planned | 0/4 | Advanced Features |
+| Phase 3 | ⚠️ In Progress | 3.5/5 | Religion-Based Deity System with Perk Trees |
+| Phase 4 | 🔲 Planned | 0/4 | Advanced Features |
 
 ---
 
@@ -176,9 +175,13 @@ This guide outlines the development roadmap for Pantheon Wars, broken down into 
 
 ---
 
-## Phase 3: Full Ability System - 🔲 Planned
+## Phase 3 (OLD): Full Ability System - ⚠️ DEPRECATED
 
-**Goal:** Expand to all 8 deities with complete ability sets and visual effects.
+> **⚠️ This phase has been cancelled and replaced with the new Phase 3: Religion-Based Deity System with Perk Trees**
+> The active ability system from Phases 1-2 will be removed in favor of passive perk trees tied to a custom religion system.
+> See the new Phase 3 section below for the updated design.
+
+**Original Goal:** Expand to all 8 deities with complete ability sets and visual effects.
 
 ### Planned Tasks
 
@@ -282,46 +285,192 @@ This guide outlines the development roadmap for Pantheon Wars, broken down into 
 
 ---
 
-## Phase 4: World Integration - 🔲 Planned
+## Phase 3: Religion-Based Deity System with Perk Trees - ⚠️ IN PROGRESS (~60% Complete)
 
-**Goal:** Add persistent world structures and territory control mechanics.
+**Goal:** Transform the mod from player-centric active abilities to religion-centric passive perk trees.
 
-### Planned Tasks
+### Executive Summary
 
-- [ ] **Shrine blocks**
-  - Craftable shrine blocks for each deity
-  - Shrine blessing mechanics
-  - Shrine defense/attack gameplay
-  - Visual indicators for shrine ownership
+This is a **fundamental redesign** that moves deity assignment from individual players to custom player-created religions. The active ability system is completely replaced with passive perk trees that unlock based on dual ranking systems.
 
-- [ ] **Temple world generation**
-  - Procedural temple generation for each deity
-  - Unique architecture per deity theme
-  - Loot tables and rewards
-  - Boss encounters in temples
+**See [phase3_group_deity_perks_guide.md](phase3_group_deity_perks_guide.md) and [phase3_task_breakdown.md](phase3_task_breakdown.md) for complete design specifications and implementation tasks.**
 
-- [ ] **Sacred ground system**
-  - Territory control mechanics
-  - Blessing zones around controlled areas
-  - Favor bonuses in controlled territory
-  - Visual boundaries and indicators
+### Key Changes
 
-- [ ] **Temple capture mechanics**
-  - Siege mechanics for temple control
-  - Capture point system
-  - Defense bonuses for controlling deity
-  - Rewards for successful captures
+1. **Custom Religion System**: Players create and join custom religions (not using VS built-in groups)
+2. **Single Religion Per Player**: Players can only be in one religion at a time
+3. **Religion-Based Deity**: A religion chooses a deity, and all members serve that deity
+4. **Passive Perk Trees**: Replace active abilities with passive perks
+5. **Dual Ranking**:
+   - **Player Favor Ranks**: Individual progression (Initiate → Disciple → Zealot → Champion → Avatar)
+   - **Religion Prestige Ranks**: Collective progression (Fledgling → Established → Renowned → Legendary → Mythic)
+6. **160 Unique Perks**: Each deity has 2 perk trees with 20 perks each (10 player perks + 10 religion perks)
 
-### Design Notes
+### Sub-Phases Progress
 
-- World structures should encourage PvP conflict
-- Temples as focal points for deity worship
-- Balance between solo and group activities
-- Long-term goals for player investment
+#### Phase 3.1: Foundation - ✅ COMPLETED (Week 1-2)
+- [x] Create all data models (ReligionData, PlayerReligionData, Perk, new enums)
+- [x] Implement ReligionManager and PlayerReligionDataManager
+- [x] Build religion commands system (/religion create, join, leave, etc.)
+- [x] Implement persistence and invitation system
+- [x] Add religion switching cooldowns
+- [x] Integrate with PantheonWarsSystem
+
+**Status**: All 10 religion commands functional, persistence working, cooldown system implemented.
+
+#### Phase 3.2: Ranking Systems - ✅ COMPLETED (Week 3)
+- [x] Implement ReligionPrestigeManager
+- [x] Integrate favor/prestige earning with PvP
+- [x] Create rank-up notifications for both systems
+- [x] Update HUD to display both player favor rank and religion prestige rank
+- [x] Network synchronization via PlayerReligionDataPacket
+
+**Status**: Dual ranking system fully functional, PvP integration complete, HUD displaying all data.
+
+#### Phase 3.3: Perk System Core - ✅ COMPLETED (Week 4-5) - Completed Oct 24, 2025
+- [x] Create PerkRegistry and PerkEffectSystem
+- [x] Implement perk unlock validation
+- [x] Build perk stat modifier system
+- [x] Create perk commands (/perks list, unlock, tree, etc.)
+- [x] Implement ApplyPerksToPlayer() using VS Stats API
+- [x] Implement RemovePerksFromPlayer() for cleanup
+- [x] Test perk application and effect stacking
+
+**Status**: All 7 perk commands implemented, stat application system complete, 160 perks registered in registry. **Ready for in-game testing**.
+
+#### Phase 3.4: Deity Perk Trees - ⚠️ 37.5% COMPLETE (Week 6-8)
+- [x] Design perk trees for Khoras (War) - 20 perks ✅
+- [x] Design perk trees for Lysa (Hunt) - 20 perks ✅
+- [x] Design perk trees for Morthen (Death) - 20 perks ✅
+- [ ] Design perk trees for Aethra (Light) - 20 perks ❌ Empty stub
+- [ ] Design perk trees for Umbros (Shadows) - 20 perks ❌ Empty stub
+- [ ] Design perk trees for Tharos (Storms) - 20 perks ❌ Empty stub
+- [ ] Design perk trees for Gaia (Earth) - 20 perks ❌ Empty stub
+- [ ] Design perk trees for Vex (Madness) - 20 perks ❌ Empty stub
+- [ ] Balance testing across all deities
+- [ ] Document all perks
+
+**Status**: 60/160 perks implemented (3/8 deities complete). Stat modifiers defined, special effects need handler implementation.
+
+**Blockers**:
+- 5 deities need perk design and implementation (100 perks remaining)
+- Special effect handlers not yet implemented (lifesteal, poison, critical strikes, etc.)
+- Balance testing pending until all deities complete
+
+#### Phase 3.5: Integration & Polish - ❌ NOT STARTED (Week 9-10)
+- [ ] Remove old ability system (AbilitySystem, AbilityCooldownManager, all ability files)
+- [ ] Implement data migration from Phase 1-2 format
+- [ ] Create perk tree visualization UI (PerkTreeDialog)
+- [ ] Build religion management UI (ReligionManagementDialog)
+- [ ] Update HUD with religion/perk information
+- [ ] Comprehensive end-to-end testing
+- [ ] Update all documentation
+
+**Status**: Awaiting Phase 3.4 completion before starting.
+
+### Deliverables
+
+**New Systems (Implemented):**
+- ✅ ReligionManager - Manage all religions and congregations
+- ✅ PlayerReligionDataManager - Track player-religion relationships
+- ✅ ReligionPrestigeManager - Handle collective religion progression
+- ✅ PerkRegistry - Central registry for all perks (160 perks registered)
+- ✅ PerkEffectSystem - Apply passive perk effects to players
+
+**New Data Models (Implemented):**
+- ✅ ReligionData - Store religion information (name, deity, members, prestige, perks)
+- ✅ PlayerReligionData - Store player's religion membership and favor
+- ✅ Perk - Define perk properties, requirements, and effects
+- ✅ New Enums: PrestigeRank, FavorRank, PerkType, PerkCategory
+
+**New Commands (Implemented):**
+- ✅ **Religion**: `/religion create`, `/religion join`, `/religion leave`, `/religion list`, `/religion info`, `/religion members`, `/religion invite`, `/religion kick`, `/religion disband`, `/religion description`
+- ✅ **Perks**: `/perks list`, `/perks player`, `/perks religion`, `/perks info`, `/perks tree`, `/perks unlock`, `/perks active`
+
+**New UI (Pending):**
+- ❌ Religion Management Dialog (create/browse/join/manage religions) - Phase 3.5
+- ❌ Perk Tree Viewer (visual perk tree with unlock status) - Phase 3.5
+- ✅ Enhanced HUD (religion name, deity, both ranks, favor/prestige display)
+
+**Content (Partially Complete):**
+- ⚠️ 3/8 deities with complete perk trees (Khoras, Lysa, Morthen)
+- ⚠️ 30/80 player perks implemented (37.5%)
+- ⚠️ 30/80 religion perks implemented (37.5%)
+- ✅ Public/private religion system
+- ✅ Invitation system
+- ✅ Religion switching with 7-day cooldown
+
+### Design Principles
+
+- **Community Focus**: Encourage player cooperation through religions
+- **Meaningful Choice**: Religion choice is significant due to switching penalties
+- **Long-term Progression**: Perks persist and accumulate over time
+- **Strategic Depth**: Perk choices and combinations create unique builds
+- **Deity Identity**: Each deity has unique perk themes and playstyles
+
+### Technical Notes
+
+- **Single Religion Enforcement**: Simpler than multi-religion, prevents exploits
+- **Custom Implementation**: Not using Vintage Story's built-in groups for full control
+- **O(1) Deity Lookup**: Single religion per player enables fast deity determination
+- **Cooldown System**: 7-day cooldown on religion switching prevents abuse
+- **Stat Modifier Stacking**: Player perks + religion perks combine additively
+- **Migration Path**: Existing Phase 1-2 saves auto-migrate to new format
+
+### Timeline
+
+**Original Estimate**: 10-12 weeks (121-154 hours)
+
+**Completed**:
+- Phase 3.1: ✅ ~16-22 hours (Foundation)
+- Phase 3.2: ✅ ~10-12 hours (Ranking Systems)
+- Phase 3.3: ✅ ~17-21 hours (Perk System Core)
+
+**In Progress**:
+- Phase 3.4: ⚠️ ~14-18 hours completed / 38-48 hours total (37.5% - Deity Perk Trees)
+
+**Remaining**:
+- Phase 3.4: ~24-30 hours (5 remaining deities + balance testing)
+- Phase 3.5: ~40-51 hours (Integration & Polish)
+
+**Total Progress**: ~60% complete (~73-92 hours completed, ~48-62 hours remaining)
+
+### Current Status Summary (Updated: Oct 24, 2025)
+
+**What's Working:**
+- ✅ Religion system fully functional (create, join, leave, manage)
+- ✅ Favor/Prestige progression working with PvP integration
+- ✅ Perk unlocking and persistence working
+- ✅ All 17 commands working (10 religion + 7 perk)
+- ✅ HUD displaying religion and rank data
+- ✅ Network sync working (PlayerReligionDataPacket)
+- ✅ Stat application system implemented (ApplyPerksToPlayer/RemovePerksFromPlayer)
+- ✅ 60/160 perks designed and registered
+
+**Critical Gaps:**
+1. **5 Deities Incomplete** - Aethra, Umbros, Tharos, Gaia, Vex need 100 perks (62.5% of content)
+2. **No GUI** - All interaction is command-based (need PerkTreeDialog and ReligionManagementDialog)
+3. **Special Effects Incomplete** - Stat modifiers work, but special handlers needed (lifesteal, poison, etc.)
+4. **In-Game Testing Pending** - Stat application just implemented, needs verification
+5. **No Balance Testing** - Blocked until all deities complete
+
+**Recommended Next Steps:**
+1. In-game testing of Phase 3.3 stat application system
+2. Complete remaining 5 deity perk definitions (100 perks)
+3. Implement special effect handlers for complex perk mechanics
+4. Balance testing with all 8 deities
+5. Begin Phase 3.5 (UI development and polish)
 
 ---
 
-## Phase 5: Advanced Features - 🔲 Planned
+## Phase 4 (OLD): World Integration - 🔲 REMOVED
+
+> **This phase has been removed from the roadmap.**
+> The focus has shifted to the religion/perk system. World integration features (shrines, temples, territory control) may be revisited in the future as part of religion mechanics.
+
+---
+
+## Phase 4: Advanced Features - 🔲 Planned
 
 **Goal:** Add end-game features and advanced PvP mechanics.
 
@@ -366,28 +515,32 @@ This guide outlines the development roadmap for Pantheon Wars, broken down into 
 
 ## Development Priorities
 
-### Immediate (Phase 3 - Next Up)
-1. Design and implement hotkey-based ability activation system
-2. Add equipped ability slot with swap cooldown
-3. Update HUD to show equipped ability
-4. Design remaining 6 deities
-5. Create 24 new abilities
+### Immediate (Phase 3.4 - Current Focus)
+1. ✅ ~~Complete in-game testing of stat application system~~ **DONE**
+2. **Complete Aethra (Light) perk design** - 20 perks (healing, shields, buffs)
+3. **Complete Umbros (Shadows) perk design** - 20 perks (stealth, backstab, evasion)
+4. **Complete Tharos (Storms) perk design** - 20 perks (AoE, lightning, mobility)
+5. **Complete Gaia (Earth) perk design** - 20 perks (defense, regeneration, durability)
+6. **Complete Vex (Madness) perk design** - 20 perks (chaos, confusion, random effects)
 
-### Short-term (Phase 3 Completion)
-1. Implement particle effects system for abilities
-2. Add visual buff/debuff indicators in HUD
-3. Balance all 32 abilities across 8 deities
-4. Add deity-themed visual effects
+### Short-term (Phase 3.4 Completion)
+1. Implement special effect handlers for complex perk mechanics
+2. Balance testing across all 8 deities
+3. Document all 160 perks in user-facing format
+4. Performance testing with multiple religions and players
+5. Bug fixes and refinement
 
-### Medium-term (Phase 4)
-1. Design temple structures
-2. Implement world generation hooks
-3. Create territory control system
-4. Add shrine blocks and mechanics
+### Medium-term (Phase 3.5)
+1. Remove old ability system (AbilitySystem, AbilityCooldownManager, all abilities)
+2. Implement data migration from Phase 1-2 to Phase 3 format
+3. Create Perk Tree Viewer UI (PerkTreeDialog)
+4. Build Religion Management UI (ReligionManagementDialog)
+5. Comprehensive end-to-end testing
+6. Update all documentation
 
-### Long-term (Phase 5)
-1. Design duel system
-2. Create event framework
+### Long-term (Phase 4)
+1. Design divine duel system
+2. Create crusade event framework
 3. Implement relic system
 4. Add apostate mechanics
 
@@ -397,9 +550,16 @@ This guide outlines the development roadmap for Pantheon Wars, broken down into 
 
 If you're interested in contributing to Pantheon Wars development, consider:
 
-- **Phase 3 Help:** Hotkey system implementation, ability design, balancing, and particle effects
-- **Phase 4 Help:** World generation, structure design, and territorial gameplay
-- **Phase 5 Help:** Event systems, leaderboards, and advanced PvP mechanics
+- **Phase 3.4 Help (URGENT):**
+  - Designing remaining 5 deity perk trees (Aethra, Umbros, Tharos, Gaia, Vex)
+  - Implementing special effect handlers (lifesteal, poison, critical strikes, etc.)
+  - Balance testing and perk refinement
+- **Phase 3.5 Help:**
+  - UI development (PerkTreeDialog, ReligionManagementDialog)
+  - Data migration implementation
+  - Comprehensive testing
+- **Phase 4 Help:**
+  - Event systems, leaderboards, advanced PvP mechanics
 
 See the main [README.md](../README.md) for contribution guidelines.
 
@@ -407,6 +567,9 @@ See the main [README.md](../README.md) for contribution guidelines.
 
 ## Version History
 
-- **v0.2.0** - Phase 2 complete (buff/debuff system, all abilities functional)
+- **v0.3.5** (Oct 24, 2025) - Phase 3.3 complete (Perk system core, stat application implemented)
+- **v0.3.2** - Phase 3.2 complete (Dual ranking systems, prestige manager)
+- **v0.3.1** - Phase 3.1 complete (Religion system foundation, 10 commands)
+- **v0.2.0** - Phase 2 complete (Buff/debuff system, all abilities functional)
 - **v0.1.0** - Phase 1 complete (MVP foundation, 2 deities, 8 basic abilities)
 - *Future versions will be documented here*
