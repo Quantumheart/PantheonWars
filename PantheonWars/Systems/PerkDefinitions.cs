@@ -564,8 +564,255 @@ namespace PantheonWars.Systems
 
         private static List<Perk> GetMorthenPerks()
         {
-            // Implementing 20 perks for Morthen - Death deity
-            return new List<Perk> { };
+            return new List<Perk>
+            {
+                // PLAYER PERKS (10 total) - Focus: Life drain, DoT, survivability
+
+                // Tier 1 - Initiate
+                new Perk("morthen_dark_touch", "Dark Touch", DeityType.Morthen)
+                {
+                    Type = PerkType.Player,
+                    Category = PerkCategory.Combat,
+                    Description = "Your strikes drain life. +5% melee damage.",
+                    RequiredFavorRank = (int)FavorRank.Initiate,
+                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.05f } },
+                    SpecialEffects = new List<string> { "lifesteal_2percent" }
+                },
+                new Perk("morthen_death_resilience", "Death's Resilience", DeityType.Morthen)
+                {
+                    Type = PerkType.Player,
+                    Category = PerkCategory.Defense,
+                    Description = "Death empowers you. +8% max health.",
+                    RequiredFavorRank = (int)FavorRank.Initiate,
+                    StatModifiers = new Dictionary<string, float> { { "maxHealthMultiplier", 0.08f } }
+                },
+
+                // Tier 2 - Disciple
+                new Perk("morthen_soul_reaper", "Soul Reaper", DeityType.Morthen)
+                {
+                    Type = PerkType.Player,
+                    Category = PerkCategory.Combat,
+                    Description = "Harvest souls. +10% melee damage, increased lifesteal. Requires Dark Touch.",
+                    RequiredFavorRank = (int)FavorRank.Disciple,
+                    PrerequisitePerks = new List<string> { "morthen_dark_touch" },
+                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.10f } },
+                    SpecialEffects = new List<string> { "lifesteal_5percent" }
+                },
+                new Perk("morthen_undying", "Undying", DeityType.Morthen)
+                {
+                    Type = PerkType.Player,
+                    Category = PerkCategory.Defense,
+                    Description = "Resist death itself. +12% max health, +5% armor. Requires Death's Resilience.",
+                    RequiredFavorRank = (int)FavorRank.Disciple,
+                    PrerequisitePerks = new List<string> { "morthen_death_resilience" },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { "maxHealthMultiplier", 0.12f },
+                        { "armorMultiplier", 0.05f }
+                    }
+                },
+
+                // Tier 3 - Zealot
+                new Perk("morthen_plague_bearer", "Plague Bearer", DeityType.Morthen)
+                {
+                    Type = PerkType.Player,
+                    Category = PerkCategory.Combat,
+                    Description = "Spread disease. +15% melee damage, attacks apply poison. Requires Soul Reaper.",
+                    RequiredFavorRank = (int)FavorRank.Zealot,
+                    PrerequisitePerks = new List<string> { "morthen_soul_reaper" },
+                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.15f } },
+                    SpecialEffects = new List<string> { "lifesteal_5percent", "poison_dot" }
+                },
+                new Perk("morthen_deathless", "Deathless", DeityType.Morthen)
+                {
+                    Type = PerkType.Player,
+                    Category = PerkCategory.Defense,
+                    Description = "Cheat death. +18% max health, +10% armor, health regen. Requires Undying.",
+                    RequiredFavorRank = (int)FavorRank.Zealot,
+                    PrerequisitePerks = new List<string> { "morthen_undying" },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { "maxHealthMultiplier", 0.18f },
+                        { "armorMultiplier", 0.10f },
+                        { "healthRegenMultiplier", 0.20f }
+                    }
+                },
+
+                // Tier 4 - Champion
+                new Perk("morthen_death_lord", "Death Lord", DeityType.Morthen)
+                {
+                    Type = PerkType.Player,
+                    Category = PerkCategory.Combat,
+                    Description = "Command death. +20% melee damage, strong lifesteal. Requires Plague Bearer.",
+                    RequiredFavorRank = (int)FavorRank.Champion,
+                    PrerequisitePerks = new List<string> { "morthen_plague_bearer" },
+                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.20f } },
+                    SpecialEffects = new List<string> { "lifesteal_10percent", "plague_aura", "weaken_enemy" }
+                },
+                new Perk("morthen_beyond_grave", "Beyond the Grave", DeityType.Morthen)
+                {
+                    Type = PerkType.Player,
+                    Category = PerkCategory.Defense,
+                    Description = "Transcend mortality. +25% max health, +15% armor, strong regen. Requires Deathless.",
+                    RequiredFavorRank = (int)FavorRank.Champion,
+                    PrerequisitePerks = new List<string> { "morthen_deathless" },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { "maxHealthMultiplier", 0.25f },
+                        { "armorMultiplier", 0.15f },
+                        { "healthRegenMultiplier", 0.35f }
+                    }
+                },
+
+                // Tier 5 - Avatar
+                new Perk("morthen_avatar_of_death", "Avatar of Death", DeityType.Morthen)
+                {
+                    Type = PerkType.Player,
+                    Category = PerkCategory.Combat,
+                    Description = "Become death incarnate. +30% melee damage, massive lifesteal. Requires Death Lord.",
+                    RequiredFavorRank = (int)FavorRank.Avatar,
+                    PrerequisitePerks = new List<string> { "morthen_death_lord" },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { "meleeDamageMultiplier", 0.30f },
+                        { "attackSpeedMultiplier", 0.10f }
+                    },
+                    SpecialEffects = new List<string> { "lifesteal_15percent", "death_aura", "execute_low_health" }
+                },
+                new Perk("morthen_immortal", "Immortal", DeityType.Morthen)
+                {
+                    Type = PerkType.Player,
+                    Category = PerkCategory.Defense,
+                    Description = "True immortality. +35% max health, +20% armor, massive regen. Requires Beyond the Grave.",
+                    RequiredFavorRank = (int)FavorRank.Avatar,
+                    PrerequisitePerks = new List<string> { "morthen_beyond_grave" },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { "maxHealthMultiplier", 0.35f },
+                        { "armorMultiplier", 0.20f },
+                        { "healthRegenMultiplier", 0.50f }
+                    },
+                    SpecialEffects = new List<string> { "cheat_death_once" }
+                },
+
+                // RELIGION PERKS (10 total)
+
+                // Tier 1 - Fledgling
+                new Perk("morthen_cult_of_death", "Cult of Death", DeityType.Morthen)
+                {
+                    Type = PerkType.Religion,
+                    Category = PerkCategory.Combat,
+                    Description = "Shared darkness. +3% melee damage for all members.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
+                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.03f } }
+                },
+                new Perk("morthen_death_pact", "Death Pact", DeityType.Morthen)
+                {
+                    Type = PerkType.Religion,
+                    Category = PerkCategory.Defense,
+                    Description = "Bound by death. +5% max health for all members.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
+                    StatModifiers = new Dictionary<string, float> { { "maxHealthMultiplier", 0.05f } }
+                },
+
+                // Tier 2 - Established
+                new Perk("morthen_necromantic_bond", "Necromantic Bond", DeityType.Morthen)
+                {
+                    Type = PerkType.Religion,
+                    Category = PerkCategory.Combat,
+                    Description = "Dark communion. +5% melee damage for all. Requires Cult of Death.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Established,
+                    PrerequisitePerks = new List<string> { "morthen_cult_of_death" },
+                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.05f } }
+                },
+                new Perk("morthen_collective_undeath", "Collective Undeath", DeityType.Morthen)
+                {
+                    Type = PerkType.Religion,
+                    Category = PerkCategory.Defense,
+                    Description = "Shared resilience. +8% max health for all. Requires Death Pact.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Established,
+                    PrerequisitePerks = new List<string> { "morthen_death_pact" },
+                    StatModifiers = new Dictionary<string, float> { { "maxHealthMultiplier", 0.08f } }
+                },
+
+                // Tier 3 - Renowned
+                new Perk("morthen_plague_congregation", "Plague Congregation", DeityType.Morthen)
+                {
+                    Type = PerkType.Religion,
+                    Category = PerkCategory.Combat,
+                    Description = "Spread pestilence. +8% melee damage for all. Requires Necromantic Bond.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Renowned,
+                    PrerequisitePerks = new List<string> { "morthen_necromantic_bond" },
+                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.08f } }
+                },
+                new Perk("morthen_deathless_army", "Deathless Army", DeityType.Morthen)
+                {
+                    Type = PerkType.Religion,
+                    Category = PerkCategory.Defense,
+                    Description = "Unstoppable horde. +12% max health, +5% regen for all. Requires Collective Undeath.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Renowned,
+                    PrerequisitePerks = new List<string> { "morthen_collective_undeath" },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { "maxHealthMultiplier", 0.12f },
+                        { "healthRegenMultiplier", 0.15f }
+                    }
+                },
+
+                // Tier 4 - Legendary
+                new Perk("morthen_death_legion", "Death Legion", DeityType.Morthen)
+                {
+                    Type = PerkType.Religion,
+                    Category = PerkCategory.Combat,
+                    Description = "Army of the dead. +12% melee damage for all. Requires Plague Congregation.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Legendary,
+                    PrerequisitePerks = new List<string> { "morthen_plague_congregation" },
+                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.12f } }
+                },
+                new Perk("morthen_undying_horde", "Undying Horde", DeityType.Morthen)
+                {
+                    Type = PerkType.Religion,
+                    Category = PerkCategory.Defense,
+                    Description = "Unkillable legion. +18% max health, +10% regen for all. Requires Deathless Army.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Legendary,
+                    PrerequisitePerks = new List<string> { "morthen_deathless_army" },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { "maxHealthMultiplier", 0.18f },
+                        { "healthRegenMultiplier", 0.25f }
+                    }
+                },
+
+                // Tier 5 - Mythic
+                new Perk("morthen_empire_of_death", "Empire of Death", DeityType.Morthen)
+                {
+                    Type = PerkType.Religion,
+                    Category = PerkCategory.Combat,
+                    Description = "Rule over death. +20% melee damage, +5% attack speed for all. Requires Death Legion.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Mythic,
+                    PrerequisitePerks = new List<string> { "morthen_death_legion" },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { "meleeDamageMultiplier", 0.20f },
+                        { "attackSpeedMultiplier", 0.05f }
+                    },
+                    SpecialEffects = new List<string> { "religion_death_mark" }
+                },
+                new Perk("morthen_eternal_undeath", "Eternal Undeath", DeityType.Morthen)
+                {
+                    Type = PerkType.Religion,
+                    Category = PerkCategory.Defense,
+                    Description = "Never die. +25% max health, +10% armor, +15% regen for all. Requires Undying Horde.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Mythic,
+                    PrerequisitePerks = new List<string> { "morthen_undying_horde" },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { "maxHealthMultiplier", 0.25f },
+                        { "armorMultiplier", 0.10f },
+                        { "healthRegenMultiplier", 0.35f }
+                    }
+                }
+            };
         }
 
         #endregion
