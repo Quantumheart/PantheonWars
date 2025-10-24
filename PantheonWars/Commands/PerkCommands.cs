@@ -43,6 +43,7 @@ namespace PantheonWars.Commands
             _sapi.ChatCommands.Create("perks")
                 .WithDescription("Manage perks and view perk information")
                 .RequiresPlayer()
+                .RequiresPrivilege(Privilege.chat)
                 .BeginSubCommand("list")
                     .WithDescription("List all available perks for your deity")
                     .HandleWith(OnPerksList)

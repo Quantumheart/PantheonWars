@@ -401,7 +401,7 @@ This document provides a detailed, actionable task list for implementing the Rel
 
 ## Phase 3.3: Perk System Core (Week 4-5)
 **Goal**: Build perk system infrastructure
-**Status**: ✅ COMPLETED
+**Status**: ✅ COMPLETED (2025-10-24)
 
 ### Task 3.1: Create PerkRegistry System ✅
 **Estimated Time**: 3-4 hours
@@ -429,9 +429,9 @@ This document provides a detailed, actionable task list for implementing the Rel
     - [x] Create 2-3 player perks for Khoras (Tier 1)
     - [x] Create 2-3 religion perks for Khoras (Tier 1)
 
-### Task 3.2: Create PerkEffectSystem ⚠️
+### Task 3.2: Create PerkEffectSystem ✅
 **Estimated Time**: 4-5 hours
-**Status**: MOSTLY COMPLETED (stat application pending)
+**Status**: COMPLETED (2025-10-24)
 
 - [x] Create `Systems/PerkEffectSystem.cs`
   - [x] Add private fields: references to other managers
@@ -451,10 +451,15 @@ This document provides a detailed, actionable task list for implementing the Rel
     - [x] Get religion modifiers
     - [x] Combine both
     - [x] Return dictionary
-  - [ ] Implement `ApplyPerksToPlayer(player)` **⚠️ CRITICAL GAP**
+  - [x] Implement `ApplyPerksToPlayer(player)` ✅ **IMPLEMENTED**
     - [x] Get combined modifiers
-    - [ ] Apply to player stats (placeholder only - not actually affecting gameplay)
-    - [ ] Store applied modifiers for removal later
+    - [x] Apply to player stats using VS Stats API (entity.Stats.Set)
+    - [x] Store applied modifiers for removal later
+    - [x] Use XSkills pattern with namespaced modifier IDs
+    - [x] Implement stat name mapping for VS compatibility
+  - [x] Implement `RemovePerksFromPlayer(player)` ✅ **NEW**
+    - [x] Remove old modifiers using entity.Stats.Remove
+    - [x] Track and clean up applied modifiers
   - [x] Implement `RefreshPlayerPerks(playerUID)`
     - [x] Clear cached modifiers
     - [x] Recalculate from scratch
@@ -524,7 +529,7 @@ This document provides a detailed, actionable task list for implementing the Rel
 
 ### Task 3.6: Testing Phase 3.3 ⚠️
 **Estimated Time**: 3 hours
-**Status**: PARTIALLY COMPLETED
+**Status**: READY FOR IN-GAME TESTING
 
 - [x] Test perk registration
   - [x] Register sample perks
@@ -533,10 +538,11 @@ This document provides a detailed, actionable task list for implementing the Rel
   - [x] Try unlocking perk without requirements (should fail)
   - [x] Earn required rank
   - [x] Unlock perk successfully
-- [ ] Test perk effects **⚠️ BLOCKED - ApplyPerksToPlayer not implemented**
-  - [ ] Unlock perk with stat modifiers
-  - [ ] Verify modifiers are applied
+- [ ] Test perk effects **⚠️ NEEDS IN-GAME VERIFICATION**
+  - [x] ApplyPerksToPlayer implemented ✅
+  - [ ] Verify modifiers actually affect gameplay (in-game testing required)
   - [ ] Test combined player + religion modifiers
+  - [ ] Verify stat names work with Vintage Story
 - [x] Test perk persistence
   - [x] Unlock perks
   - [x] Save and reload
@@ -925,7 +931,7 @@ This document provides a detailed, actionable task list for implementing the Rel
 **Minor Gaps:**
 - Visual/sound effects for rank-ups not implemented (low priority)
 
-### Phase 3.3 Status: ✅ MOSTLY COMPLETED
+### Phase 3.3 Status: ✅ COMPLETED (2025-10-24)
 **Completed Tasks:**
 - PerkRegistry system with 160 perks registered
 - PerkEffectSystem calculating stat modifiers
@@ -933,11 +939,16 @@ This document provides a detailed, actionable task list for implementing the Rel
 - Perk persistence working
 - All 7 perk commands implemented
 - Perk system infrastructure complete
+- ✅ **ApplyPerksToPlayer() IMPLEMENTED** using VS Stats API
+- ✅ **RemovePerksFromPlayer() IMPLEMENTED** for cleanup
+- ✅ Stat name mapping for Vintage Story compatibility
+- ✅ Applied modifier tracking system
 
-**⚠️ CRITICAL GAP:**
-- `PerkEffectSystem.ApplyPerksToPlayer()` is a placeholder
-- Stat modifiers are calculated but **NOT actually applied to player stats in-game**
-- Perks unlock successfully but have no gameplay effect yet
+**📋 READY FOR TESTING:**
+- System is functionally complete
+- Needs in-game testing to verify stat effects
+- May need stat name adjustments based on testing
+- See `docs/PERK_STAT_APPLICATION_IMPLEMENTATION.md` for details
 
 ### Phase 3.4 Status: ⚠️ 37.5% COMPLETED (60/160 perks)
 **Completed Deities:**

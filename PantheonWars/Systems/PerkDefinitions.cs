@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using PantheonWars.Constants;
 using PantheonWars.Models;
 
 namespace PantheonWars.Systems
@@ -43,7 +44,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Combat,
                     Description = "Your devotion to war strengthens your strikes. +5% melee damage.",
                     RequiredFavorRank = (int)FavorRank.Initiate,
-                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.05f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.05f } }
                 },
                 new Perk("khoras_battle_endurance", "Battle Endurance", DeityType.Khoras)
                 {
@@ -51,7 +52,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Defense,
                     Description = "Your body adapts to the rigors of combat. +10% max health.",
                     RequiredFavorRank = (int)FavorRank.Initiate,
-                    StatModifiers = new Dictionary<string, float> { { "maxHealthMultiplier", 0.10f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 0.10f } }
                 },
 
                 // Tier 2 - Disciple (500-1999 favor)
@@ -62,7 +63,7 @@ namespace PantheonWars.Systems
                     Description = "Each strike fuels your rage. +10% melee damage. Requires Warrior's Resolve.",
                     RequiredFavorRank = (int)FavorRank.Disciple,
                     PrerequisitePerks = new List<string> { "khoras_warriors_resolve" },
-                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.10f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.10f } }
                 },
                 new Perk("khoras_iron_skin", "Iron Skin", DeityType.Khoras)
                 {
@@ -71,7 +72,7 @@ namespace PantheonWars.Systems
                     Description = "Battle hardens your flesh. +15% armor rating. Requires Battle Endurance.",
                     RequiredFavorRank = (int)FavorRank.Disciple,
                     PrerequisitePerks = new List<string> { "khoras_battle_endurance" },
-                    StatModifiers = new Dictionary<string, float> { { "armorMultiplier", 0.15f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponArmor, 0.15f } }
                 },
 
                 // Tier 3 - Zealot (2000-4999 favor)
@@ -84,8 +85,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_bloodlust" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "meleeDamageMultiplier", 0.15f },
-                        { "attackSpeedMultiplier", 0.05f }
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.15f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.05f }
                     }
                 },
                 new Perk("khoras_war_veteran", "War Veteran", DeityType.Khoras)
@@ -97,8 +98,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_iron_skin" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "maxHealthMultiplier", 0.15f },
-                        { "armorMultiplier", 0.10f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.15f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.10f }
                     }
                 },
 
@@ -112,8 +113,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_berserker_rage" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "meleeDamageMultiplier", 0.20f },
-                        { "attackSpeedMultiplier", 0.10f }
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.20f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.10f }
                     },
                     SpecialEffects = new List<string> { "critical_strike_chance" }
                 },
@@ -126,8 +127,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_war_veteran" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "maxHealthMultiplier", 0.25f },
-                        { "armorMultiplier", 0.15f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.25f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.15f }
                     }
                 },
 
@@ -141,9 +142,9 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_weapon_master" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "meleeDamageMultiplier", 0.30f },
-                        { "attackSpeedMultiplier", 0.15f },
-                        { "walkSpeedMultiplier", 0.10f }
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.30f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.15f },
+                        { VintageStoryStats.WalkSpeed, 0.10f }
                     },
                     SpecialEffects = new List<string> { "lifesteal", "aoe_cleave" }
                 },
@@ -156,9 +157,9 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_unbreakable" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "maxHealthMultiplier", 0.35f },
-                        { "armorMultiplier", 0.20f },
-                        { "healthRegenMultiplier", 0.50f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.35f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.20f },
+                        { VintageStoryStats.HealingEffectiveness, 0.50f }
                     },
                     SpecialEffects = new List<string> { "last_stand" }
                 },
@@ -172,7 +173,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Combat,
                     Description = "All members gain strength together. +3% melee damage for all members.",
                     RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
-                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.03f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.03f } }
                 },
                 new Perk("khoras_war_banner", "War Banner", DeityType.Khoras)
                 {
@@ -180,7 +181,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Defense,
                     Description = "Your banner inspires courage. +5% max health for all members.",
                     RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
-                    StatModifiers = new Dictionary<string, float> { { "maxHealthMultiplier", 0.05f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 0.05f } }
                 },
 
                 // Tier 2 - Established (500-1999 prestige)
@@ -191,7 +192,7 @@ namespace PantheonWars.Systems
                     Description = "Coordinate attacks. +5% melee damage for all. Requires Congregation's Strength.",
                     RequiredPrestigeRank = (int)PrestigeRank.Established,
                     PrerequisitePerks = new List<string> { "khoras_congregation_strength" },
-                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.05f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.05f } }
                 },
                 new Perk("khoras_fortress_faith", "Fortress Faith", DeityType.Khoras)
                 {
@@ -200,7 +201,7 @@ namespace PantheonWars.Systems
                     Description = "Collective defense. +8% max health for all. Requires War Banner.",
                     RequiredPrestigeRank = (int)PrestigeRank.Established,
                     PrerequisitePerks = new List<string> { "khoras_war_banner" },
-                    StatModifiers = new Dictionary<string, float> { { "maxHealthMultiplier", 0.08f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 0.08f } }
                 },
 
                 // Tier 3 - Renowned (2000-4999 prestige)
@@ -213,8 +214,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_legion_tactics" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "meleeDamageMultiplier", 0.08f },
-                        { "attackSpeedMultiplier", 0.05f }
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.08f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.05f }
                     }
                 },
                 new Perk("khoras_shield_wall", "Shield Wall", DeityType.Khoras)
@@ -226,8 +227,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_fortress_faith" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "maxHealthMultiplier", 0.12f },
-                        { "armorMultiplier", 0.10f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.12f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.10f }
                     }
                 },
 
@@ -241,8 +242,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_army_of_one" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "meleeDamageMultiplier", 0.12f },
-                        { "attackSpeedMultiplier", 0.08f }
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.12f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.08f }
                     }
                 },
                 new Perk("khoras_iron_legion", "Iron Legion", DeityType.Khoras)
@@ -254,8 +255,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_shield_wall" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "maxHealthMultiplier", 0.18f },
-                        { "armorMultiplier", 0.15f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.18f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.15f }
                     }
                 },
 
@@ -269,9 +270,9 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_warhost" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "meleeDamageMultiplier", 0.20f },
-                        { "attackSpeedMultiplier", 0.12f },
-                        { "walkSpeedMultiplier", 0.05f }
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.20f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.12f },
+                        { VintageStoryStats.WalkSpeed, 0.05f }
                     },
                     SpecialEffects = new List<string> { "religion_war_cry" }
                 },
@@ -284,9 +285,9 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_iron_legion" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "maxHealthMultiplier", 0.25f },
-                        { "armorMultiplier", 0.20f },
-                        { "healthRegenMultiplier", 0.30f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.25f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.20f },
+                        { VintageStoryStats.HealingEffectiveness, 0.30f }
                     },
                     SpecialEffects = new List<string> { "religion_battle_standard" }
                 }
@@ -310,7 +311,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Combat,
                     Description = "Sharpen your aim. +5% ranged damage.",
                     RequiredFavorRank = (int)FavorRank.Initiate,
-                    StatModifiers = new Dictionary<string, float> { { "rangedDamageMultiplier", 0.05f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.RangedWeaponsDamage, 0.05f } }
                 },
                 new Perk("lysa_tracker", "Tracker", DeityType.Lysa)
                 {
@@ -318,7 +319,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Mobility,
                     Description = "Move swiftly through the wilderness. +8% movement speed.",
                     RequiredFavorRank = (int)FavorRank.Initiate,
-                    StatModifiers = new Dictionary<string, float> { { "walkSpeedMultiplier", 0.08f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.WalkSpeed, 0.08f } }
                 },
 
                 // Tier 2 - Disciple
@@ -329,7 +330,7 @@ namespace PantheonWars.Systems
                     Description = "Perfect accuracy. +10% ranged damage, +5% critical chance. Requires Keen Eye.",
                     RequiredFavorRank = (int)FavorRank.Disciple,
                     PrerequisitePerks = new List<string> { "lysa_keen_eye" },
-                    StatModifiers = new Dictionary<string, float> { { "rangedDamageMultiplier", 0.10f } },
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.RangedWeaponsDamage, 0.10f } },
                     SpecialEffects = new List<string> { "critical_chance_5" }
                 },
                 new Perk("lysa_silent_stalker", "Silent Stalker", DeityType.Lysa)
@@ -339,7 +340,7 @@ namespace PantheonWars.Systems
                     Description = "Move like a ghost. +12% movement speed, reduced detection. Requires Tracker.",
                     RequiredFavorRank = (int)FavorRank.Disciple,
                     PrerequisitePerks = new List<string> { "lysa_tracker" },
-                    StatModifiers = new Dictionary<string, float> { { "walkSpeedMultiplier", 0.12f } },
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.WalkSpeed, 0.12f } },
                     SpecialEffects = new List<string> { "stealth_bonus" }
                 },
 
@@ -351,7 +352,7 @@ namespace PantheonWars.Systems
                     Description = "Never miss. +15% ranged damage, +10% critical chance. Requires Hunter's Focus.",
                     RequiredFavorRank = (int)FavorRank.Zealot,
                     PrerequisitePerks = new List<string> { "lysa_hunters_focus" },
-                    StatModifiers = new Dictionary<string, float> { { "rangedDamageMultiplier", 0.15f } },
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.RangedWeaponsDamage, 0.15f } },
                     SpecialEffects = new List<string> { "critical_chance_10" }
                 },
                 new Perk("lysa_predator", "Predator", DeityType.Lysa)
@@ -363,8 +364,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "lysa_silent_stalker" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "walkSpeedMultiplier", 0.18f },
-                        { "meleeDamageMultiplier", 0.05f }
+                        { VintageStoryStats.WalkSpeed, 0.18f },
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.05f }
                     }
                 },
 
@@ -378,8 +379,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "lysa_deadly_precision" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "rangedDamageMultiplier", 0.20f },
-                        { "attackSpeedMultiplier", 0.05f }
+                        { VintageStoryStats.RangedWeaponsDamage, 0.20f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.05f }
                     },
                     SpecialEffects = new List<string> { "critical_chance_15", "headshot_bonus" }
                 },
@@ -392,8 +393,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "lysa_predator" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "walkSpeedMultiplier", 0.25f },
-                        { "meleeDamageMultiplier", 0.10f }
+                        { VintageStoryStats.WalkSpeed, 0.25f },
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.10f }
                     }
                 },
 
@@ -407,8 +408,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "lysa_master_huntress" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "rangedDamageMultiplier", 0.30f },
-                        { "attackSpeedMultiplier", 0.10f }
+                        { VintageStoryStats.RangedWeaponsDamage, 0.30f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.10f }
                     },
                     SpecialEffects = new List<string> { "critical_chance_25", "multishot", "tracking_vision" }
                 },
@@ -421,9 +422,9 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "lysa_untamed" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "walkSpeedMultiplier", 0.35f },
-                        { "meleeDamageMultiplier", 0.15f },
-                        { "maxHealthMultiplier", 0.10f }
+                        { VintageStoryStats.WalkSpeed, 0.35f },
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.15f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.10f }
                     },
                     SpecialEffects = new List<string> { "animal_companion" }
                 },
@@ -437,7 +438,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Combat,
                     Description = "Hunt as one. +3% ranged damage for all members.",
                     RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
-                    StatModifiers = new Dictionary<string, float> { { "rangedDamageMultiplier", 0.03f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.RangedWeaponsDamage, 0.03f } }
                 },
                 new Perk("lysa_swift_pack", "Swift Pack", DeityType.Lysa)
                 {
@@ -445,7 +446,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Mobility,
                     Description = "Run together. +5% movement speed for all members.",
                     RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
-                    StatModifiers = new Dictionary<string, float> { { "walkSpeedMultiplier", 0.05f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.WalkSpeed, 0.05f } }
                 },
 
                 // Tier 2 - Established
@@ -456,7 +457,7 @@ namespace PantheonWars.Systems
                     Description = "Strike together. +5% ranged damage for all. Requires Pack Hunters.",
                     RequiredPrestigeRank = (int)PrestigeRank.Established,
                     PrerequisitePerks = new List<string> { "lysa_pack_hunters" },
-                    StatModifiers = new Dictionary<string, float> { { "rangedDamageMultiplier", 0.05f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.RangedWeaponsDamage, 0.05f } }
                 },
                 new Perk("lysa_pack_agility", "Pack Agility", DeityType.Lysa)
                 {
@@ -465,7 +466,7 @@ namespace PantheonWars.Systems
                     Description = "Agile collective. +8% movement speed for all. Requires Swift Pack.",
                     RequiredPrestigeRank = (int)PrestigeRank.Established,
                     PrerequisitePerks = new List<string> { "lysa_swift_pack" },
-                    StatModifiers = new Dictionary<string, float> { { "walkSpeedMultiplier", 0.08f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.WalkSpeed, 0.08f } }
                 },
 
                 // Tier 3 - Renowned
@@ -478,8 +479,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "lysa_coordinated_strike" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "rangedDamageMultiplier", 0.08f },
-                        { "meleeDamageMultiplier", 0.05f }
+                        { VintageStoryStats.RangedWeaponsDamage, 0.08f },
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.05f }
                     }
                 },
                 new Perk("lysa_wild_sprint", "Wild Sprint", DeityType.Lysa)
@@ -491,8 +492,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "lysa_pack_agility" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "walkSpeedMultiplier", 0.12f },
-                        { "attackSpeedMultiplier", 0.05f }
+                        { VintageStoryStats.WalkSpeed, 0.12f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.05f }
                     }
                 },
 
@@ -506,8 +507,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "lysa_hunting_party" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "rangedDamageMultiplier", 0.12f },
-                        { "meleeDamageMultiplier", 0.08f }
+                        { VintageStoryStats.RangedWeaponsDamage, 0.12f },
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.08f }
                     }
                 },
                 new Perk("lysa_cheetah_stride", "Cheetah Stride", DeityType.Lysa)
@@ -519,8 +520,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "lysa_wild_sprint" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "walkSpeedMultiplier", 0.18f },
-                        { "attackSpeedMultiplier", 0.08f }
+                        { VintageStoryStats.WalkSpeed, 0.18f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.08f }
                     }
                 },
 
@@ -534,9 +535,9 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "lysa_apex_pack" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "rangedDamageMultiplier", 0.20f },
-                        { "meleeDamageMultiplier", 0.12f },
-                        { "attackSpeedMultiplier", 0.10f }
+                        { VintageStoryStats.RangedWeaponsDamage, 0.20f },
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.12f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.10f }
                     },
                     SpecialEffects = new List<string> { "religion_hunters_mark" }
                 },
@@ -549,9 +550,9 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "lysa_cheetah_stride" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "walkSpeedMultiplier", 0.25f },
-                        { "attackSpeedMultiplier", 0.12f },
-                        { "maxHealthMultiplier", 0.10f }
+                        { VintageStoryStats.WalkSpeed, 0.25f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.12f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.10f }
                     },
                     SpecialEffects = new List<string> { "religion_pack_bond" }
                 }
@@ -575,7 +576,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Combat,
                     Description = "Your strikes drain life. +5% melee damage.",
                     RequiredFavorRank = (int)FavorRank.Initiate,
-                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.05f } },
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.05f } },
                     SpecialEffects = new List<string> { "lifesteal_2percent" }
                 },
                 new Perk("morthen_death_resilience", "Death's Resilience", DeityType.Morthen)
@@ -584,7 +585,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Defense,
                     Description = "Death empowers you. +8% max health.",
                     RequiredFavorRank = (int)FavorRank.Initiate,
-                    StatModifiers = new Dictionary<string, float> { { "maxHealthMultiplier", 0.08f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 0.08f } }
                 },
 
                 // Tier 2 - Disciple
@@ -595,7 +596,7 @@ namespace PantheonWars.Systems
                     Description = "Harvest souls. +10% melee damage, increased lifesteal. Requires Dark Touch.",
                     RequiredFavorRank = (int)FavorRank.Disciple,
                     PrerequisitePerks = new List<string> { "morthen_dark_touch" },
-                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.10f } },
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.10f } },
                     SpecialEffects = new List<string> { "lifesteal_5percent" }
                 },
                 new Perk("morthen_undying", "Undying", DeityType.Morthen)
@@ -607,8 +608,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_death_resilience" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "maxHealthMultiplier", 0.12f },
-                        { "armorMultiplier", 0.05f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.12f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.05f }
                     }
                 },
 
@@ -620,7 +621,7 @@ namespace PantheonWars.Systems
                     Description = "Spread disease. +15% melee damage, attacks apply poison. Requires Soul Reaper.",
                     RequiredFavorRank = (int)FavorRank.Zealot,
                     PrerequisitePerks = new List<string> { "morthen_soul_reaper" },
-                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.15f } },
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.15f } },
                     SpecialEffects = new List<string> { "lifesteal_5percent", "poison_dot" }
                 },
                 new Perk("morthen_deathless", "Deathless", DeityType.Morthen)
@@ -632,9 +633,9 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_undying" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "maxHealthMultiplier", 0.18f },
-                        { "armorMultiplier", 0.10f },
-                        { "healthRegenMultiplier", 0.20f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.18f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.10f },
+                        { VintageStoryStats.HealingEffectiveness, 0.20f }
                     }
                 },
 
@@ -646,7 +647,7 @@ namespace PantheonWars.Systems
                     Description = "Command death. +20% melee damage, strong lifesteal. Requires Plague Bearer.",
                     RequiredFavorRank = (int)FavorRank.Champion,
                     PrerequisitePerks = new List<string> { "morthen_plague_bearer" },
-                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.20f } },
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.20f } },
                     SpecialEffects = new List<string> { "lifesteal_10percent", "plague_aura", "weaken_enemy" }
                 },
                 new Perk("morthen_beyond_grave", "Beyond the Grave", DeityType.Morthen)
@@ -658,9 +659,9 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_deathless" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "maxHealthMultiplier", 0.25f },
-                        { "armorMultiplier", 0.15f },
-                        { "healthRegenMultiplier", 0.35f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.25f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.15f },
+                        { VintageStoryStats.HealingEffectiveness, 0.35f }
                     }
                 },
 
@@ -674,8 +675,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_death_lord" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "meleeDamageMultiplier", 0.30f },
-                        { "attackSpeedMultiplier", 0.10f }
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.30f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.10f }
                     },
                     SpecialEffects = new List<string> { "lifesteal_15percent", "death_aura", "execute_low_health" }
                 },
@@ -688,9 +689,9 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_beyond_grave" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "maxHealthMultiplier", 0.35f },
-                        { "armorMultiplier", 0.20f },
-                        { "healthRegenMultiplier", 0.50f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.35f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.20f },
+                        { VintageStoryStats.HealingEffectiveness, 0.50f }
                     },
                     SpecialEffects = new List<string> { "cheat_death_once" }
                 },
@@ -704,7 +705,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Combat,
                     Description = "Shared darkness. +3% melee damage for all members.",
                     RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
-                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.03f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.03f } }
                 },
                 new Perk("morthen_death_pact", "Death Pact", DeityType.Morthen)
                 {
@@ -712,7 +713,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Defense,
                     Description = "Bound by death. +5% max health for all members.",
                     RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
-                    StatModifiers = new Dictionary<string, float> { { "maxHealthMultiplier", 0.05f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 0.05f } }
                 },
 
                 // Tier 2 - Established
@@ -723,7 +724,7 @@ namespace PantheonWars.Systems
                     Description = "Dark communion. +5% melee damage for all. Requires Cult of Death.",
                     RequiredPrestigeRank = (int)PrestigeRank.Established,
                     PrerequisitePerks = new List<string> { "morthen_cult_of_death" },
-                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.05f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.05f } }
                 },
                 new Perk("morthen_collective_undeath", "Collective Undeath", DeityType.Morthen)
                 {
@@ -732,7 +733,7 @@ namespace PantheonWars.Systems
                     Description = "Shared resilience. +8% max health for all. Requires Death Pact.",
                     RequiredPrestigeRank = (int)PrestigeRank.Established,
                     PrerequisitePerks = new List<string> { "morthen_death_pact" },
-                    StatModifiers = new Dictionary<string, float> { { "maxHealthMultiplier", 0.08f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 0.08f } }
                 },
 
                 // Tier 3 - Renowned
@@ -743,7 +744,7 @@ namespace PantheonWars.Systems
                     Description = "Spread pestilence. +8% melee damage for all. Requires Necromantic Bond.",
                     RequiredPrestigeRank = (int)PrestigeRank.Renowned,
                     PrerequisitePerks = new List<string> { "morthen_necromantic_bond" },
-                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.08f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.08f } }
                 },
                 new Perk("morthen_deathless_army", "Deathless Army", DeityType.Morthen)
                 {
@@ -754,8 +755,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_collective_undeath" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "maxHealthMultiplier", 0.12f },
-                        { "healthRegenMultiplier", 0.15f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.12f },
+                        { VintageStoryStats.HealingEffectiveness, 0.15f }
                     }
                 },
 
@@ -767,7 +768,7 @@ namespace PantheonWars.Systems
                     Description = "Army of the dead. +12% melee damage for all. Requires Plague Congregation.",
                     RequiredPrestigeRank = (int)PrestigeRank.Legendary,
                     PrerequisitePerks = new List<string> { "morthen_plague_congregation" },
-                    StatModifiers = new Dictionary<string, float> { { "meleeDamageMultiplier", 0.12f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.12f } }
                 },
                 new Perk("morthen_undying_horde", "Undying Horde", DeityType.Morthen)
                 {
@@ -778,8 +779,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_deathless_army" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "maxHealthMultiplier", 0.18f },
-                        { "healthRegenMultiplier", 0.25f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.18f },
+                        { VintageStoryStats.HealingEffectiveness, 0.25f }
                     }
                 },
 
@@ -793,8 +794,8 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_death_legion" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "meleeDamageMultiplier", 0.20f },
-                        { "attackSpeedMultiplier", 0.05f }
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.20f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.05f }
                     },
                     SpecialEffects = new List<string> { "religion_death_mark" }
                 },
@@ -807,9 +808,9 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_undying_horde" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { "maxHealthMultiplier", 0.25f },
-                        { "armorMultiplier", 0.10f },
-                        { "healthRegenMultiplier", 0.35f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 0.25f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.10f },
+                        { VintageStoryStats.HealingEffectiveness, 0.35f }
                     }
                 }
             };

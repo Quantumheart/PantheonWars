@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using PantheonWars.Data;
 using PantheonWars.Models;
+using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Server;
 
 namespace PantheonWars.Systems
@@ -20,6 +22,9 @@ namespace PantheonWars.Systems
         // Cache for stat modifiers to reduce computation
         private readonly Dictionary<string, Dictionary<string, float>> _playerModifierCache = new();
         private readonly Dictionary<string, Dictionary<string, float>> _religionModifierCache = new();
+
+        // Track applied modifiers per player for cleanup
+        private readonly Dictionary<string, HashSet<string>> _appliedModifiers = new();
 
         public PerkEffectSystem(
             ICoreServerAPI sapi,
@@ -154,25 +159,109 @@ namespace PantheonWars.Systems
         }
 
         /// <summary>
-        /// Applies perks to a player (placeholder for future implementation)
+        /// Applies perks to a player using Vintage Story's Stats API
+        /// Based on XSkills implementation pattern
         /// </summary>
         public void ApplyPerksToPlayer(IServerPlayer player)
         {
+            if (player?.Entity == null)
+            {
+                _sapi.Logger.Warning($"[PantheonWars] Cannot apply perks - player entity is null");
+                return;
+            }
+
+            EntityAgent agent = player.Entity as EntityAgent;
+            if (agent?.Stats == null)
+            {
+                _sapi.Logger.Warning($"[PantheonWars] Cannot apply perks - player has no Stats");
+                return;
+            }
+
+            // Get combined modifiers (player perks + religion perks)
             var modifiers = GetCombinedStatModifiers(player.PlayerUID);
 
-            // Log the modifiers for now
-            if (modifiers.Count > 0)
+            // Remove old modifiers first
+            RemovePerksFromPlayer(player);
+
+            // Apply new modifiers
+            int appliedCount = 0;
+            var appliedSet = new HashSet<string>();
+
+            foreach (var modifier in modifiers)
             {
-                _sapi.Logger.Debug($"[PantheonWars] Player {player.PlayerName} has {modifiers.Count} active stat modifiers:");
-                foreach (var kvp in modifiers)
+                // Stat names now come directly from VintageStoryStats constants
+                string statName = modifier.Key;
+
+                // Use namespaced modifier ID to avoid conflicts
+                string modifierId = $"perk-{player.PlayerUID}";
+                float value = modifier.Value;
+
+                try
                 {
-                    _sapi.Logger.Debug($"  - {kvp.Key}: +{kvp.Value * 100}%");
+                    // Apply stat modifier (false = deferred update, per XSkills pattern)
+                    agent.Stats.Set(statName, modifierId, value, false);
+                    appliedSet.Add(statName);
+                    appliedCount++;
+
+                    _sapi.Logger.Debug($"[PantheonWars] Applied {statName}: {modifierId} = {value:F3}");
+                }
+                catch (KeyNotFoundException ex)
+                {
+                    _sapi.Logger.Warning($"[PantheonWars] Stat '{statName}' not found for player {player.PlayerName}: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    _sapi.Logger.Error($"[PantheonWars] Error applying stat '{statName}' to player {player.PlayerName}: {ex}");
                 }
             }
 
-            // TODO: Apply modifiers to player stats
-            // This will require integration with Vintage Story's entity attribute system
-            // or custom EntityBehavior implementation in a future phase
+            // Track applied modifiers for cleanup later
+            _appliedModifiers[player.PlayerUID] = appliedSet;
+
+            if (appliedCount > 0)
+            {
+                _sapi.Logger.Notification($"[PantheonWars] Applied {appliedCount} perk modifiers to player {player.PlayerName}");
+            }
+        }
+
+        /// <summary>
+        /// Removes all perk modifiers from a player
+        /// </summary>
+        private void RemovePerksFromPlayer(IServerPlayer player)
+        {
+            if (player?.Entity == null) return;
+
+            EntityAgent agent = player.Entity as EntityAgent;
+            if (agent?.Stats == null) return;
+
+            // Get previously applied modifiers
+            if (!_appliedModifiers.TryGetValue(player.PlayerUID, out var appliedSet))
+            {
+                return; // No modifiers to remove
+            }
+
+            string modifierId = $"perk-{player.PlayerUID}";
+            int removedCount = 0;
+
+            foreach (var statName in appliedSet)
+            {
+                try
+                {
+                    agent.Stats.Remove(statName, modifierId);
+                    removedCount++;
+                }
+                catch (Exception ex)
+                {
+                    _sapi.Logger.Debug($"[PantheonWars] Could not remove modifier '{statName}' from player {player.PlayerName}: {ex.Message}");
+                }
+            }
+
+            if (removedCount > 0)
+            {
+                _sapi.Logger.Debug($"[PantheonWars] Removed {removedCount} old perk modifiers from player {player.PlayerName}");
+            }
+
+            appliedSet.Clear();
         }
 
         /// <summary>
@@ -329,11 +418,13 @@ namespace PantheonWars.Systems
         {
             return statKey switch
             {
-                "meleeDamageMultiplier" => "Melee Damage",
-                "maxHealthMultiplier" => "Max Health",
-                "walkSpeedMultiplier" => "Walk Speed",
-                "rangedDamageMultiplier" => "Ranged Damage",
-                "armorMultiplier" => "Armor",
+                "meleeWeaponsDamage" => "Melee Damage",
+                "rangedWeaponsDamage" => "Ranged Damage",
+                "meleeWeaponsSpeed" => "Attack Speed",
+                "meleeWeaponArmor" => "Armor",
+                "maxhealthExtraPoints" => "Max Health",
+                "walkspeed" => "Walk Speed",
+                "healingeffectivness" => "Health Regen",
                 _ => statKey
             };
         }
