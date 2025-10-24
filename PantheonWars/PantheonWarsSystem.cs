@@ -27,10 +27,13 @@ namespace PantheonWars
         private PlayerReligionDataManager _playerReligionDataManager;
         private ReligionPrestigeManager _religionPrestigeManager;
         private PvPManager _pvpManager;
+        private PerkRegistry _perkRegistry;
+        private PerkEffectSystem _perkEffectSystem;
         private DeityCommands _deityCommands;
         private AbilityCommands _abilityCommands;
         private FavorCommands _favorCommands;
         private ReligionCommands _religionCommands;
+        private PerkCommands _perkCommands;
 
         // Client-side systems
         private ICoreClientAPI _capi;
@@ -100,6 +103,13 @@ namespace PantheonWars
             _pvpManager = new PvPManager(api, _playerReligionDataManager, _religionManager, _religionPrestigeManager, _deityRegistry);
             _pvpManager.Initialize();
 
+            // Initialize perk systems (Phase 3.3)
+            _perkRegistry = new PerkRegistry(api);
+            _perkRegistry.Initialize();
+
+            _perkEffectSystem = new PerkEffectSystem(api, _perkRegistry, _playerReligionDataManager, _religionManager);
+            _perkEffectSystem.Initialize();
+
             // Register commands
             _deityCommands = new DeityCommands(api, _deityRegistry, _playerDataManager);
             _deityCommands.RegisterCommands();
@@ -112,6 +122,9 @@ namespace PantheonWars
 
             _religionCommands = new ReligionCommands(api, _religionManager, _playerReligionDataManager);
             _religionCommands.RegisterCommands();
+
+            _perkCommands = new PerkCommands(api, _perkRegistry, _playerReligionDataManager, _religionManager, _perkEffectSystem);
+            _perkCommands.RegisterCommands();
 
             // Setup network channel and handlers
             _serverChannel = api.Network.GetChannel(NETWORK_CHANNEL);
