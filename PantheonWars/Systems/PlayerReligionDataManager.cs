@@ -18,11 +18,20 @@ namespace PantheonWars.Systems
         private readonly ICoreServerAPI _sapi;
         private readonly ReligionManager _religionManager;
         private readonly Dictionary<string, PlayerReligionData> _playerData = new();
+        private PerkEffectSystem? _perkEffectSystem;
 
         public PlayerReligionDataManager(ICoreServerAPI sapi, ReligionManager religionManager)
         {
             _sapi = sapi;
             _religionManager = religionManager;
+        }
+
+        /// <summary>
+        /// Sets the PerkEffectSystem reference (called after construction to avoid circular dependency)
+        /// </summary>
+        public void SetPerkEffectSystem(PerkEffectSystem perkEffectSystem)
+        {
+            _perkEffectSystem = perkEffectSystem;
         }
 
         /// <summary>
@@ -184,6 +193,9 @@ namespace PantheonWars.Systems
             // Add player to religion
             _religionManager.AddMember(religionUID, playerUID);
 
+            // Refresh perks to apply religion bonuses
+            _perkEffectSystem?.RefreshPlayerPerks(playerUID);
+
             _sapi.Logger.Notification($"[PantheonWars] Player {playerUID} joined religion {religion.ReligionName}");
         }
 
@@ -207,6 +219,9 @@ namespace PantheonWars.Systems
             // Clear player data
             data.ReligionUID = null;
             data.ActiveDeity = DeityType.None;
+
+            // Refresh perks to remove religion bonuses
+            _perkEffectSystem?.RefreshPlayerPerks(playerUID);
 
             _sapi.Logger.Notification($"[PantheonWars] Player {playerUID} left religion");
         }
