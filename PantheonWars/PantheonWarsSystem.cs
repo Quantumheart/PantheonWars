@@ -51,7 +51,7 @@ namespace PantheonWars
 
             // Register network channel and message types
             api.Network.RegisterChannel(NETWORK_CHANNEL)
-                .RegisterMessageType<PlayerDataPacket>();
+                .RegisterMessageType<PlayerReligionDataPacket>();
         }
 
         public override void StartServerSide(ICoreServerAPI api)
@@ -128,7 +128,7 @@ namespace PantheonWars
 
             // Setup network channel and handlers
             _serverChannel = api.Network.GetChannel(NETWORK_CHANNEL);
-            _serverChannel.SetMessageHandler<PlayerDataPacket>(OnServerMessageReceived);
+            _serverChannel.SetMessageHandler<PlayerReligionDataPacket>(OnServerMessageReceived);
             SetupServerNetworking(api);
 
             // Hook player join to send initial data
@@ -169,7 +169,7 @@ namespace PantheonWars
             // Add any additional server-side packet handlers here if needed
         }
 
-        private void OnServerMessageReceived(IServerPlayer fromPlayer, PlayerDataPacket packet)
+        private void OnServerMessageReceived(IServerPlayer fromPlayer, PlayerReligionDataPacket packet)
         {
             // Handle any client-to-server messages here
             // Currently not used, but necessary for channel setup
@@ -186,18 +186,21 @@ namespace PantheonWars
         {
             if (_playerDataManager == null || _deityRegistry == null || _serverChannel == null) return;
 
-            var playerData = _playerDataManager.GetOrCreatePlayerData(player);
-            var deity = _deityRegistry.GetDeity(playerData.DeityType);
+            var playerReligionData = _playerReligionDataManager.GetOrCreatePlayerData(player.PlayerUID);
+            var religionData = _religionManager.GetPlayerReligion(player.PlayerUID);
+            var deity = _deityRegistry.GetDeity(playerReligionData.ActiveDeity);
             string deityName = deity?.Name ?? "None";
 
-            var packet = new PlayerDataPacket(
-                playerData.DeityType,
-                playerData.DivineFavor,
-                playerData.DevotionRank,
-                deityName
-            );
+            if (religionData != null)
+            {
+                var packet = new PlayerReligionDataPacket(
+                    religionData.ReligionName, deityName, playerReligionData.Favor,
+                    playerReligionData.FavorRank.ToString(), religionData.Prestige, religionData.PrestigeRank.ToString()
 
-            _serverChannel.SendPacket(packet, player);
+                );
+
+                _serverChannel.SendPacket(packet, player);
+            }
         }
 
         #endregion
@@ -207,19 +210,22 @@ namespace PantheonWars
         private void SetupClientNetworking(ICoreClientAPI api)
         {
             _clientChannel = api.Network.GetChannel(NETWORK_CHANNEL);
-            _clientChannel.SetMessageHandler<PlayerDataPacket>(OnServerPlayerDataUpdate);
-            _clientChannel.RegisterMessageType(typeof(PlayerDataPacket));
+            _clientChannel.SetMessageHandler<PlayerReligionDataPacket>(OnServerPlayerDataUpdate);
+            _clientChannel.RegisterMessageType(typeof(PlayerReligionDataPacket));
         }
 
-        private void OnServerPlayerDataUpdate(PlayerDataPacket packet)
+        private void OnServerPlayerDataUpdate(PlayerReligionDataPacket packet)
         {
             // Update HUD with server data
             if (_favorHud != null)
             {
-                _favorHud.UpdateDisplay(
-                    packet.DeityName,
-                    packet.DivineFavor,
-                    packet.GetDevotionRank().ToString()
+                _favorHud.UpdateReligionDisplay(
+                    packet.ReligionName, // Religion name not sent yet
+                    packet.Deity.ToString(),
+                    packet.Favor,
+                    packet.FavorRank,
+                    packet.Prestige,
+                    packet.PrestigeRank
                 );
             }
         }
