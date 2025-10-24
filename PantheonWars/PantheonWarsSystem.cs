@@ -23,9 +23,12 @@ namespace PantheonWars
         private FavorSystem _favorSystem;
         private AbilitySystem _abilitySystem;
         private BuffManager _buffManager;
+        private ReligionManager _religionManager;
+        private PlayerReligionDataManager _playerReligionDataManager;
         private DeityCommands _deityCommands;
         private AbilityCommands _abilityCommands;
         private FavorCommands _favorCommands;
+        private ReligionCommands _religionCommands;
 
         // Client-side systems
         private ICoreClientAPI _capi;
@@ -82,15 +85,25 @@ namespace PantheonWars
             _abilitySystem = new AbilitySystem(api, _abilityRegistry, _playerDataManager, _cooldownManager, _buffManager);
             _abilitySystem.Initialize();
 
+            // Initialize religion systems (Phase 3.1)
+            _religionManager = new ReligionManager(api);
+            _religionManager.Initialize();
+
+            _playerReligionDataManager = new PlayerReligionDataManager(api, _religionManager);
+            _playerReligionDataManager.Initialize();
+
             // Register commands
             _deityCommands = new DeityCommands(api, _deityRegistry, _playerDataManager);
             _deityCommands.RegisterCommands();
 
             _abilityCommands = new AbilityCommands(api, _abilitySystem, _playerDataManager);
             _abilityCommands.RegisterCommands();
-            
+
             _favorCommands = new FavorCommands(api, _deityRegistry, _playerDataManager);
             _favorCommands.RegisterCommands();
+
+            _religionCommands = new ReligionCommands(api, _religionManager, _playerReligionDataManager);
+            _religionCommands.RegisterCommands();
 
             // Setup network channel and handlers
             _serverChannel = api.Network.GetChannel(NETWORK_CHANNEL);
