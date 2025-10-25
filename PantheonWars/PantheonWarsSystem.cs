@@ -110,6 +110,9 @@ namespace PantheonWars
             _perkEffectSystem = new PerkEffectSystem(api, _perkRegistry, _playerReligionDataManager, _religionManager);
             _perkEffectSystem.Initialize();
 
+            // Inject PerkEffectSystem into PlayerReligionDataManager (to avoid circular dependency)
+            _playerReligionDataManager.SetPerkEffectSystem(_perkEffectSystem);
+
             // Register commands
             _deityCommands = new DeityCommands(api, _deityRegistry, _playerDataManager);
             _deityCommands.RegisterCommands();
