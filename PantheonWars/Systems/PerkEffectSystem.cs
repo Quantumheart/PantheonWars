@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using PantheonWars.Data;
 using PantheonWars.Models;
 using Vintagestory.API.Common;
-using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Server;
 
 namespace PantheonWars.Systems
@@ -47,8 +45,14 @@ namespace PantheonWars.Systems
 
             // Register event handlers
             _sapi.Event.PlayerJoin += OnPlayerJoin;
+            _playerReligionDataManager.OnPlayerLeavesReligion += OnPlayerLeavesReligion;
 
             _sapi.Logger.Notification("[PantheonWars] Perk Effect System initialized");
+        }
+
+        private void OnPlayerLeavesReligion(string playerUid)
+        {
+            RefreshPlayerPerks(playerUid);
         }
 
         /// <summary>

@@ -18,7 +18,10 @@ namespace PantheonWars.Systems
         private readonly ICoreServerAPI _sapi;
         private readonly ReligionManager _religionManager;
         private readonly Dictionary<string, PlayerReligionData> _playerData = new();
+        public delegate void PlayerReligionDataChangedDelegate(string playerUID);
+        public event PlayerReligionDataChangedDelegate OnPlayerLeavesReligion = null!;
 
+        // ReSharper disable once ConvertToPrimaryConstructor
         public PlayerReligionDataManager(ICoreServerAPI sapi, ReligionManager religionManager)
         {
             _sapi = sapi;
@@ -204,6 +207,7 @@ namespace PantheonWars.Systems
             // Remove from religion
             _religionManager.RemoveMember(religionUID, playerUID);
 
+            OnPlayerLeavesReligion.Invoke(playerUID);
             // Clear player data
             data.ReligionUID = null;
             data.ActiveDeity = DeityType.None;

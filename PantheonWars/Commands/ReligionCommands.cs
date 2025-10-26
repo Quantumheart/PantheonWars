@@ -497,7 +497,7 @@ namespace PantheonWars.Commands
             {
                 return TextCommandResult.Error("Only the founder can disband the religion");
             }
-
+            
             string religionName = religion.ReligionName;
 
             // Remove all members
@@ -513,7 +513,7 @@ namespace PantheonWars.Commands
                     memberPlayer.SendMessage(
                         Vintagestory.API.Config.GlobalConstants.GeneralChatGroup,
                         $"{religionName} has been disbanded by its founder",
-                        Vintagestory.API.Common.EnumChatType.Notification
+                        EnumChatType.Notification
                     );
                 }
             }
