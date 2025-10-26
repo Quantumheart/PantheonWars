@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using PantheonWars.Data;
@@ -15,6 +14,7 @@ namespace PantheonWars.Systems
         private readonly ICoreAPI _api;
         private readonly Dictionary<string, Perk> _perks = new();
 
+        // ReSharper disable once ConvertToPrimaryConstructor
         public PerkRegistry(ICoreAPI api)
         {
             _api = api;
@@ -62,19 +62,19 @@ namespace PantheonWars.Systems
         /// </summary>
         public Perk? GetPerk(string perkId)
         {
-            return _perks.TryGetValue(perkId, out var perk) ? perk : null;
+            return _perks.GetValueOrDefault(perkId);
         }
 
         /// <summary>
         /// Gets all perks for a specific deity and type
         /// </summary>
-        public List<Perk> GetPerksForDeity(DeityType deity, PerkType? type = null)
+        public List<Perk> GetPerksForDeity(DeityType deity, PerkKind? type = null)
         {
             var query = _perks.Values.Where(p => p.Deity == deity);
 
             if (type.HasValue)
             {
-                query = query.Where(p => p.Type == type.Value);
+                query = query.Where(p => p.Kind == type.Value);
             }
 
             return query.OrderBy(p => p.RequiredFavorRank)
@@ -96,7 +96,7 @@ namespace PantheonWars.Systems
         public (bool canUnlock, string reason) CanUnlockPerk(
             PlayerReligionData playerData,
             ReligionData? religionData,
-            Perk perk)
+            Perk? perk)
         {
             // Check if perk exists
             if (perk == null)
@@ -105,7 +105,7 @@ namespace PantheonWars.Systems
             }
 
             // Check perk type and corresponding requirements
-            if (perk.Type == PerkType.Player)
+            if (perk.Kind == PerkKind.Player)
             {
                 // Check if already unlocked
                 if (playerData.IsPerkUnlocked(perk.PerkId))

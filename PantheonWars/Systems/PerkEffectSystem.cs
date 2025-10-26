@@ -83,7 +83,7 @@ namespace PantheonWars.Systems
             foreach (var perkId in unlockedPerkIds)
             {
                 var perk = _perkRegistry.GetPerk(perkId);
-                if (perk != null && perk.Type == PerkType.Player)
+                if (perk != null && perk.Kind == PerkKind.Player)
                 {
                     CombineModifiers(modifiers, perk.StatModifiers);
                 }
@@ -124,7 +124,7 @@ namespace PantheonWars.Systems
             foreach (var perkId in unlockedPerkIds)
             {
                 var perk = _perkRegistry.GetPerk(perkId);
-                if (perk != null && perk.Type == PerkType.Religion)
+                if (perk != null && perk.Kind == PerkKind.Religion)
                 {
                     CombineModifiers(modifiers, perk.StatModifiers);
                 }

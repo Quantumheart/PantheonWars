@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using Vintagestory.GameContent;
 
 namespace PantheonWars.Models
 {
     /// <summary>
     /// Represents a passive perk that can be unlocked by players or religions
     /// </summary>
-    public class Perk
+    public class Perk : Trait
     {
         /// <summary>
         /// Unique identifier for this perk (e.g., "khoras_warriors_resolve")
@@ -30,7 +31,7 @@ namespace PantheonWars.Models
         /// <summary>
         /// Type of perk (Player or Religion)
         /// </summary>
-        public PerkType Type { get; set; }
+        public PerkKind Kind { get; set; }
 
         /// <summary>
         /// Category for organization (Combat, Defense, etc.)

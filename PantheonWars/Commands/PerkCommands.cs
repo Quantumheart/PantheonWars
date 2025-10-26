@@ -94,8 +94,8 @@ namespace PantheonWars.Commands
                 return TextCommandResult.Error("You must join a religion to view perks. Use /religion to get started.");
             }
 
-            var playerPerks = _perkRegistry.GetPerksForDeity(playerData.ActiveDeity, PerkType.Player);
-            var religionPerks = _perkRegistry.GetPerksForDeity(playerData.ActiveDeity, PerkType.Religion);
+            var playerPerks = _perkRegistry.GetPerksForDeity(playerData.ActiveDeity, PerkKind.Player);
+            var religionPerks = _perkRegistry.GetPerksForDeity(playerData.ActiveDeity, PerkKind.Religion);
 
             var sb = new StringBuilder();
             sb.AppendLine($"=== Perks for {playerData.ActiveDeity} ===");
@@ -234,13 +234,13 @@ namespace PantheonWars.Commands
             sb.AppendLine($"=== {perk.Name} ===");
             sb.AppendLine($"ID: {perk.PerkId}");
             sb.AppendLine($"Deity: {perk.Deity}");
-            sb.AppendLine($"Type: {perk.Type}");
+            sb.AppendLine($"Type: {perk.Kind}");
             sb.AppendLine($"Category: {perk.Category}");
             sb.AppendLine();
             sb.AppendLine($"Description: {perk.Description}");
             sb.AppendLine();
 
-            if (perk.Type == PerkType.Player)
+            if (perk.Kind == PerkKind.Player)
             {
                 FavorRank requiredRank = (FavorRank)perk.RequiredFavorRank;
                 sb.AppendLine($"Required Favor Rank: {requiredRank}");
@@ -302,17 +302,17 @@ namespace PantheonWars.Commands
             string type = args[0] as string ?? "player";
             type = type.ToLower();
 
-            PerkType perkType = type == "religion" ? PerkType.Religion : PerkType.Player;
-            var perks = _perkRegistry.GetPerksForDeity(playerData.ActiveDeity, perkType);
+            PerkKind perkKind = type == "religion" ? PerkKind.Religion : PerkKind.Player;
+            var perks = _perkRegistry.GetPerksForDeity(playerData.ActiveDeity, perkKind);
 
             var religion = playerData.ReligionUID != null ? _religionManager.GetReligion(playerData.ReligionUID) : null;
 
             var sb = new StringBuilder();
-            sb.AppendLine($"=== {playerData.ActiveDeity} {perkType} Perk Tree ===");
+            sb.AppendLine($"=== {playerData.ActiveDeity} {perkKind} Perk Tree ===");
             sb.AppendLine();
 
             // Group by rank
-            if (perkType == PerkType.Player)
+            if (perkKind == PerkKind.Player)
             {
                 foreach (FavorRank rank in Enum.GetValues(typeof(FavorRank)))
                 {
@@ -403,7 +403,7 @@ namespace PantheonWars.Commands
             }
 
             // Unlock the perk
-            if (perk.Type == PerkType.Player)
+            if (perk.Kind == PerkKind.Player)
             {
                 bool success = _playerReligionDataManager.UnlockPlayerPerk(player.PlayerUID, perkId);
                 if (!success)

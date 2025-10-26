@@ -3,7 +3,7 @@ namespace PantheonWars.Models
     /// <summary>
     /// Type of perk - determines who benefits and unlock requirements
     /// </summary>
-    public enum PerkType
+    public enum PerkKind
     {
         /// <summary>
         /// Personal perk - unlocked by player favor rank, benefits individual player
