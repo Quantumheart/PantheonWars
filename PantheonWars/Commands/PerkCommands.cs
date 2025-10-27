@@ -405,6 +405,11 @@ namespace PantheonWars.Commands
             // Unlock the perk
             if (perk.Kind == PerkKind.Player)
             {
+                if (religion == null)
+                {
+                    return TextCommandResult.Error("You must be in a religion to unlock player perks.");
+                }
+                
                 bool success = _playerReligionDataManager.UnlockPlayerPerk(player.PlayerUID, perkId);
                 if (!success)
                 {
