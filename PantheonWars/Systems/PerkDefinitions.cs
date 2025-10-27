@@ -30,791 +30,503 @@ namespace PantheonWars.Systems
             return perks;
         }
 
-        #region Khoras (War) - 20 Perks
+        #region Khoras (War) - 10 Perks (Refactored)
 
         private static List<Perk> GetKhorasPerks()
         {
             return new List<Perk>
             {
-                // PLAYER PERKS (10 total)
+                // PLAYER PERKS (6 total) - Streamlined for meaningful choices
 
-                // Tier 1 - Initiate (0-499 favor)
-                new Perk("khoras_warriors_resolve", "Warrior's Resolve", DeityType.Khoras)
+                // Tier 1 - Initiate (0-499 favor) - Foundation
+                new Perk(PerkIds.KhorasWarriorsResolve, "Warrior's Resolve", DeityType.Khoras)
                 {
                     Kind = PerkKind.Player,
                     Type = EnumTraitType.Positive,
                     Category = PerkCategory.Combat,
-                    Description = "Your devotion to war strengthens your strikes. +5% melee damage.",
+                    Description = "Your devotion to war strengthens body and blade. +10% melee damage, +10% max health.",
                     RequiredFavorRank = (int)FavorRank.Initiate,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.05f } }
-                },
-                new Perk("khoras_battle_endurance", "Battle Endurance", DeityType.Khoras)
-                {
-                    Kind = PerkKind.Player,
-                    Type = EnumTraitType.Positive,
-                    Category = PerkCategory.Defense,
-                    Description = "Your body adapts to the rigors of combat. +10% max health.",
-                    RequiredFavorRank = (int)FavorRank.Initiate,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 1.10f } }
+                    StatModifiers = new Dictionary<string, float> 
+                    { 
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.10f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.10f }
+                    }
                 },
 
-                // Tier 2 - Disciple (500-1999 favor)
-                new Perk("khoras_bloodlust", "Bloodlust", DeityType.Khoras)
+                // Tier 2 - Disciple (500-1999 favor) - Choose Your Path
+                new Perk(PerkIds.KhorasBloodlust, "Bloodlust", DeityType.Khoras)
                 {
                     Kind = PerkKind.Player,
                     Category = PerkCategory.Combat,
-                    Description = "Each strike fuels your rage. +10% melee damage. Requires Warrior's Resolve.",
+                    Description = "Embrace the rage of battle. +15% melee damage, +10% attack speed. Offense path. Requires Warrior's Resolve.",
                     RequiredFavorRank = (int)FavorRank.Disciple,
-                    PrerequisitePerks = new List<string> { "khoras_warriors_resolve" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.10f } }
+                    PrerequisitePerks = new List<string> { PerkIds.KhorasWarriorsResolve },
+                    StatModifiers = new Dictionary<string, float> 
+                    { 
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.15f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.10f }
+                    }
                 },
-                new Perk("khoras_iron_skin", "Iron Skin", DeityType.Khoras)
+                new Perk(PerkIds.KhorasIronSkin, "Iron Skin", DeityType.Khoras)
                 {
                     Kind = PerkKind.Player,
                     Category = PerkCategory.Defense,
-                    Description = "Battle hardens your flesh. +15% armor rating. Requires Battle Endurance.",
+                    Description = "Battle hardens your body. +20% armor, +15% max health. Defense path. Requires Warrior's Resolve.",
                     RequiredFavorRank = (int)FavorRank.Disciple,
-                    PrerequisitePerks = new List<string> { "khoras_battle_endurance" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponArmor, 0.15f } }
+                    PrerequisitePerks = new List<string> { PerkIds.KhorasWarriorsResolve },
+                    StatModifiers = new Dictionary<string, float> 
+                    { 
+                        { VintageStoryStats.MeleeWeaponArmor, 0.20f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.15f }
+                    }
                 },
 
-                // Tier 3 - Zealot (2000-4999 favor)
-                new Perk("khoras_berserker_rage", "Berserker Rage", DeityType.Khoras)
+                // Tier 3 - Zealot (2000-4999 favor) - Specialization
+                new Perk(PerkIds.KhorasBerserkerRage, "Berserker Rage", DeityType.Khoras)
                 {
                     Kind = PerkKind.Player,
                     Category = PerkCategory.Combat,
-                    Description = "Unleash devastating fury. +15% melee damage, +5% attack speed. Requires Bloodlust.",
+                    Description = "Unleash devastating fury with lifesteal. +25% melee damage, +15% attack speed, heal 10% of damage dealt. Requires Bloodlust.",
                     RequiredFavorRank = (int)FavorRank.Zealot,
-                    PrerequisitePerks = new List<string> { "khoras_bloodlust" },
+                    PrerequisitePerks = new List<string> { PerkIds.KhorasBloodlust },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.25f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.15f }
+                    },
+                    SpecialEffects = new List<string> { SpecialEffects.Lifesteal10 }
+                },
+                new Perk(PerkIds.KhorasUnbreakable, "Unbreakable", DeityType.Khoras)
+                {
+                    Kind = PerkKind.Player,
+                    Category = PerkCategory.Defense,
+                    Description = "Become nearly invincible. +30% armor, +25% max health, 10% damage reduction. Requires Iron Skin.",
+                    RequiredFavorRank = (int)FavorRank.Zealot,
+                    PrerequisitePerks = new List<string> { PerkIds.KhorasIronSkin },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { VintageStoryStats.MeleeWeaponArmor, 0.30f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.25f }
+                    },
+                    SpecialEffects = new List<string> { SpecialEffects.DamageReduction10 }
+                },
+
+                // Tier 4 - Champion (5000-9999 favor) - Capstone (requires both paths)
+                new Perk(PerkIds.KhorasAvatarOfWar, "Avatar of War", DeityType.Khoras)
+                {
+                    Kind = PerkKind.Player,
+                    Category = PerkCategory.Combat,
+                    Description = "Embody war itself. +15% to all combat stats, +10% movement speed, AoE cleave attacks. Requires both Berserker Rage and Unbreakable.",
+                    RequiredFavorRank = (int)FavorRank.Champion,
+                    PrerequisitePerks = new List<string> { PerkIds.KhorasBerserkerRage, PerkIds.KhorasUnbreakable },
                     StatModifiers = new Dictionary<string, float>
                     {
                         { VintageStoryStats.MeleeWeaponsDamage, 0.15f },
-                        { VintageStoryStats.MeleeWeaponsSpeed, 0.05f }
-                    }
-                },
-                new Perk("khoras_war_veteran", "War Veteran", DeityType.Khoras)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Defense,
-                    Description = "Survive countless battles. +15% max health, +10% armor. Requires Iron Skin.",
-                    RequiredFavorRank = (int)FavorRank.Zealot,
-                    PrerequisitePerks = new List<string> { "khoras_iron_skin" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.15f },
-                        { VintageStoryStats.MeleeWeaponArmor, 0.10f }
-                    }
-                },
-
-                // Tier 4 - Champion (5000-9999 favor)
-                new Perk("khoras_weapon_master", "Weapon Master", DeityType.Khoras)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Combat,
-                    Description = "Master all weapons of war. +20% melee damage, +10% attack speed. Requires Berserker Rage.",
-                    RequiredFavorRank = (int)FavorRank.Champion,
-                    PrerequisitePerks = new List<string> { "khoras_berserker_rage" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MeleeWeaponsDamage, 0.20f },
-                        { VintageStoryStats.MeleeWeaponsSpeed, 0.10f }
-                    },
-                    SpecialEffects = new List<string> { "critical_strike_chance" }
-                },
-                new Perk("khoras_unbreakable", "Unbreakable", DeityType.Khoras)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Defense,
-                    Description = "Become nearly invincible. +25% max health, +15% armor. Requires War Veteran.",
-                    RequiredFavorRank = (int)FavorRank.Champion,
-                    PrerequisitePerks = new List<string> { "khoras_war_veteran" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.25f },
-                        { VintageStoryStats.MeleeWeaponArmor, 0.15f }
-                    }
-                },
-
-                // Tier 5 - Avatar (10000+ favor)
-                new Perk("khoras_avatar_of_war", "Avatar of War", DeityType.Khoras)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Combat,
-                    Description = "Embody war itself. +30% melee damage, +15% attack speed, +10% movement speed. Requires Weapon Master.",
-                    RequiredFavorRank = (int)FavorRank.Avatar,
-                    PrerequisitePerks = new List<string> { "khoras_weapon_master" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MeleeWeaponsDamage, 0.30f },
                         { VintageStoryStats.MeleeWeaponsSpeed, 0.15f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.15f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.15f },
                         { VintageStoryStats.WalkSpeed, 0.10f }
                     },
-                    SpecialEffects = new List<string> { "lifesteal", "aoe_cleave" }
-                },
-                new Perk("khoras_immortal_warrior", "Immortal Warrior", DeityType.Khoras)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Defense,
-                    Description = "Death fears you. +35% max health, +20% armor, health regeneration. Requires Unbreakable.",
-                    RequiredFavorRank = (int)FavorRank.Avatar,
-                    PrerequisitePerks = new List<string> { "khoras_unbreakable" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.35f },
-                        { VintageStoryStats.MeleeWeaponArmor, 0.20f },
-                        { VintageStoryStats.HealingEffectiveness, 0.50f }
-                    },
-                    SpecialEffects = new List<string> { "last_stand" }
+                    SpecialEffects = new List<string> { SpecialEffects.AoeCleave }
                 },
 
-                // RELIGION PERKS (10 total)
+                // RELIGION PERKS (4 total) - Unified group buffs
 
-                // Tier 1 - Fledgling (0-499 prestige)
-                new Perk("khoras_congregation_strength", "Congregation's Strength", DeityType.Khoras)
+                // Tier 1 - Fledgling (0-499 prestige) - Foundation
+                new Perk(PerkIds.KhorasWarBanner, "War Banner", DeityType.Khoras)
                 {
                     Kind = PerkKind.Religion,
                     Category = PerkCategory.Combat,
-                    Description = "All members gain strength together. +3% melee damage for all members.",
+                    Description = "Your congregation's banner inspires strength and courage. +8% melee damage, +8% max health for all members.",
                     RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.03f } }
-                },
-                new Perk("khoras_war_banner", "War Banner", DeityType.Khoras)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Defense,
-                    Description = "Your banner inspires courage. +5% max health for all members.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 1.05f } }
-                },
-
-                // Tier 2 - Established (500-1999 prestige)
-                new Perk("khoras_legion_tactics", "Legion Tactics", DeityType.Khoras)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Combat,
-                    Description = "Coordinate attacks. +5% melee damage for all. Requires Congregation's Strength.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Established,
-                    PrerequisitePerks = new List<string> { "khoras_congregation_strength" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.05f } }
-                },
-                new Perk("khoras_fortress_faith", "Fortress Faith", DeityType.Khoras)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Defense,
-                    Description = "Collective defense. +8% max health for all. Requires War Banner.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Established,
-                    PrerequisitePerks = new List<string> { "khoras_war_banner" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 1.08f } }
-                },
-
-                // Tier 3 - Renowned (2000-4999 prestige)
-                new Perk("khoras_army_of_one", "Army of One", DeityType.Khoras)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Combat,
-                    Description = "Elite fighting force. +8% melee damage, +5% attack speed for all. Requires Legion Tactics.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Renowned,
-                    PrerequisitePerks = new List<string> { "khoras_legion_tactics" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
+                    StatModifiers = new Dictionary<string, float> 
+                    { 
                         { VintageStoryStats.MeleeWeaponsDamage, 0.08f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.08f }
+                    }
+                },
+
+                // Tier 2 - Established (500-1999 prestige) - Coordination
+                new Perk(PerkIds.KhorasLegionTactics, "Legion Tactics", DeityType.Khoras)
+                {
+                    Kind = PerkKind.Religion,
+                    Category = PerkCategory.Combat,
+                    Description = "Coordinated warfare. +12% melee damage, +10% armor, +5% attack speed for all. Requires War Banner.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Established,
+                    PrerequisitePerks = new List<string> { PerkIds.KhorasWarBanner },
+                    StatModifiers = new Dictionary<string, float> 
+                    { 
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.12f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.10f },
                         { VintageStoryStats.MeleeWeaponsSpeed, 0.05f }
                     }
                 },
-                new Perk("khoras_shield_wall", "Shield Wall", DeityType.Khoras)
+
+                // Tier 3 - Renowned (2000-4999 prestige) - Elite Force
+                new Perk(PerkIds.KhorasWarhost, "Warhost", DeityType.Khoras)
                 {
                     Kind = PerkKind.Religion,
-                    Category = PerkCategory.Defense,
-                    Description = "Impenetrable defense. +12% max health, +10% armor for all. Requires Fortress Faith.",
+                    Category = PerkCategory.Combat,
+                    Description = "Elite fighting force. +18% melee damage, +15% armor, +15% max health, +10% attack speed for all. Requires Legion Tactics.",
                     RequiredPrestigeRank = (int)PrestigeRank.Renowned,
-                    PrerequisitePerks = new List<string> { "khoras_fortress_faith" },
+                    PrerequisitePerks = new List<string> { PerkIds.KhorasLegionTactics },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.12f },
-                        { VintageStoryStats.MeleeWeaponArmor, 0.10f }
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.18f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.15f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.15f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.10f }
                     }
                 },
 
-                // Tier 4 - Legendary (5000-9999 prestige)
-                new Perk("khoras_warhost", "Warhost", DeityType.Khoras)
+                // Tier 4 - Legendary (5000-9999 prestige) - Unstoppable Army
+                new Perk(PerkIds.KhorasPantheonOfWar, "Pantheon of War", DeityType.Khoras)
                 {
                     Kind = PerkKind.Religion,
                     Category = PerkCategory.Combat,
-                    Description = "Legendary warriors. +12% melee damage, +8% attack speed for all. Requires Army of One.",
+                    Description = "Your religion becomes legendary. +25% melee damage, +20% armor, +20% max health, +15% attack speed, +8% movement speed for all. Group war cry ability. Requires Warhost.",
                     RequiredPrestigeRank = (int)PrestigeRank.Legendary,
-                    PrerequisitePerks = new List<string> { "khoras_army_of_one" },
+                    PrerequisitePerks = new List<string> { PerkIds.KhorasWarhost },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MeleeWeaponsDamage, 0.12f },
-                        { VintageStoryStats.MeleeWeaponsSpeed, 0.08f }
-                    }
-                },
-                new Perk("khoras_iron_legion", "Iron Legion", DeityType.Khoras)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Defense,
-                    Description = "Unstoppable force. +18% max health, +15% armor for all. Requires Shield Wall.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Legendary,
-                    PrerequisitePerks = new List<string> { "khoras_shield_wall" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.18f },
-                        { VintageStoryStats.MeleeWeaponArmor, 0.15f }
-                    }
-                },
-
-                // Tier 5 - Mythic (10000+ prestige)
-                new Perk("khoras_pantheon_of_war", "Pantheon of War", DeityType.Khoras)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Combat,
-                    Description = "Gods of battle. +20% melee damage, +12% attack speed, +5% movement speed for all. Requires Warhost.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Mythic,
-                    PrerequisitePerks = new List<string> { "khoras_warhost" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MeleeWeaponsDamage, 0.20f },
-                        { VintageStoryStats.MeleeWeaponsSpeed, 0.12f },
-                        { VintageStoryStats.WalkSpeed, 0.05f }
-                    },
-                    SpecialEffects = new List<string> { "religion_war_cry" }
-                },
-                new Perk("khoras_eternal_empire", "Eternal Empire", DeityType.Khoras)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Defense,
-                    Description = "Unkillable empire. +25% max health, +20% armor, health regen for all. Requires Iron Legion.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Mythic,
-                    PrerequisitePerks = new List<string> { "khoras_iron_legion" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.25f },
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.25f },
                         { VintageStoryStats.MeleeWeaponArmor, 0.20f },
-                        { VintageStoryStats.HealingEffectiveness, 0.30f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.20f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.15f },
+                        { VintageStoryStats.WalkSpeed, 0.08f }
                     },
-                    SpecialEffects = new List<string> { "religion_battle_standard" }
+                    SpecialEffects = new List<string> { SpecialEffects.ReligionWarCry }
                 }
             };
         }
 
         #endregion
 
-        #region Lysa (Hunt) - 20 Perks
+        #region Lysa (Hunt) - 10 Perks (Refactored)
 
         private static List<Perk> GetLysaPerks()
         {
             return new List<Perk>
             {
-                // PLAYER PERKS (10 total)
+                // PLAYER PERKS (6 total) - Streamlined for meaningful choices
 
-                // Tier 1 - Initiate
-                new Perk("lysa_keen_eye", "Keen Eye", DeityType.Lysa)
+                // Tier 1 - Initiate (0-499 favor) - Foundation
+                new Perk(PerkIds.LysaKeenEye, "Keen Eye", DeityType.Lysa)
                 {
                     Kind = PerkKind.Player,
                     Category = PerkCategory.Combat,
-                    Description = "Sharpen your aim. +5% ranged damage.",
+                    Description = "The hunt sharpens your senses. +10% ranged damage, +10% movement speed.",
                     RequiredFavorRank = (int)FavorRank.Initiate,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.RangedWeaponsDamage, 0.05f } }
-                },
-                new Perk("lysa_tracker", "Tracker", DeityType.Lysa)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Mobility,
-                    Description = "Move swiftly through the wilderness. +8% movement speed.",
-                    RequiredFavorRank = (int)FavorRank.Initiate,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.WalkSpeed, 0.08f } }
+                    StatModifiers = new Dictionary<string, float> 
+                    { 
+                        { VintageStoryStats.RangedWeaponsDamage, 0.10f },
+                        { VintageStoryStats.WalkSpeed, 0.10f }
+                    }
                 },
 
-                // Tier 2 - Disciple
-                new Perk("lysa_hunters_focus", "Hunter's Focus", DeityType.Lysa)
+                // Tier 2 - Disciple (500-1999 favor) - Choose Your Path
+                new Perk(PerkIds.LysaDeadlyPrecision, "Deadly Precision", DeityType.Lysa)
                 {
                     Kind = PerkKind.Player,
                     Category = PerkCategory.Combat,
-                    Description = "Perfect accuracy. +10% ranged damage, +5% critical chance. Requires Keen Eye.",
+                    Description = "Perfect your aim. +15% ranged damage, +10% critical chance. Precision path. Requires Keen Eye.",
                     RequiredFavorRank = (int)FavorRank.Disciple,
-                    PrerequisitePerks = new List<string> { "lysa_keen_eye" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.RangedWeaponsDamage, 0.10f } },
-                    SpecialEffects = new List<string> { "critical_chance_5" }
-                },
-                new Perk("lysa_silent_stalker", "Silent Stalker", DeityType.Lysa)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Mobility,
-                    Description = "Move like a ghost. +12% movement speed, reduced detection. Requires Tracker.",
-                    RequiredFavorRank = (int)FavorRank.Disciple,
-                    PrerequisitePerks = new List<string> { "lysa_tracker" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.WalkSpeed, 0.12f } },
-                    SpecialEffects = new List<string> { "stealth_bonus" }
-                },
-
-                // Tier 3 - Zealot
-                new Perk("lysa_deadly_precision", "Deadly Precision", DeityType.Lysa)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Combat,
-                    Description = "Never miss. +15% ranged damage, +10% critical chance. Requires Hunter's Focus.",
-                    RequiredFavorRank = (int)FavorRank.Zealot,
-                    PrerequisitePerks = new List<string> { "lysa_hunters_focus" },
+                    PrerequisitePerks = new List<string> { PerkIds.LysaKeenEye },
                     StatModifiers = new Dictionary<string, float> { { VintageStoryStats.RangedWeaponsDamage, 0.15f } },
-                    SpecialEffects = new List<string> { "critical_chance_10" }
+                    SpecialEffects = new List<string> { SpecialEffects.CriticalChance10 }
                 },
-                new Perk("lysa_predator", "Predator", DeityType.Lysa)
+                new Perk(PerkIds.LysaSilentStalker, "Silent Stalker", DeityType.Lysa)
                 {
                     Kind = PerkKind.Player,
                     Category = PerkCategory.Mobility,
-                    Description = "Become the apex hunter. +18% movement speed, +5% melee damage. Requires Silent Stalker.",
-                    RequiredFavorRank = (int)FavorRank.Zealot,
-                    PrerequisitePerks = new List<string> { "lysa_silent_stalker" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
+                    Description = "Move like a shadow. +18% movement speed, +10% melee damage. Mobility path. Requires Keen Eye.",
+                    RequiredFavorRank = (int)FavorRank.Disciple,
+                    PrerequisitePerks = new List<string> { PerkIds.LysaKeenEye },
+                    StatModifiers = new Dictionary<string, float> 
+                    { 
                         { VintageStoryStats.WalkSpeed, 0.18f },
-                        { VintageStoryStats.MeleeWeaponsDamage, 0.05f }
-                    }
-                },
-
-                // Tier 4 - Champion
-                new Perk("lysa_master_huntress", "Master Huntress", DeityType.Lysa)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Combat,
-                    Description = "Legendary marksmanship. +20% ranged damage, +15% critical chance, +5% attack speed. Requires Deadly Precision.",
-                    RequiredFavorRank = (int)FavorRank.Champion,
-                    PrerequisitePerks = new List<string> { "lysa_deadly_precision" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.RangedWeaponsDamage, 0.20f },
-                        { VintageStoryStats.MeleeWeaponsSpeed, 0.05f }
-                    },
-                    SpecialEffects = new List<string> { "critical_chance_15", "headshot_bonus" }
-                },
-                new Perk("lysa_untamed", "Untamed", DeityType.Lysa)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Mobility,
-                    Description = "Wild and free. +25% movement speed, +10% melee damage. Requires Predator.",
-                    RequiredFavorRank = (int)FavorRank.Champion,
-                    PrerequisitePerks = new List<string> { "lysa_predator" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.WalkSpeed, 0.25f },
                         { VintageStoryStats.MeleeWeaponsDamage, 0.10f }
-                    }
+                    },
+                    SpecialEffects = new List<string> { SpecialEffects.StealthBonus }
                 },
 
-                // Tier 5 - Avatar
-                new Perk("lysa_avatar_of_hunt", "Avatar of the Hunt", DeityType.Lysa)
+                // Tier 3 - Zealot (2000-4999 favor) - Specialization
+                new Perk(PerkIds.LysaMasterHuntress, "Master Huntress", DeityType.Lysa)
                 {
                     Kind = PerkKind.Player,
                     Category = PerkCategory.Combat,
-                    Description = "Perfect hunter. +30% ranged damage, +25% critical chance, +10% attack speed. Requires Master Huntress.",
-                    RequiredFavorRank = (int)FavorRank.Avatar,
-                    PrerequisitePerks = new List<string> { "lysa_master_huntress" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.RangedWeaponsDamage, 0.30f },
-                        { VintageStoryStats.MeleeWeaponsSpeed, 0.10f }
-                    },
-                    SpecialEffects = new List<string> { "critical_chance_25", "multishot", "tracking_vision" }
+                    Description = "Legendary marksmanship. +25% ranged damage, +20% critical chance, headshot bonus. Requires Deadly Precision.",
+                    RequiredFavorRank = (int)FavorRank.Zealot,
+                    PrerequisitePerks = new List<string> { PerkIds.LysaDeadlyPrecision },
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.RangedWeaponsDamage, 0.25f } },
+                    SpecialEffects = new List<string> { SpecialEffects.CriticalChance20, SpecialEffects.HeadshotBonus }
                 },
-                new Perk("lysa_nature_incarnate", "Nature Incarnate", DeityType.Lysa)
+                new Perk(PerkIds.LysaApexPredator, "Apex Predator", DeityType.Lysa)
                 {
                     Kind = PerkKind.Player,
                     Category = PerkCategory.Mobility,
-                    Description = "One with the wild. +35% movement speed, +15% melee damage, +10% max health. Requires Untamed.",
-                    RequiredFavorRank = (int)FavorRank.Avatar,
-                    PrerequisitePerks = new List<string> { "lysa_untamed" },
+                    Description = "Untouchable hunter. +28% movement speed, +18% melee damage, +15% attack speed. Requires Silent Stalker.",
+                    RequiredFavorRank = (int)FavorRank.Zealot,
+                    PrerequisitePerks = new List<string> { PerkIds.LysaSilentStalker },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.WalkSpeed, 0.35f },
+                        { VintageStoryStats.WalkSpeed, 0.28f },
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.18f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.15f }
+                    },
+                    SpecialEffects = new List<string> { SpecialEffects.TrackingVision }
+                },
+
+                // Tier 4 - Champion (5000-9999 favor) - Capstone (requires both paths)
+                new Perk(PerkIds.LysaAvatarOfHunt, "Avatar of the Hunt", DeityType.Lysa)
+                {
+                    Kind = PerkKind.Player,
+                    Category = PerkCategory.Combat,
+                    Description = "Embody the perfect hunter. +15% all damage, +20% movement speed, +10% attack speed, multishot ability. Requires both Master Huntress and Apex Predator.",
+                    RequiredFavorRank = (int)FavorRank.Champion,
+                    PrerequisitePerks = new List<string> { PerkIds.LysaMasterHuntress, PerkIds.LysaApexPredator },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { VintageStoryStats.RangedWeaponsDamage, 0.15f },
                         { VintageStoryStats.MeleeWeaponsDamage, 0.15f },
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.10f }
-                    },
-                    SpecialEffects = new List<string> { "animal_companion" }
-                },
-
-                // RELIGION PERKS (10 total)
-
-                // Tier 1 - Fledgling
-                new Perk("lysa_pack_hunters", "Pack Hunters", DeityType.Lysa)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Combat,
-                    Description = "Hunt as one. +3% ranged damage for all members.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.RangedWeaponsDamage, 0.03f } }
-                },
-                new Perk("lysa_swift_pack", "Swift Pack", DeityType.Lysa)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Mobility,
-                    Description = "Run together. +5% movement speed for all members.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.WalkSpeed, 0.05f } }
-                },
-
-                // Tier 2 - Established
-                new Perk("lysa_coordinated_strike", "Coordinated Strike", DeityType.Lysa)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Combat,
-                    Description = "Strike together. +5% ranged damage for all. Requires Pack Hunters.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Established,
-                    PrerequisitePerks = new List<string> { "lysa_pack_hunters" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.RangedWeaponsDamage, 0.05f } }
-                },
-                new Perk("lysa_pack_agility", "Pack Agility", DeityType.Lysa)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Mobility,
-                    Description = "Agile collective. +8% movement speed for all. Requires Swift Pack.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Established,
-                    PrerequisitePerks = new List<string> { "lysa_swift_pack" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.WalkSpeed, 0.08f } }
-                },
-
-                // Tier 3 - Renowned
-                new Perk("lysa_hunting_party", "Hunting Party", DeityType.Lysa)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Combat,
-                    Description = "Elite hunters. +8% ranged damage, +5% melee damage for all. Requires Coordinated Strike.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Renowned,
-                    PrerequisitePerks = new List<string> { "lysa_coordinated_strike" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.RangedWeaponsDamage, 0.08f },
-                        { VintageStoryStats.MeleeWeaponsDamage, 0.05f }
-                    }
-                },
-                new Perk("lysa_wild_sprint", "Wild Sprint", DeityType.Lysa)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Mobility,
-                    Description = "Lightning fast. +12% movement speed, +5% attack speed for all. Requires Pack Agility.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Renowned,
-                    PrerequisitePerks = new List<string> { "lysa_pack_agility" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.WalkSpeed, 0.12f },
-                        { VintageStoryStats.MeleeWeaponsSpeed, 0.05f }
-                    }
-                },
-
-                // Tier 4 - Legendary
-                new Perk("lysa_apex_pack", "Apex Pack", DeityType.Lysa)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Combat,
-                    Description = "Unstoppable hunters. +12% ranged damage, +8% melee damage for all. Requires Hunting Party.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Legendary,
-                    PrerequisitePerks = new List<string> { "lysa_hunting_party" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.RangedWeaponsDamage, 0.12f },
-                        { VintageStoryStats.MeleeWeaponsDamage, 0.08f }
-                    }
-                },
-                new Perk("lysa_cheetah_stride", "Cheetah Stride", DeityType.Lysa)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Mobility,
-                    Description = "Blinding speed. +18% movement speed, +8% attack speed for all. Requires Wild Sprint.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Legendary,
-                    PrerequisitePerks = new List<string> { "lysa_wild_sprint" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.WalkSpeed, 0.18f },
-                        { VintageStoryStats.MeleeWeaponsSpeed, 0.08f }
-                    }
-                },
-
-                // Tier 5 - Mythic
-                new Perk("lysa_hunters_paradise", "Hunter's Paradise", DeityType.Lysa)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Combat,
-                    Description = "Perfect hunt. +20% ranged damage, +12% melee damage, +10% attack speed for all. Requires Apex Pack.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Mythic,
-                    PrerequisitePerks = new List<string> { "lysa_apex_pack" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.RangedWeaponsDamage, 0.20f },
-                        { VintageStoryStats.MeleeWeaponsDamage, 0.12f },
+                        { VintageStoryStats.WalkSpeed, 0.20f },
                         { VintageStoryStats.MeleeWeaponsSpeed, 0.10f }
                     },
-                    SpecialEffects = new List<string> { "religion_hunters_mark" }
+                    SpecialEffects = new List<string> { SpecialEffects.Multishot, SpecialEffects.AnimalCompanion }
                 },
-                new Perk("lysa_wild_gods", "Wild Gods", DeityType.Lysa)
+
+                // RELIGION PERKS (4 total) - Unified pack buffs
+
+                // Tier 1 - Fledgling (0-499 prestige) - Foundation
+                new Perk(PerkIds.LysaPackHunters, "Pack Hunters", DeityType.Lysa)
                 {
                     Kind = PerkKind.Religion,
-                    Category = PerkCategory.Mobility,
-                    Description = "Untouchable. +25% movement speed, +12% attack speed, +10% max health for all. Requires Cheetah Stride.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Mythic,
-                    PrerequisitePerks = new List<string> { "lysa_cheetah_stride" },
+                    Category = PerkCategory.Combat,
+                    Description = "Your pack hunts as one. +8% ranged damage, +8% movement speed for all members.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
+                    StatModifiers = new Dictionary<string, float> 
+                    { 
+                        { VintageStoryStats.RangedWeaponsDamage, 0.08f },
+                        { VintageStoryStats.WalkSpeed, 0.08f }
+                    }
+                },
+
+                // Tier 2 - Established (500-1999 prestige) - Coordination
+                new Perk(PerkIds.LysaCoordinatedStrike, "Coordinated Strike", DeityType.Lysa)
+                {
+                    Kind = PerkKind.Religion,
+                    Category = PerkCategory.Combat,
+                    Description = "Coordinated hunting. +12% ranged damage, +10% melee damage, +10% movement speed for all. Requires Pack Hunters.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Established,
+                    PrerequisitePerks = new List<string> { PerkIds.LysaPackHunters },
+                    StatModifiers = new Dictionary<string, float> 
+                    { 
+                        { VintageStoryStats.RangedWeaponsDamage, 0.12f },
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.10f },
+                        { VintageStoryStats.WalkSpeed, 0.10f }
+                    }
+                },
+
+                // Tier 3 - Renowned (2000-4999 prestige) - Elite Pack
+                new Perk(PerkIds.LysaApexPack, "Apex Pack", DeityType.Lysa)
+                {
+                    Kind = PerkKind.Religion,
+                    Category = PerkCategory.Combat,
+                    Description = "Elite hunting force. +18% ranged damage, +15% melee damage, +15% movement speed, +10% attack speed for all. Requires Coordinated Strike.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Renowned,
+                    PrerequisitePerks = new List<string> { PerkIds.LysaCoordinatedStrike },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.WalkSpeed, 0.25f },
-                        { VintageStoryStats.MeleeWeaponsSpeed, 0.12f },
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.10f }
+                        { VintageStoryStats.RangedWeaponsDamage, 0.18f },
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.15f },
+                        { VintageStoryStats.WalkSpeed, 0.15f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.10f }
+                    }
+                },
+
+                // Tier 4 - Legendary (5000-9999 prestige) - Perfect Pack
+                new Perk(PerkIds.LysaHuntersParadise, "Hunter's Paradise", DeityType.Lysa)
+                {
+                    Kind = PerkKind.Religion,
+                    Category = PerkCategory.Combat,
+                    Description = "Your congregation becomes unstoppable predators. +25% ranged damage, +20% melee damage, +22% movement speed, +15% attack speed for all. Pack tracking ability. Requires Apex Pack.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Legendary,
+                    PrerequisitePerks = new List<string> { PerkIds.LysaApexPack },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { VintageStoryStats.RangedWeaponsDamage, 0.25f },
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.20f },
+                        { VintageStoryStats.WalkSpeed, 0.22f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.15f }
                     },
-                    SpecialEffects = new List<string> { "religion_pack_bond" }
+                    SpecialEffects = new List<string> { SpecialEffects.ReligionPackTracking }
                 }
             };
         }
 
         #endregion
 
-        #region Morthen (Death) - 20 Perks
+        #region Morthen (Death) - 10 Perks (Refactored)
 
         private static List<Perk> GetMorthenPerks()
         {
             return new List<Perk>
             {
-                // PLAYER PERKS (10 total) - Focus: Life drain, DoT, survivability
+                // PLAYER PERKS (6 total) - Streamlined for meaningful choices
 
-                // Tier 1 - Initiate
-                new Perk("morthen_dark_touch", "Dark Touch", DeityType.Morthen)
+                // Tier 1 - Initiate (0-499 favor) - Foundation
+                new Perk(PerkIds.MorthenDeathsEmbrace, "Death's Embrace", DeityType.Morthen)
                 {
                     Kind = PerkKind.Player,
                     Category = PerkCategory.Combat,
-                    Description = "Your strikes drain life. +5% melee damage.",
+                    Description = "Death empowers your strikes and body. +10% melee damage, +10% max health, minor lifesteal.",
                     RequiredFavorRank = (int)FavorRank.Initiate,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.05f } },
-                    SpecialEffects = new List<string> { "lifesteal_2percent" }
-                },
-                new Perk("morthen_death_resilience", "Death's Resilience", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Defense,
-                    Description = "Death empowers you. +8% max health.",
-                    RequiredFavorRank = (int)FavorRank.Initiate,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 1.08f } }
+                    StatModifiers = new Dictionary<string, float> 
+                    { 
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.10f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.10f }
+                    },
+                    SpecialEffects = new List<string> { SpecialEffects.Lifesteal3 }
                 },
 
-                // Tier 2 - Disciple
-                new Perk("morthen_soul_reaper", "Soul Reaper", DeityType.Morthen)
+                // Tier 2 - Disciple (500-1999 favor) - Choose Your Path
+                new Perk(PerkIds.MorthenSoulReaper, "Soul Reaper", DeityType.Morthen)
                 {
                     Kind = PerkKind.Player,
                     Category = PerkCategory.Combat,
-                    Description = "Harvest souls. +10% melee damage, increased lifesteal. Requires Dark Touch.",
+                    Description = "Harvest souls with dark magic. +15% melee damage, +10% lifesteal, attacks apply poison. Offense path. Requires Death's Embrace.",
                     RequiredFavorRank = (int)FavorRank.Disciple,
-                    PrerequisitePerks = new List<string> { "morthen_dark_touch" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.10f } },
-                    SpecialEffects = new List<string> { "lifesteal_5percent" }
-                },
-                new Perk("morthen_undying", "Undying", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Defense,
-                    Description = "Resist death itself. +12% max health, +5% armor. Requires Death's Resilience.",
-                    RequiredFavorRank = (int)FavorRank.Disciple,
-                    PrerequisitePerks = new List<string> { "morthen_death_resilience" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.12f },
-                        { VintageStoryStats.MeleeWeaponArmor, 0.05f }
-                    }
-                },
-
-                // Tier 3 - Zealot
-                new Perk("morthen_plague_bearer", "Plague Bearer", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Combat,
-                    Description = "Spread disease. +15% melee damage, attacks apply poison. Requires Soul Reaper.",
-                    RequiredFavorRank = (int)FavorRank.Zealot,
-                    PrerequisitePerks = new List<string> { "morthen_soul_reaper" },
+                    PrerequisitePerks = new List<string> { PerkIds.MorthenDeathsEmbrace },
                     StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.15f } },
-                    SpecialEffects = new List<string> { "lifesteal_5percent", "poison_dot" }
+                    SpecialEffects = new List<string> { SpecialEffects.Lifesteal10, SpecialEffects.PoisonDot }
                 },
-                new Perk("morthen_deathless", "Deathless", DeityType.Morthen)
+                new Perk(PerkIds.MorthenUndying, "Undying", DeityType.Morthen)
                 {
                     Kind = PerkKind.Player,
                     Category = PerkCategory.Defense,
-                    Description = "Cheat death. +18% max health, +10% armor, health regen. Requires Undying.",
-                    RequiredFavorRank = (int)FavorRank.Zealot,
-                    PrerequisitePerks = new List<string> { "morthen_undying" },
+                    Description = "Resist death itself. +20% max health, +15% armor, +10% health regeneration. Defense path. Requires Death's Embrace.",
+                    RequiredFavorRank = (int)FavorRank.Disciple,
+                    PrerequisitePerks = new List<string> { PerkIds.MorthenDeathsEmbrace },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.18f },
-                        { VintageStoryStats.MeleeWeaponArmor, 0.10f },
-                        { VintageStoryStats.HealingEffectiveness, 0.20f }
-                    }
-                },
-
-                // Tier 4 - Champion
-                new Perk("morthen_death_lord", "Death Lord", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Combat,
-                    Description = "Command death. +20% melee damage, strong lifesteal. Requires Plague Bearer.",
-                    RequiredFavorRank = (int)FavorRank.Champion,
-                    PrerequisitePerks = new List<string> { "morthen_plague_bearer" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.20f } },
-                    SpecialEffects = new List<string> { "lifesteal_10percent", "plague_aura", "weaken_enemy" }
-                },
-                new Perk("morthen_beyond_grave", "Beyond the Grave", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Defense,
-                    Description = "Transcend mortality. +25% max health, +15% armor, strong regen. Requires Deathless.",
-                    RequiredFavorRank = (int)FavorRank.Champion,
-                    PrerequisitePerks = new List<string> { "morthen_deathless" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.25f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.20f },
                         { VintageStoryStats.MeleeWeaponArmor, 0.15f },
-                        { VintageStoryStats.HealingEffectiveness, 0.35f }
+                        { VintageStoryStats.HealingEffectiveness, 0.10f }
                     }
                 },
 
-                // Tier 5 - Avatar
-                new Perk("morthen_avatar_of_death", "Avatar of Death", DeityType.Morthen)
+                // Tier 3 - Zealot (2000-4999 favor) - Specialization
+                new Perk(PerkIds.MorthenPlagueBearer, "Plague Bearer", DeityType.Morthen)
                 {
                     Kind = PerkKind.Player,
                     Category = PerkCategory.Combat,
-                    Description = "Become death incarnate. +30% melee damage, massive lifesteal. Requires Death Lord.",
-                    RequiredFavorRank = (int)FavorRank.Avatar,
-                    PrerequisitePerks = new List<string> { "morthen_death_lord" },
+                    Description = "Spread pestilence and decay. +25% melee damage, +15% lifesteal, plague aura weakens enemies. Requires Soul Reaper.",
+                    RequiredFavorRank = (int)FavorRank.Zealot,
+                    PrerequisitePerks = new List<string> { PerkIds.MorthenSoulReaper },
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.25f } },
+                    SpecialEffects = new List<string> { SpecialEffects.Lifesteal15, SpecialEffects.PoisonDotStrong, SpecialEffects.PlagueAura }
+                },
+                new Perk(PerkIds.MorthenDeathless, "Deathless", DeityType.Morthen)
+                {
+                    Kind = PerkKind.Player,
+                    Category = PerkCategory.Defense,
+                    Description = "Transcend mortality. +30% max health, +25% armor, +20% health regen, death resistance. Requires Undying.",
+                    RequiredFavorRank = (int)FavorRank.Zealot,
+                    PrerequisitePerks = new List<string> { PerkIds.MorthenUndying },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MeleeWeaponsDamage, 0.30f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.30f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.25f },
+                        { VintageStoryStats.HealingEffectiveness, 0.20f }
+                    },
+                    SpecialEffects = new List<string> { SpecialEffects.DamageReduction10 }
+                },
+
+                // Tier 4 - Champion (5000-9999 favor) - Capstone (requires both paths)
+                new Perk(PerkIds.MorthenLordOfDeath, "Lord of Death", DeityType.Morthen)
+                {
+                    Kind = PerkKind.Player,
+                    Category = PerkCategory.Combat,
+                    Description = "Command death itself. +15% all stats, +10% attack speed, death aura, execute low health enemies. Requires both Plague Bearer and Deathless.",
+                    RequiredFavorRank = (int)FavorRank.Champion,
+                    PrerequisitePerks = new List<string> { PerkIds.MorthenPlagueBearer, PerkIds.MorthenDeathless },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.15f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.15f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.15f },
+                        { VintageStoryStats.MeleeWeaponsSpeed, 0.10f },
+                        { VintageStoryStats.HealingEffectiveness, 0.15f }
+                    },
+                    SpecialEffects = new List<string> { SpecialEffects.DeathAura, SpecialEffects.ExecuteThreshold, SpecialEffects.Lifesteal20 }
+                },
+
+                // RELIGION PERKS (4 total) - Unified death cult progression
+
+                // Tier 1 - Fledgling (0-499 prestige) - Foundation
+                new Perk(PerkIds.MorthenDeathCult, "Death Cult", DeityType.Morthen)
+                {
+                    Kind = PerkKind.Religion,
+                    Category = PerkCategory.Combat,
+                    Description = "Your congregation embraces the darkness. +8% melee damage, +8% max health for all members.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
+                    StatModifiers = new Dictionary<string, float> 
+                    { 
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.08f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.08f }
+                    }
+                },
+
+                // Tier 2 - Established (500-1999 prestige) - Coordination
+                new Perk(PerkIds.MorthenNecromanticCovenant, "Necromantic Covenant", DeityType.Morthen)
+                {
+                    Kind = PerkKind.Religion,
+                    Category = PerkCategory.Combat,
+                    Description = "Dark pact strengthens all. +12% melee damage, +10% armor, +8% health regen for all. Requires Death Cult.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Established,
+                    PrerequisitePerks = new List<string> { PerkIds.MorthenDeathCult },
+                    StatModifiers = new Dictionary<string, float> 
+                    { 
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.12f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.10f },
+                        { VintageStoryStats.HealingEffectiveness, 0.08f }
+                    }
+                },
+
+                // Tier 3 - Renowned (2000-4999 prestige) - Elite Force
+                new Perk(PerkIds.MorthenDeathlessLegion, "Deathless Legion", DeityType.Morthen)
+                {
+                    Kind = PerkKind.Religion,
+                    Category = PerkCategory.Combat,
+                    Description = "Unkillable army of the dead. +18% melee damage, +15% armor, +15% max health, +12% regen for all. Requires Necromantic Covenant.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Renowned,
+                    PrerequisitePerks = new List<string> { PerkIds.MorthenNecromanticCovenant },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.18f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.15f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.15f },
+                        { VintageStoryStats.HealingEffectiveness, 0.12f }
+                    }
+                },
+
+                // Tier 4 - Legendary (5000-9999 prestige) - Death's Empire
+                new Perk(PerkIds.MorthenEmpireOfDeath, "Empire of Death", DeityType.Morthen)
+                {
+                    Kind = PerkKind.Religion,
+                    Category = PerkCategory.Combat,
+                    Description = "Your religion rules over death itself. +25% melee damage, +20% armor, +20% max health, +18% regen, +10% attack speed for all. Death mark ability. Requires Deathless Legion.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Legendary,
+                    PrerequisitePerks = new List<string> { PerkIds.MorthenDeathlessLegion },
+                    StatModifiers = new Dictionary<string, float>
+                    {
+                        { VintageStoryStats.MeleeWeaponsDamage, 0.25f },
+                        { VintageStoryStats.MeleeWeaponArmor, 0.20f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.20f },
+                        { VintageStoryStats.HealingEffectiveness, 0.18f },
                         { VintageStoryStats.MeleeWeaponsSpeed, 0.10f }
                     },
-                    SpecialEffects = new List<string> { "lifesteal_15percent", "death_aura", "execute_low_health" }
-                },
-                new Perk("morthen_immortal", "Immortal", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Player,
-                    Category = PerkCategory.Defense,
-                    Description = "True immortality. +35% max health, +20% armor, massive regen. Requires Beyond the Grave.",
-                    RequiredFavorRank = (int)FavorRank.Avatar,
-                    PrerequisitePerks = new List<string> { "morthen_beyond_grave" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.35f },
-                        { VintageStoryStats.MeleeWeaponArmor, 0.20f },
-                        { VintageStoryStats.HealingEffectiveness, 0.50f }
-                    },
-                    SpecialEffects = new List<string> { "cheat_death_once" }
-                },
-
-                // RELIGION PERKS (10 total)
-
-                // Tier 1 - Fledgling
-                new Perk("morthen_cult_of_death", "Cult of Death", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Combat,
-                    Description = "Shared darkness. +3% melee damage for all members.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.03f } }
-                },
-                new Perk("morthen_death_pact", "Death Pact", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Defense,
-                    Description = "Bound by death. +5% max health for all members.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 1.05f } }
-                },
-
-                // Tier 2 - Established
-                new Perk("morthen_necromantic_bond", "Necromantic Bond", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Combat,
-                    Description = "Dark communion. +5% melee damage for all. Requires Cult of Death.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Established,
-                    PrerequisitePerks = new List<string> { "morthen_cult_of_death" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.05f } }
-                },
-                new Perk("morthen_collective_undeath", "Collective Undeath", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Defense,
-                    Description = "Shared resilience. +8% max health for all. Requires Death Pact.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Established,
-                    PrerequisitePerks = new List<string> { "morthen_death_pact" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 1.08f } }
-                },
-
-                // Tier 3 - Renowned
-                new Perk("morthen_plague_congregation", "Plague Congregation", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Combat,
-                    Description = "Spread pestilence. +8% melee damage for all. Requires Necromantic Bond.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Renowned,
-                    PrerequisitePerks = new List<string> { "morthen_necromantic_bond" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.08f } }
-                },
-                new Perk("morthen_deathless_army", "Deathless Army", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Defense,
-                    Description = "Unstoppable horde. +12% max health, +5% regen for all. Requires Collective Undeath.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Renowned,
-                    PrerequisitePerks = new List<string> { "morthen_collective_undeath" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.12f },
-                        { VintageStoryStats.HealingEffectiveness, 0.15f }
-                    }
-                },
-
-                // Tier 4 - Legendary
-                new Perk("morthen_death_legion", "Death Legion", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Combat,
-                    Description = "Army of the dead. +12% melee damage for all. Requires Plague Congregation.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Legendary,
-                    PrerequisitePerks = new List<string> { "morthen_plague_congregation" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MeleeWeaponsDamage, 0.12f } }
-                },
-                new Perk("morthen_undying_horde", "Undying Horde", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Defense,
-                    Description = "Unkillable legion. +18% max health, +10% regen for all. Requires Deathless Army.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Legendary,
-                    PrerequisitePerks = new List<string> { "morthen_deathless_army" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.18f },
-                        { VintageStoryStats.HealingEffectiveness, 0.25f }
-                    }
-                },
-
-                // Tier 5 - Mythic
-                new Perk("morthen_empire_of_death", "Empire of Death", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Combat,
-                    Description = "Rule over death. +20% melee damage, +5% attack speed for all. Requires Death Legion.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Mythic,
-                    PrerequisitePerks = new List<string> { "morthen_death_legion" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MeleeWeaponsDamage, 0.20f },
-                        { VintageStoryStats.MeleeWeaponsSpeed, 0.05f }
-                    },
-                    SpecialEffects = new List<string> { "religion_death_mark" }
-                },
-                new Perk("morthen_eternal_undeath", "Eternal Undeath", DeityType.Morthen)
-                {
-                    Kind = PerkKind.Religion,
-                    Category = PerkCategory.Defense,
-                    Description = "Never die. +25% max health, +10% armor, +15% regen for all. Requires Undying Horde.",
-                    RequiredPrestigeRank = (int)PrestigeRank.Mythic,
-                    PrerequisitePerks = new List<string> { "morthen_undying_horde" },
-                    StatModifiers = new Dictionary<string, float>
-                    {
-                        { VintageStoryStats.MaxHealthExtraPoints, 1.25f },
-                        { VintageStoryStats.MeleeWeaponArmor, 0.10f },
-                        { VintageStoryStats.HealingEffectiveness, 0.35f }
-                    }
+                    SpecialEffects = new List<string> { SpecialEffects.ReligionDeathMark }
                 }
             };
         }

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using PantheonWars.Constants;
 using PantheonWars.Models;
 using Vintagestory.API.Common;
+using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 
@@ -42,13 +44,13 @@ namespace PantheonWars.Systems
         /// </summary>
         public void Initialize()
         {
-            _sapi.Logger.Notification("[PantheonWars] Initializing Perk Effect System...");
+            _sapi.Logger.Notification($"{SystemConstants.LogPrefix} {SystemConstants.InfoInitializingPerkSystem}");
 
             // Register event handlers
             _sapi.Event.PlayerJoin += OnPlayerJoin;
             _playerReligionDataManager.OnPlayerLeavesReligion += OnPlayerLeavesReligion;
 
-            _sapi.Logger.Notification("[PantheonWars] Perk Effect System initialized");
+            _sapi.Logger.Notification($"{SystemConstants.LogPrefix} {SystemConstants.InfoPerkSystemInitialized}");
         }
 
         private void OnPlayerLeavesReligion(IServerPlayer player, string religionUID)
@@ -179,14 +181,14 @@ namespace PantheonWars.Systems
         {
             if (player?.Entity == null)
             {
-                _sapi.Logger.Warning($"[PantheonWars] Cannot apply perks - player entity is null");
+                _sapi.Logger.Warning($"{SystemConstants.LogPrefix} {SystemConstants.ErrorPlayerEntityNull}");
                 return;
             }
 
             EntityAgent agent = player.Entity;
             if (agent?.Stats == null)
             {
-                _sapi.Logger.Warning($"[PantheonWars] Cannot apply perks - player has no Stats");
+                _sapi.Logger.Warning($"{SystemConstants.LogPrefix} {SystemConstants.ErrorPlayerStatsNull}");
                 return;
             }
 
@@ -206,7 +208,7 @@ namespace PantheonWars.Systems
                 string statName = modifier.Key;
 
                 // Use namespaced modifier ID to avoid conflicts
-                string modifierId = $"perk-{player.PlayerUID}";
+                string modifierId = string.Format(SystemConstants.ModifierIdFormat, player.PlayerUID);
                 float value = modifier.Value;
 
                 try
@@ -215,15 +217,15 @@ namespace PantheonWars.Systems
                     appliedSet.Add(statName);
                     appliedCount++;
 
-                    _sapi.Logger.Debug($"[PantheonWars] Applied {statName}: {modifierId} = {value:F3}");
+                    _sapi.Logger.Debug($"{SystemConstants.LogPrefix} {string.Format(SystemConstants.DebugAppliedStatFormat, statName, modifierId, value)}");
                 }
                 catch (KeyNotFoundException ex)
                 {
-                    _sapi.Logger.Warning($"[PantheonWars] Stat '{statName}' not found for player {player.PlayerName}: {ex.Message}");
+                    _sapi.Logger.Warning($"{SystemConstants.LogPrefix} {string.Format(SystemConstants.ErrorStatNotFoundFormat, statName, player.PlayerName)}: {ex.Message}");
                 }
                 catch (Exception ex)
                 {
-                    _sapi.Logger.Error($"[PantheonWars] Error applying stat '{statName}' to player {player.PlayerName}: {ex}");
+                    _sapi.Logger.Error($"{SystemConstants.LogPrefix} {string.Format(SystemConstants.ErrorApplyingStatFormat, statName, player.PlayerName)}: {ex}");
                 }
             }
 
@@ -242,15 +244,14 @@ namespace PantheonWars.Systems
                 {
                     float statValue = agent.Stats.GetBlended("maxhealthExtraPoints");
                     _sapi.Logger.Notification(
-                        $"[PantheonWars] {player.PlayerName} max health: {beforeHealth.ToString("F1")} → {afterHealth.ToString("F1")} " +
-                        $"(Base: {healthBehavior.BaseMaxHealth.ToString("F1")}, Stat: {statValue.ToString("F3")})"
+                        $"{SystemConstants.LogPrefix} {string.Format(SystemConstants.SuccessHealthUpdateFormat, player.PlayerName, beforeHealth, afterHealth, healthBehavior.BaseMaxHealth, statValue)}"
                     );
                 }
             }
 
             if (appliedCount > 0)
             {
-                _sapi.Logger.Notification($"[PantheonWars] Applied {appliedCount} perk modifiers to player {player.PlayerName}");
+                _sapi.Logger.Notification($"{SystemConstants.LogPrefix} {string.Format(SystemConstants.SuccessAppliedModifiersFormat, appliedCount, player.PlayerName)}");
             }
         }
 
@@ -270,7 +271,7 @@ namespace PantheonWars.Systems
                 return; // No modifiers to remove
             }
 
-            string modifierId = $"perk-{player.PlayerUID}";
+            string modifierId = string.Format(SystemConstants.ModifierIdFormat, player.PlayerUID);
             int removedCount = 0;
 
             foreach (var statName in appliedSet)
@@ -282,13 +283,13 @@ namespace PantheonWars.Systems
                 }
                 catch (Exception ex)
                 {
-                    _sapi.Logger.Debug($"[PantheonWars] Could not remove modifier '{statName}' from player {player.PlayerName}: {ex.Message}");
+                    _sapi.Logger.Debug($"{SystemConstants.LogPrefix} {string.Format(SystemConstants.ErrorRemovingModifierFormat, statName, player.PlayerName)}: {ex.Message}");
                 }
             }
 
             if (removedCount > 0)
             {
-                _sapi.Logger.Debug($"[PantheonWars] Removed {removedCount} old perk modifiers from player {player.PlayerName}");
+                _sapi.Logger.Debug($"{SystemConstants.LogPrefix} {string.Format(SystemConstants.SuccessRemovedModifiersFormat, removedCount, player.PlayerName)}");
             }
 
             appliedSet.Clear();
@@ -322,7 +323,7 @@ namespace PantheonWars.Systems
                 ApplyPerksToPlayer(player);
             }
 
-            _sapi.Logger.Debug($"[PantheonWars] Refreshed perks for player {playerUID}");
+            _sapi.Logger.Debug($"{SystemConstants.LogPrefix} {string.Format(SystemConstants.SuccessRefreshedPerksFormat, playerUID)}");
         }
 
         /// <summary>
@@ -345,7 +346,7 @@ namespace PantheonWars.Systems
                 RefreshPlayerPerks(memberUID);
             }
 
-            _sapi.Logger.Debug($"[PantheonWars] Refreshed perks for religion {religion.ReligionName} ({religion.MemberUIDs.Count} members)");
+            _sapi.Logger.Debug($"{SystemConstants.LogPrefix} {string.Format(SystemConstants.SuccessRefreshedReligionPerksFormat, religion.ReligionName, religion.MemberUIDs.Count)}");
         }
 
         /// <summary>
@@ -423,7 +424,7 @@ namespace PantheonWars.Systems
         {
             _playerModifierCache.Clear();
             _religionModifierCache.Clear();
-            _sapi.Logger.Notification("[PantheonWars] Cleared all perk modifier caches");
+            _sapi.Logger.Notification($"{SystemConstants.LogPrefix} {SystemConstants.InfoClearedCaches}");
         }
 
         /// <summary>
@@ -433,7 +434,7 @@ namespace PantheonWars.Systems
         {
             if (modifiers.Count == 0)
             {
-                return "No active modifiers";
+                return SystemConstants.NoActiveModifiers;
             }
 
             var lines = new List<string>();
@@ -455,13 +456,13 @@ namespace PantheonWars.Systems
         {
             return statKey switch
             {
-                "meleeWeaponsDamage" => "Melee Damage",
-                "rangedWeaponsDamage" => "Ranged Damage",
-                "meleeWeaponsSpeed" => "Attack Speed",
-                "meleeWeaponArmor" => "Armor",
-                "maxhealthExtraPoints" => "Max Health",
-                "walkspeed" => "Walk Speed",
-                "healingeffectivness" => "Health Regen",
+                VintageStoryStats.MeleeWeaponsDamage => SystemConstants.StatDisplayMeleeDamage,
+                VintageStoryStats.RangedWeaponsDamage => SystemConstants.StatDisplayRangedDamage,
+                VintageStoryStats.MeleeWeaponsSpeed => SystemConstants.StatDisplayAttackSpeed,
+                VintageStoryStats.MeleeWeaponArmor => SystemConstants.StatDisplayArmor,
+                VintageStoryStats.MaxHealthExtraPoints => SystemConstants.StatDisplayMaxHealth,
+                VintageStoryStats.WalkSpeed => SystemConstants.StatDisplayWalkSpeed,
+                VintageStoryStats.HealingEffectiveness => SystemConstants.StatDisplayHealthRegen,
                 _ => statKey
             };
         }
