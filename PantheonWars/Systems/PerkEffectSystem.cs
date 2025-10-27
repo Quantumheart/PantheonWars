@@ -4,6 +4,7 @@ using System.Linq;
 using PantheonWars.Models;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
+using Vintagestory.GameContent;
 
 namespace PantheonWars.Systems
 {
@@ -50,9 +51,17 @@ namespace PantheonWars.Systems
             _sapi.Logger.Notification("[PantheonWars] Perk Effect System initialized");
         }
 
-        private void OnPlayerLeavesReligion(string playerUid)
+        private void OnPlayerLeavesReligion(IServerPlayer player, string religionUID)
+        {
+            
+            RemovePerksFromPlayer(player);
+            RefreshPerks(player.PlayerUID, religionUID);
+        }
+
+        private void RefreshPerks(string playerUid, string religionUID)
         {
             RefreshPlayerPerks(playerUid);
+            RefreshReligionPerks(religionUID);
         }
 
         /// <summary>
@@ -174,7 +183,7 @@ namespace PantheonWars.Systems
                 return;
             }
 
-            EntityAgent agent = player.Entity as EntityAgent;
+            EntityAgent agent = player.Entity;
             if (agent?.Stats == null)
             {
                 _sapi.Logger.Warning($"[PantheonWars] Cannot apply perks - player has no Stats");
@@ -202,7 +211,6 @@ namespace PantheonWars.Systems
 
                 try
                 {
-                    // Apply stat modifier (false = deferred update, per XSkills pattern)
                     agent.Stats.Set(statName, modifierId, value, false);
                     appliedSet.Add(statName);
                     appliedCount++;
@@ -221,6 +229,24 @@ namespace PantheonWars.Systems
 
             // Track applied modifiers for cleanup later
             _appliedModifiers[player.PlayerUID] = appliedSet;
+
+            // Force health recalculation after applying stats
+            var healthBehavior = agent.GetBehavior<EntityBehaviorHealth>();
+            if (healthBehavior != null)
+            {
+                float beforeHealth = healthBehavior.MaxHealth;
+                healthBehavior.UpdateMaxHealth();
+                float afterHealth = healthBehavior.MaxHealth;
+                
+                if (Math.Abs(beforeHealth - afterHealth) > 0.01f)
+                {
+                    float statValue = agent.Stats.GetBlended("maxhealthExtraPoints");
+                    _sapi.Logger.Notification(
+                        $"[PantheonWars] {player.PlayerName} max health: {beforeHealth.ToString("F1")} → {afterHealth.ToString("F1")} " +
+                        $"(Base: {healthBehavior.BaseMaxHealth.ToString("F1")}, Stat: {statValue.ToString("F3")})"
+                    );
+                }
+            }
 
             if (appliedCount > 0)
             {
@@ -266,6 +292,13 @@ namespace PantheonWars.Systems
             }
 
             appliedSet.Clear();
+            
+            // Update health after removing modifiers
+            var healthBehavior = agent.GetBehavior<EntityBehaviorHealth>();
+            if (healthBehavior != null)
+            {
+                healthBehavior.UpdateMaxHealth();
+            }
         }
 
         /// <summary>

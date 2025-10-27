@@ -55,7 +55,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Defense,
                     Description = "Your body adapts to the rigors of combat. +10% max health.",
                     RequiredFavorRank = (int)FavorRank.Initiate,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 0.10f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 1.10f } }
                 },
 
                 // Tier 2 - Disciple (500-1999 favor)
@@ -101,7 +101,7 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_iron_skin" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.15f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.15f },
                         { VintageStoryStats.MeleeWeaponArmor, 0.10f }
                     }
                 },
@@ -130,7 +130,7 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_war_veteran" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.25f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.25f },
                         { VintageStoryStats.MeleeWeaponArmor, 0.15f }
                     }
                 },
@@ -160,7 +160,7 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_unbreakable" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.35f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.35f },
                         { VintageStoryStats.MeleeWeaponArmor, 0.20f },
                         { VintageStoryStats.HealingEffectiveness, 0.50f }
                     },
@@ -184,7 +184,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Defense,
                     Description = "Your banner inspires courage. +5% max health for all members.",
                     RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 0.05f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 1.05f } }
                 },
 
                 // Tier 2 - Established (500-1999 prestige)
@@ -204,7 +204,7 @@ namespace PantheonWars.Systems
                     Description = "Collective defense. +8% max health for all. Requires War Banner.",
                     RequiredPrestigeRank = (int)PrestigeRank.Established,
                     PrerequisitePerks = new List<string> { "khoras_war_banner" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 0.08f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 1.08f } }
                 },
 
                 // Tier 3 - Renowned (2000-4999 prestige)
@@ -230,7 +230,7 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_fortress_faith" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.12f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.12f },
                         { VintageStoryStats.MeleeWeaponArmor, 0.10f }
                     }
                 },
@@ -258,7 +258,7 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_shield_wall" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.18f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.18f },
                         { VintageStoryStats.MeleeWeaponArmor, 0.15f }
                     }
                 },
@@ -288,7 +288,7 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "khoras_iron_legion" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.25f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.25f },
                         { VintageStoryStats.MeleeWeaponArmor, 0.20f },
                         { VintageStoryStats.HealingEffectiveness, 0.30f }
                     },
@@ -427,7 +427,7 @@ namespace PantheonWars.Systems
                     {
                         { VintageStoryStats.WalkSpeed, 0.35f },
                         { VintageStoryStats.MeleeWeaponsDamage, 0.15f },
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.10f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.10f }
                     },
                     SpecialEffects = new List<string> { "animal_companion" }
                 },
@@ -555,7 +555,7 @@ namespace PantheonWars.Systems
                     {
                         { VintageStoryStats.WalkSpeed, 0.25f },
                         { VintageStoryStats.MeleeWeaponsSpeed, 0.12f },
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.10f }
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.10f }
                     },
                     SpecialEffects = new List<string> { "religion_pack_bond" }
                 }
@@ -588,7 +588,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Defense,
                     Description = "Death empowers you. +8% max health.",
                     RequiredFavorRank = (int)FavorRank.Initiate,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 0.08f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 1.08f } }
                 },
 
                 // Tier 2 - Disciple
@@ -611,7 +611,7 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_death_resilience" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.12f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.12f },
                         { VintageStoryStats.MeleeWeaponArmor, 0.05f }
                     }
                 },
@@ -636,7 +636,7 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_undying" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.18f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.18f },
                         { VintageStoryStats.MeleeWeaponArmor, 0.10f },
                         { VintageStoryStats.HealingEffectiveness, 0.20f }
                     }
@@ -662,7 +662,7 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_deathless" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.25f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.25f },
                         { VintageStoryStats.MeleeWeaponArmor, 0.15f },
                         { VintageStoryStats.HealingEffectiveness, 0.35f }
                     }
@@ -692,7 +692,7 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_beyond_grave" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.35f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.35f },
                         { VintageStoryStats.MeleeWeaponArmor, 0.20f },
                         { VintageStoryStats.HealingEffectiveness, 0.50f }
                     },
@@ -716,7 +716,7 @@ namespace PantheonWars.Systems
                     Category = PerkCategory.Defense,
                     Description = "Bound by death. +5% max health for all members.",
                     RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 0.05f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 1.05f } }
                 },
 
                 // Tier 2 - Established
@@ -736,7 +736,7 @@ namespace PantheonWars.Systems
                     Description = "Shared resilience. +8% max health for all. Requires Death Pact.",
                     RequiredPrestigeRank = (int)PrestigeRank.Established,
                     PrerequisitePerks = new List<string> { "morthen_death_pact" },
-                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 0.08f } }
+                    StatModifiers = new Dictionary<string, float> { { VintageStoryStats.MaxHealthExtraPoints, 1.08f } }
                 },
 
                 // Tier 3 - Renowned
@@ -758,7 +758,7 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_collective_undeath" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.12f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.12f },
                         { VintageStoryStats.HealingEffectiveness, 0.15f }
                     }
                 },
@@ -782,7 +782,7 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_deathless_army" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.18f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.18f },
                         { VintageStoryStats.HealingEffectiveness, 0.25f }
                     }
                 },
@@ -811,7 +811,7 @@ namespace PantheonWars.Systems
                     PrerequisitePerks = new List<string> { "morthen_undying_horde" },
                     StatModifiers = new Dictionary<string, float>
                     {
-                        { VintageStoryStats.MaxHealthExtraPoints, 0.25f },
+                        { VintageStoryStats.MaxHealthExtraPoints, 1.25f },
                         { VintageStoryStats.MeleeWeaponArmor, 0.10f },
                         { VintageStoryStats.HealingEffectiveness, 0.35f }
                     }

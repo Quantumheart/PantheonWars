@@ -107,6 +107,11 @@ namespace PantheonWars.Systems
             // Check perk type and corresponding requirements
             if (perk.Kind == PerkKind.Player)
             {
+                if (!playerData.HasReligion())
+                {
+                    return (false, "Not in a religion");
+                }
+                
                 // Check if already unlocked
                 if (playerData.IsPerkUnlocked(perk.PerkId))
                 {
