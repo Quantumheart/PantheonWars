@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using PantheonWars.Data;
 using PantheonWars.Models;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 
@@ -10,7 +11,7 @@ namespace PantheonWars.Systems
     /// <summary>
     /// Manages player-religion relationships and player progression
     /// </summary>
-    public class PlayerReligionDataManager
+    public class PlayerReligionDataManager : IPlayerReligionDataManager
     {
         private const string DATA_KEY = "pantheonwars_playerreligiondata";
         private const int RELIGION_SWITCH_COOLDOWN_DAYS = 7;

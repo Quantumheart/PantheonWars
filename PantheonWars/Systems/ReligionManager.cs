@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PantheonWars.Data;
 using PantheonWars.Models;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Server;
 using Vintagestory.API.Util;
 
@@ -11,7 +12,7 @@ namespace PantheonWars.Systems
     /// <summary>
     /// Manages all religions and congregation membership
     /// </summary>
-    public class ReligionManager
+    public class ReligionManager : IReligionManager
     {
         private const string DATA_KEY = "pantheonwars_religions";
         private readonly ICoreServerAPI _sapi;
@@ -290,12 +291,12 @@ namespace PantheonWars.Systems
 
         #region Persistence
 
-        private void OnSaveGameLoaded()
+        public void OnSaveGameLoaded()
         {
             LoadAllReligions();
         }
 
-        private void OnGameWorldSave()
+        public void OnGameWorldSave()
         {
             SaveAllReligions();
         }

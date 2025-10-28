@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using PantheonWars.Models;
 using PantheonWars.Systems;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
@@ -14,16 +15,16 @@ namespace PantheonWars.Commands
     /// </summary>
     public class PerkCommands(
         ICoreServerAPI? sapi,
-        PerkRegistry? perkRegistry,
-        PlayerReligionDataManager? playerReligionDataManager,
-        ReligionManager? religionManager,
-        PerkEffectSystem? perkEffectSystem)
+        IPerkRegistry? perkRegistry,
+        IPlayerReligionDataManager? playerReligionDataManager,
+        IReligionManager? religionManager,
+        IPerkEffectSystem? perkEffectSystem)
     {
         private readonly ICoreServerAPI _sapi = sapi ?? throw new ArgumentNullException($"{nameof(sapi)}");
-        private readonly PerkRegistry _perkRegistry = perkRegistry ?? throw new ArgumentNullException($"{nameof(sapi)}");
-        private readonly PlayerReligionDataManager _playerReligionDataManager = playerReligionDataManager ?? throw new ArgumentNullException($"{nameof(sapi)}");
-        private readonly ReligionManager _religionManager = religionManager ?? throw new ArgumentNullException($"{nameof(sapi)}");
-        private readonly PerkEffectSystem _perkEffectSystem = perkEffectSystem ?? throw new ArgumentNullException($"{nameof(sapi)}");
+        private readonly IPerkRegistry _perkRegistry = perkRegistry ?? throw new ArgumentNullException($"{nameof(sapi)}");
+        private readonly IPlayerReligionDataManager _playerReligionDataManager = playerReligionDataManager ?? throw new ArgumentNullException($"{nameof(sapi)}");
+        private readonly IReligionManager _religionManager = religionManager ?? throw new ArgumentNullException($"{nameof(sapi)}");
+        private readonly IPerkEffectSystem _perkEffectSystem = perkEffectSystem ?? throw new ArgumentNullException($"{nameof(sapi)}");
 
         /// <summary>
         /// Registers all perk commands

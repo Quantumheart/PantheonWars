@@ -1,0 +1,96 @@
+using System.Collections.Generic;
+using PantheonWars.Data;
+using PantheonWars.Models;
+
+namespace PantheonWars.Systems.Interfaces;
+
+public interface IReligionManager
+{
+    /// <summary>
+    /// Initializes the religion manager
+    /// </summary>
+    void Initialize();
+
+    /// <summary>
+    /// Creates a new religion
+    /// </summary>
+    ReligionData CreateReligion(string name, DeityType deity, string founderUID, bool isPublic);
+
+    /// <summary>
+    /// Adds a member to a religion
+    /// </summary>
+    void AddMember(string religionUID, string playerUID);
+
+    /// <summary>
+    /// Removes a member from a religion
+    /// </summary>
+    void RemoveMember(string religionUID, string playerUID);
+
+    /// <summary>
+    /// Gets the religion a player belongs to
+    /// </summary>
+    ReligionData? GetPlayerReligion(string playerUID);
+
+    /// <summary>
+    /// Gets a religion by UID
+    /// </summary>
+    ReligionData? GetReligion(string religionUID);
+
+    /// <summary>
+    /// Gets a religion by name
+    /// </summary>
+    ReligionData? GetReligionByName(string name);
+
+    /// <summary>
+    /// Gets the active deity for a player
+    /// </summary>
+    DeityType GetPlayerActiveDeity(string playerUID);
+
+    /// <summary>
+    /// Checks if a player can join a religion
+    /// </summary>
+    bool CanJoinReligion(string religionUID, string playerUID);
+
+    /// <summary>
+    /// Invites a player to a religion
+    /// </summary>
+    void InvitePlayer(string religionUID, string playerUID, string inviterUID);
+
+    /// <summary>
+    /// Checks if a player has an invitation to a religion
+    /// </summary>
+    bool HasInvitation(string playerUID, string religionUID);
+
+    /// <summary>
+    /// Removes an invitation (called after accepting or declining)
+    /// </summary>
+    void RemoveInvitation(string playerUID, string religionUID);
+
+    /// <summary>
+    /// Gets all invitations for a player
+    /// </summary>
+    List<string> GetPlayerInvitations(string playerUID);
+
+    /// <summary>
+    /// Checks if a player has a religion
+    /// </summary>
+    bool HasReligion(string playerUID);
+
+    /// <summary>
+    /// Gets all religions
+    /// </summary>
+    List<ReligionData> GetAllReligions();
+
+    /// <summary>
+    /// Gets religions by deity
+    /// </summary>
+    List<ReligionData> GetReligionsByDeity(DeityType deity);
+
+    /// <summary>
+    /// Deletes a religion (founder only)
+    /// </summary>
+    bool DeleteReligion(string religionUID, string requesterUID);
+
+    void OnSaveGameLoaded();
+    void OnGameWorldSave();
+}

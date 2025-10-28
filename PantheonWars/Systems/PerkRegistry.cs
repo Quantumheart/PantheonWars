@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PantheonWars.Data;
 using PantheonWars.Models;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
 
 namespace PantheonWars.Systems
@@ -9,7 +10,7 @@ namespace PantheonWars.Systems
     /// <summary>
     /// Registry for all perks in the game (Phase 3.3)
     /// </summary>
-    public class PerkRegistry
+    public class PerkRegistry : IPerkRegistry
     {
         private readonly ICoreAPI _api;
         private readonly Dictionary<string, Perk> _perks = new();

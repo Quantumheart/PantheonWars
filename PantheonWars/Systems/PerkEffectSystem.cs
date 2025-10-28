@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using PantheonWars.Constants;
 using PantheonWars.Models;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
-using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Server;
 using Vintagestory.GameContent;
 
@@ -13,7 +13,7 @@ namespace PantheonWars.Systems
     /// <summary>
     /// Manages perk effects and stat modifiers (Phase 3.3)
     /// </summary>
-    public class PerkEffectSystem
+    public class PerkEffectSystem : IPerkEffectSystem
     {
         private readonly ICoreServerAPI _sapi;
         private readonly PerkRegistry _perkRegistry;
