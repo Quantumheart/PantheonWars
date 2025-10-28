@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using PantheonWars.Models;
@@ -13,27 +12,18 @@ namespace PantheonWars.Commands
     /// <summary>
     /// Commands for managing perks (Phase 3.3)
     /// </summary>
-    public class PerkCommands
+    public class PerkCommands(
+        ICoreServerAPI? sapi,
+        PerkRegistry? perkRegistry,
+        PlayerReligionDataManager? playerReligionDataManager,
+        ReligionManager? religionManager,
+        PerkEffectSystem? perkEffectSystem)
     {
-        private readonly ICoreServerAPI _sapi;
-        private readonly PerkRegistry _perkRegistry;
-        private readonly PlayerReligionDataManager _playerReligionDataManager;
-        private readonly ReligionManager _religionManager;
-        private readonly PerkEffectSystem _perkEffectSystem;
-
-        public PerkCommands(
-            ICoreServerAPI sapi,
-            PerkRegistry perkRegistry,
-            PlayerReligionDataManager playerReligionDataManager,
-            ReligionManager religionManager,
-            PerkEffectSystem perkEffectSystem)
-        {
-            _sapi = sapi;
-            _perkRegistry = perkRegistry;
-            _playerReligionDataManager = playerReligionDataManager;
-            _religionManager = religionManager;
-            _perkEffectSystem = perkEffectSystem;
-        }
+        private readonly ICoreServerAPI _sapi = sapi ?? throw new ArgumentNullException($"{nameof(sapi)}");
+        private readonly PerkRegistry _perkRegistry = perkRegistry ?? throw new ArgumentNullException($"{nameof(sapi)}");
+        private readonly PlayerReligionDataManager _playerReligionDataManager = playerReligionDataManager ?? throw new ArgumentNullException($"{nameof(sapi)}");
+        private readonly ReligionManager _religionManager = religionManager ?? throw new ArgumentNullException($"{nameof(sapi)}");
+        private readonly PerkEffectSystem _perkEffectSystem = perkEffectSystem ?? throw new ArgumentNullException($"{nameof(sapi)}");
 
         /// <summary>
         /// Registers all perk commands

@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PantheonWars", "PantheonWar
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CakeBuild", "CakeBuild\CakeBuild.csproj", "{7B2D9C5E-8F4A-4D6C-9E5F-2A8D4B6C7E9A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PantheonWars.Tests", "PantheonWars.Tests\PantheonWars.Tests.csproj", "{11CB40C9-400A-4DC1-814E-6A3338EB8ABD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{7B2D9C5E-8F4A-4D6C-9E5F-2A8D4B6C7E9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7B2D9C5E-8F4A-4D6C-9E5F-2A8D4B6C7E9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7B2D9C5E-8F4A-4D6C-9E5F-2A8D4B6C7E9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11CB40C9-400A-4DC1-814E-6A3338EB8ABD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11CB40C9-400A-4DC1-814E-6A3338EB8ABD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11CB40C9-400A-4DC1-814E-6A3338EB8ABD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11CB40C9-400A-4DC1-814E-6A3338EB8ABD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
