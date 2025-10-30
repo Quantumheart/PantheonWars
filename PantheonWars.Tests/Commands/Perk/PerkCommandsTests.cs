@@ -129,6 +129,7 @@ namespace PantheonWars.Tests.Commands.Perk
 
             Assert.Null(exception);
             mockChatCommands.Verify(c => c.Create("perks"), Times.Once);
+            mockSapi.Verify(c => c.Logger.Notification(LogMessageConstants.LogPerkCommandsRegistered), Times.Once);
         }
         
         [Fact]
@@ -186,5 +187,51 @@ namespace PantheonWars.Tests.Commands.Perk
             mockCommandBuilder.Verify(b => b.EndSubCommand(), Times.Exactly(7)); // 7 subcommands
         }
         
+        [Fact]
+        public void ShouldConfigureRequiresPlayerAndPrivilege()
+        {
+            // Arrange
+            var mockSapi = new Mock<ICoreServerAPI>();
+            var mockChatCommands = new Mock<IChatCommandApi>();
+            var mockCommandBuilder = new Mock<IChatCommand>();
+            var mockLogger = new Mock<ILogger>();
+
+            // Use real CommandArgumentParsers instead of mocking it
+            var realParsers = new CommandArgumentParsers(mockSapi.Object);
+            mockChatCommands.Setup(c => c.Parsers).Returns(realParsers);
+
+            // Setup fluent builder chain - all methods return the builder itself
+            mockCommandBuilder.Setup(b => b.WithDescription(It.IsAny<string>())).Returns(mockCommandBuilder.Object);
+            mockCommandBuilder.Setup(b => b.RequiresPlayer()).Returns(mockCommandBuilder.Object);
+            mockCommandBuilder.Setup(b => b.RequiresPrivilege(It.IsAny<string>())).Returns(mockCommandBuilder.Object);
+            mockCommandBuilder.Setup(b => b.BeginSubCommand(It.IsAny<string>())).Returns(mockCommandBuilder.Object);
+            mockCommandBuilder.Setup(b => b.WithArgs(It.IsAny<ICommandArgumentParser>()))
+                .Returns(mockCommandBuilder.Object);
+            mockCommandBuilder.Setup(b => b.HandleWith(It.IsAny<OnCommandDelegate>()))
+                .Returns(mockCommandBuilder.Object);
+            mockCommandBuilder.Setup(b => b.EndSubCommand()).Returns(mockCommandBuilder.Object);
+
+            mockChatCommands.Setup(c => c.Create(It.IsAny<string>())).Returns(mockCommandBuilder.Object);
+
+            mockSapi.Setup(s => s.ChatCommands).Returns(mockChatCommands.Object);
+            mockSapi.Setup(s => s.Logger).Returns(mockLogger.Object);
+
+            // Create PerkCommands with properly configured mock
+            var perkCommands = new PerkCommands(
+                mockSapi.Object,
+                _perkRegistry.Object,
+                _playerReligionDataManager.Object,
+                _religionManager.Object,
+                _perkEffectSystem.Object);
+
+            // Act
+            perkCommands.RegisterCommands();
+
+            // Assert - Verify that RequiresPlayer() and RequiresPrivilege() were called
+            mockCommandBuilder.Verify(b => b.RequiresPlayer(), Times.Once,
+                "RequiresPlayer() should be called once during command registration");
+            mockCommandBuilder.Verify(b => b.RequiresPrivilege(Privilege.chat), Times.Once,
+                "RequiresPrivilege(Privilege.chat) should be called once during command registration");
+        }
     }
 }

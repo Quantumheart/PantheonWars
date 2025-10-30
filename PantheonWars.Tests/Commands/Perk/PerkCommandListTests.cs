@@ -246,13 +246,13 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
                     Kind = PerkKind.Religion
                 }
             };
-            
+
             _playerReligionDataManager.Setup(prdm => prdm.GetOrCreatePlayerData(It.IsAny<string>()))
                 .Returns(playerData);
 
             _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Religion))
                 .Returns(religionPerks);
-            
+
             _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Player))
                 .Returns(new List<Models.Perk>());
 
@@ -276,5 +276,238 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
                 result.StatusMessage);
             Assert.Contains(FormatStringConstants.HeaderReligionPerks, result.StatusMessage);
             Assert.Contains("Sacred Flame [UNLOCKED]", result.StatusMessage);
+        }
+
+        [Fact]
+        public void OnPerksList_DisplaysFavorRankCorrectly()
+        {
+            // Arrange
+            var args = new TextCommandCallingArgs
+            {
+                Caller = new Caller()
+                {
+                    Player = new Mock<IServerPlayer>().Object
+                }
+            };
+
+            var playerData = new PlayerReligionData
+            {
+                ActiveDeity = DeityType.Aethra,
+                ReligionUID = "religion-uid"
+            };
+
+            var playerPerks = new List<Models.Perk>
+            {
+                new Models.Perk
+                {
+                    PerkId = "perk_zealot",
+                    Name = "Zealot Perk",
+                    Description = "A perk for zealots.",
+                    RequiredFavorRank = (int)FavorRank.Zealot,
+                    Kind = PerkKind.Player
+                }
+            };
+
+            _playerReligionDataManager.Setup(prdm => prdm.GetOrCreatePlayerData(It.IsAny<string>()))
+                .Returns(playerData);
+
+            _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Player))
+                .Returns(playerPerks);
+            _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Religion))
+                .Returns(new List<Models.Perk>());
+
+            // Act
+            var result = _sut.OnPerksList(args);
+
+            // Assert
+            Assert.Contains("Zealot Perk", result.StatusMessage);
+            Assert.Contains(string.Format(FormatStringConstants.FormatRequiredRank, FavorRank.Zealot), result.StatusMessage);
+        }
+
+        [Fact]
+        public void OnPerksList_DisplaysPrestigeRankCorrectly()
+        {
+            // Arrange
+            var args = new TextCommandCallingArgs
+            {
+                Caller = new Caller()
+                {
+                    Player = new Mock<IServerPlayer>().Object
+                }
+            };
+
+            var playerData = new PlayerReligionData
+            {
+                ActiveDeity = DeityType.Aethra,
+                ReligionUID = "religion-uid"
+            };
+
+            var religionPerks = new List<Models.Perk>
+            {
+                new Models.Perk
+                {
+                    PerkId = "perk_established",
+                    Name = "Established Perk",
+                    Description = "A perk for established religions.",
+                    RequiredPrestigeRank = (int)PrestigeRank.Established,
+                    Kind = PerkKind.Religion
+                }
+            };
+
+            _playerReligionDataManager.Setup(prdm => prdm.GetOrCreatePlayerData(It.IsAny<string>()))
+                .Returns(playerData);
+
+            _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Player))
+                .Returns(new List<Models.Perk>());
+            _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Religion))
+                .Returns(religionPerks);
+
+            var religion = new ReligionData()
+            {
+                ReligionUID = "religion-uid",
+                UnlockedPerks = new Dictionary<string, bool>()
+            };
+
+            _religionManager.Setup(rm => rm.GetReligion("religion-uid"))
+                .Returns(religion);
+
+            // Act
+            var result = _sut.OnPerksList(args);
+
+            // Assert
+            Assert.Contains("Established Perk", result.StatusMessage);
+            Assert.Contains(string.Format(FormatStringConstants.FormatRequiredRank, PrestigeRank.Established), result.StatusMessage);
+        }
+
+        [Fact]
+        public void OnPerksList_DisplaysPerkIdAndDescription()
+        {
+            // Arrange
+            var args = new TextCommandCallingArgs
+            {
+                Caller = new Caller()
+                {
+                    Player = new Mock<IServerPlayer>().Object
+                }
+            };
+
+            var playerData = new PlayerReligionData
+            {
+                ActiveDeity = DeityType.Aethra,
+                ReligionUID = "religion-uid"
+            };
+
+            var playerPerks = new List<Models.Perk>
+            {
+                new Models.Perk
+                {
+                    PerkId = "unique_perk_id_123",
+                    Name = "Test Perk",
+                    Description = "This is a unique test description.",
+                    RequiredFavorRank = (int)FavorRank.Initiate,
+                    Kind = PerkKind.Player
+                }
+            };
+
+            _playerReligionDataManager.Setup(prdm => prdm.GetOrCreatePlayerData(It.IsAny<string>()))
+                .Returns(playerData);
+
+            _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Player))
+                .Returns(playerPerks);
+            _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Religion))
+                .Returns(new List<Models.Perk>());
+
+            // Act
+            var result = _sut.OnPerksList(args);
+
+            // Assert
+            Assert.Contains("Test Perk", result.StatusMessage);
+            Assert.Contains(string.Format(FormatStringConstants.FormatPerkId, "unique_perk_id_123"), result.StatusMessage);
+            Assert.Contains(string.Format(FormatStringConstants.FormatDescription, "This is a unique test description."), result.StatusMessage);
+        }
+
+        [Fact]
+        public void OnPerksList_OutputFormatContainsAllSections()
+        {
+            // Arrange
+            var args = new TextCommandCallingArgs
+            {
+                Caller = new Caller()
+                {
+                    Player = new Mock<IServerPlayer>().Object
+                }
+            };
+
+            var playerData = new PlayerReligionData
+            {
+                ActiveDeity = DeityType.Aethra,
+                ReligionUID = "religion-uid"
+            };
+
+            var playerPerks = new List<Models.Perk>
+            {
+                new Models.Perk
+                {
+                    PerkId = "player_perk",
+                    Name = "Player Perk",
+                    Description = "Player description",
+                    RequiredFavorRank = (int)FavorRank.Disciple,
+                    Kind = PerkKind.Player
+                }
+            };
+
+            var religionPerks = new List<Models.Perk>
+            {
+                new Models.Perk
+                {
+                    PerkId = "religion_perk",
+                    Name = "Religion Perk",
+                    Description = "Religion description",
+                    RequiredPrestigeRank = (int)PrestigeRank.Fledgling,
+                    Kind = PerkKind.Religion
+                }
+            };
+
+            _playerReligionDataManager.Setup(prdm => prdm.GetOrCreatePlayerData(It.IsAny<string>()))
+                .Returns(playerData);
+
+            _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Player))
+                .Returns(playerPerks);
+            _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Religion))
+                .Returns(religionPerks);
+
+            var religion = new ReligionData()
+            {
+                ReligionUID = "religion-uid",
+                UnlockedPerks = new Dictionary<string, bool>()
+            };
+
+            _religionManager.Setup(rm => rm.GetReligion("religion-uid"))
+                .Returns(religion);
+
+            // Act
+            var result = _sut.OnPerksList(args);
+
+            // Assert - Verify all expected sections are present
+            var message = result.StatusMessage;
+
+            // Header
+            Assert.Contains(string.Format(FormatStringConstants.HeaderPerksForDeity, DeityType.Aethra), message);
+
+            // Player perks section
+            Assert.Contains(FormatStringConstants.HeaderPlayerPerks, message);
+            Assert.Contains("Player Perk", message);
+
+            // Religion perks section
+            Assert.Contains(FormatStringConstants.HeaderReligionPerks, message);
+            Assert.Contains("Religion Perk", message);
+
+            // Verify section ordering: header appears before player perks, player perks before religion perks
+            var headerIndex = message.IndexOf(string.Format(FormatStringConstants.HeaderPerksForDeity, DeityType.Aethra));
+            var playerPerksIndex = message.IndexOf(FormatStringConstants.HeaderPlayerPerks);
+            var religionPerksIndex = message.IndexOf(FormatStringConstants.HeaderReligionPerks);
+
+            Assert.True(headerIndex < playerPerksIndex, "Header should appear before player perks section");
+            Assert.True(playerPerksIndex < religionPerksIndex, "Player perks section should appear before religion perks section");
         }
 }
