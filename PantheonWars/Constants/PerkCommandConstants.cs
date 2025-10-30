@@ -1,7 +1,7 @@
 namespace PantheonWars.Constants;
 
 // Command and subcommand names
-public static class CommandConstants
+public static class PerkCommandConstants
 {
     public const string CommandName = "perks";
     public const string SubCommandList = "list";
@@ -21,7 +21,7 @@ public static class ParameterConstants
 }
 
 // Command descriptions
-public static class DescriptionConstants
+public static class PerkDescriptionConstants
 {
     public const string CommandDescription = "Manage perks and view perk information";
     public const string DescriptionList = "List all available perks for your deity";
@@ -72,7 +72,7 @@ public static class InfoMessageConstants
 // Log messages
 public static class LogMessageConstants
 {
-    public const string LogCommandsRegistered = "[PantheonWars] Perk commands registered";
+    public const string LogPerkCommandsRegistered = "[PantheonWars] Perk commands registered";
 }
 
 // Format strings

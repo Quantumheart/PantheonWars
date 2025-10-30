@@ -32,51 +32,50 @@ namespace PantheonWars.Commands
         /// </summary>
         public void RegisterCommands()
         {
-            var chatCommands = _sapi.ChatCommands;
-            var commandBuilder = chatCommands.Create(CommandConstants.CommandName);
+            _sapi.ChatCommands.Create(PerkCommandConstants.CommandName)
 
-            commandBuilder.WithDescription(DescriptionConstants.CommandDescription)
+            .WithDescription(PerkDescriptionConstants.CommandDescription)
                 .RequiresPlayer()
                 .RequiresPrivilege(Privilege.chat)
-                .BeginSubCommand(CommandConstants.SubCommandList)
-                .WithDescription(DescriptionConstants.DescriptionList)
+                .BeginSubCommand(PerkCommandConstants.SubCommandList)
+                .WithDescription(PerkDescriptionConstants.DescriptionList)
                 .HandleWith(OnPerksList)
-                .EndSubCommand();
+                .EndSubCommand()
 
-            commandBuilder.BeginSubCommand(CommandConstants.SubCommandPlayer)
-                .WithDescription(DescriptionConstants.DescriptionPlayer)
+                .BeginSubCommand(PerkCommandConstants.SubCommandPlayer)
+                .WithDescription(PerkDescriptionConstants.DescriptionPlayer)
                 .HandleWith(OnPerksPlayer)
-                .EndSubCommand();
+                .EndSubCommand()
 
-            commandBuilder.BeginSubCommand(CommandConstants.SubCommandReligion)
-                .WithDescription(DescriptionConstants.DescriptionReligion)
+                .BeginSubCommand(PerkCommandConstants.SubCommandReligion)
+                .WithDescription(PerkDescriptionConstants.DescriptionReligion)
                 .HandleWith(OnPerksReligion)
-                .EndSubCommand();
+                .EndSubCommand()
 
-            commandBuilder.BeginSubCommand(CommandConstants.SubCommandInfo)
-                .WithDescription(DescriptionConstants.DescriptionInfo)
+            .BeginSubCommand(PerkCommandConstants.SubCommandInfo)
+                .WithDescription(PerkDescriptionConstants.DescriptionInfo)
                 .WithArgs(_sapi.ChatCommands.Parsers.OptionalWord(ParameterConstants.ParamPerkId))
                 .HandleWith(OnPerksInfo)
-                .EndSubCommand();
+                .EndSubCommand()
 
-            commandBuilder.BeginSubCommand(CommandConstants.SubCommandTree)
-                .WithDescription(DescriptionConstants.DescriptionTree)
+            .BeginSubCommand(PerkCommandConstants.SubCommandTree)
+                .WithDescription(PerkDescriptionConstants.DescriptionTree)
                 .WithArgs(_sapi.ChatCommands.Parsers.Word(ParameterConstants.ParamType))
                 .HandleWith(OnPerksTree)
-                .EndSubCommand();
+                .EndSubCommand()
 
-            commandBuilder.BeginSubCommand(CommandConstants.SubCommandUnlock)
-                .WithDescription(DescriptionConstants.DescriptionUnlock)
+            .BeginSubCommand(PerkCommandConstants.SubCommandUnlock)
+                .WithDescription(PerkDescriptionConstants.DescriptionUnlock)
                 .WithArgs(_sapi.ChatCommands.Parsers.Word(ParameterConstants.ParamPerkId))
                 .HandleWith(OnPerksUnlock)
-                .EndSubCommand();
+                .EndSubCommand()
 
-            commandBuilder.BeginSubCommand(CommandConstants.SubCommandActive)
-                .WithDescription(DescriptionConstants.DescriptionActive)
+            .BeginSubCommand(PerkCommandConstants.SubCommandActive)
+                .WithDescription(PerkDescriptionConstants.DescriptionActive)
                 .HandleWith(OnPerksActive)
                 .EndSubCommand();
 
-            _sapi.Logger.Notification(LogMessageConstants.LogCommandsRegistered);
+            _sapi.Logger.Notification(LogMessageConstants.LogPerkCommandsRegistered);
         }
 
         /// <summary>
