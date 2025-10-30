@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using Vintagestory.API.Common;
 
 [assembly: ModInfo("Pantheon Wars", "pantheonwars",
@@ -5,3 +6,5 @@ using Vintagestory.API.Common;
     Version = "0.1.0",
     Authors = new[] { "Valinnar" },
     Side = "Universal")]
+
+[assembly: InternalsVisibleTo("PantheonWars.Tests")]
