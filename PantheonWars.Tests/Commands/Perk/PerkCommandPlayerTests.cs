@@ -11,9 +11,9 @@ using Vintagestory.API.Server;
 namespace PantheonWars.Tests.Commands.Perk;
 
 [ExcludeFromCodeCoverage]
-public class PerkCommandPlayer : PerkCommandsTestHelpers
+public class PerkCommandPlayerTests : PerkCommandsTestHelpers
 {
-    public PerkCommandPlayer()
+    public PerkCommandPlayerTests()
     {
         _sut = InitializeMocksAndSut();
     }
