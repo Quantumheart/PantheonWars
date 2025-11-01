@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using PantheonWars.Commands;
 using PantheonWars.GUI;
 using PantheonWars.Models;
@@ -39,6 +41,8 @@ namespace PantheonWars
         private ICoreClientAPI _capi;
         private FavorHudElement _favorHud;
         private DeityRegistry _clientDeityRegistry;
+        private ReligionManagementDialog _religionDialog;
+        private CreateReligionDialog _createReligionDialog;
         private IServerNetworkChannel _serverChannel;
         private IClientNetworkChannel _clientChannel;
 
@@ -51,7 +55,17 @@ namespace PantheonWars
 
             // Register network channel and message types
             api.Network.RegisterChannel(NETWORK_CHANNEL)
-                .RegisterMessageType<PlayerReligionDataPacket>();
+                .RegisterMessageType<PlayerReligionDataPacket>()
+                .RegisterMessageType<ReligionListRequestPacket>()
+                .RegisterMessageType<ReligionListResponsePacket>()
+                .RegisterMessageType<PlayerReligionInfoRequestPacket>()
+                .RegisterMessageType<PlayerReligionInfoResponsePacket>()
+                .RegisterMessageType<ReligionActionRequestPacket>()
+                .RegisterMessageType<ReligionActionResponsePacket>()
+                .RegisterMessageType<CreateReligionRequestPacket>()
+                .RegisterMessageType<CreateReligionResponsePacket>()
+                .RegisterMessageType<EditDescriptionRequestPacket>()
+                .RegisterMessageType<EditDescriptionResponsePacket>();
         }
 
         public override void StartServerSide(ICoreServerAPI api)
@@ -154,9 +168,19 @@ namespace PantheonWars
             _favorHud = new FavorHudElement(api);
             _favorHud.TryOpen();
 
+            // Initialize religion management dialog
+            _religionDialog = new ReligionManagementDialog(api, _clientChannel);
+
+            // Initialize create religion dialog
+            _createReligionDialog = new CreateReligionDialog(api, _clientChannel);
+
             // Register deity selection dialog opener command
             api.Input.RegisterHotKey("opendeityselection", "Open Deity Selection", GlKeys.K, HotkeyType.GUIOrOtherControls);
             api.Input.SetHotKeyHandler("opendeityselection", OpenDeitySelectionDialog);
+
+            // Register religion dialog opener command
+            api.Input.RegisterHotKey("openreligionmanagement", "Open Religion Management", GlKeys.R, HotkeyType.GUIOrOtherControls);
+            api.Input.SetHotKeyHandler("openreligionmanagement", OpenReligionManagementDialog);
 
             api.Logger.Notification("[PantheonWars] Client-side initialization complete");
         }
@@ -165,8 +189,12 @@ namespace PantheonWars
 
         private void SetupServerNetworking(ICoreServerAPI api)
         {
-            // Channel already registered and handlers set in StartServerSide
-            // Add any additional server-side packet handlers here if needed
+            // Register handlers for religion dialog packets
+            _serverChannel.SetMessageHandler<ReligionListRequestPacket>(OnReligionListRequest);
+            _serverChannel.SetMessageHandler<PlayerReligionInfoRequestPacket>(OnPlayerReligionInfoRequest);
+            _serverChannel.SetMessageHandler<ReligionActionRequestPacket>(OnReligionActionRequest);
+            _serverChannel.SetMessageHandler<CreateReligionRequestPacket>(OnCreateReligionRequest);
+            _serverChannel.SetMessageHandler<EditDescriptionRequestPacket>(OnEditDescriptionRequest);
         }
 
         private void OnServerMessageReceived(IServerPlayer fromPlayer, PlayerReligionDataPacket packet)
@@ -174,6 +202,308 @@ namespace PantheonWars
             // Handle any client-to-server messages here
             // Currently not used, but necessary for channel setup
             // Future implementation: Handle deity selection from client dialog
+        }
+
+        private void OnReligionListRequest(IServerPlayer fromPlayer, ReligionListRequestPacket packet)
+        {
+            var religions = string.IsNullOrEmpty(packet.FilterDeity)
+                ? _religionManager.GetAllReligions()
+                : _religionManager.GetReligionsByDeity(
+                    Enum.TryParse<DeityType>(packet.FilterDeity, out var deity) ? deity : DeityType.None);
+
+            var religionInfoList = religions.Select(r => new ReligionListResponsePacket.ReligionInfo
+            {
+                ReligionUID = r.ReligionUID,
+                ReligionName = r.ReligionName,
+                Deity = r.Deity.ToString(),
+                MemberCount = r.MemberUIDs.Count,
+                Prestige = r.Prestige,
+                PrestigeRank = r.PrestigeRank.ToString(),
+                IsPublic = r.IsPublic,
+                FounderUID = r.FounderUID,
+                Description = r.Description
+            }).ToList();
+
+            var response = new ReligionListResponsePacket(religionInfoList);
+            _serverChannel.SendPacket(response, fromPlayer);
+        }
+
+        private void OnPlayerReligionInfoRequest(IServerPlayer fromPlayer, PlayerReligionInfoRequestPacket packet)
+        {
+            var religion = _religionManager.GetPlayerReligion(fromPlayer.PlayerUID);
+            var response = new PlayerReligionInfoResponsePacket();
+
+            if (religion != null)
+            {
+                response.HasReligion = true;
+                response.ReligionUID = religion.ReligionUID;
+                response.ReligionName = religion.ReligionName;
+                response.Deity = religion.Deity.ToString();
+                response.FounderUID = religion.FounderUID;
+                response.Prestige = religion.Prestige;
+                response.PrestigeRank = religion.PrestigeRank.ToString();
+                response.IsPublic = religion.IsPublic;
+                response.Description = religion.Description;
+                response.IsFounder = religion.FounderUID == fromPlayer.PlayerUID;
+
+                // Build member list with player names and favor ranks
+                foreach (var memberUID in religion.MemberUIDs)
+                {
+                    var memberPlayerData = _playerReligionDataManager.GetOrCreatePlayerData(memberUID);
+                    var memberPlayer = _sapi.World.PlayerByUid(memberUID);
+                    var memberName = memberPlayer?.PlayerName ?? memberUID;
+
+                    response.Members.Add(new PlayerReligionInfoResponsePacket.MemberInfo
+                    {
+                        PlayerUID = memberUID,
+                        PlayerName = memberName,
+                        FavorRank = memberPlayerData.FavorRank.ToString(),
+                        Favor = memberPlayerData.Favor,
+                        IsFounder = memberUID == religion.FounderUID
+                    });
+                }
+            }
+            else
+            {
+                response.HasReligion = false;
+            }
+
+            _serverChannel.SendPacket(response, fromPlayer);
+        }
+
+        private void OnReligionActionRequest(IServerPlayer fromPlayer, ReligionActionRequestPacket packet)
+        {
+            string message;
+            bool success = false;
+
+            try
+            {
+                switch (packet.Action.ToLower())
+                {
+                    case "join":
+                        if (_religionManager.CanJoinReligion(packet.ReligionUID, fromPlayer.PlayerUID))
+                        {
+                            _playerReligionDataManager.JoinReligion(fromPlayer.PlayerUID, packet.ReligionUID);
+                            var religion = _religionManager.GetReligion(packet.ReligionUID);
+                            message = $"Successfully joined {religion?.ReligionName ?? "religion"}!";
+                            success = true;
+                            SendPlayerDataToClient(fromPlayer); // Refresh player's HUD
+                        }
+                        else
+                        {
+                            message = "Cannot join this religion. Check if you already have a religion or if it's invite-only.";
+                        }
+                        break;
+
+                    case "leave":
+                        var currentReligion = _religionManager.GetPlayerReligion(fromPlayer.PlayerUID);
+                        if (currentReligion != null)
+                        {
+                            _playerReligionDataManager.LeaveReligion(fromPlayer.PlayerUID);
+                            message = $"Left {currentReligion.ReligionName}.";
+                            success = true;
+                            SendPlayerDataToClient(fromPlayer); // Refresh player's HUD
+                        }
+                        else
+                        {
+                            message = "You are not in a religion.";
+                        }
+                        break;
+
+                    case "kick":
+                        var religionForKick = _religionManager.GetPlayerReligion(fromPlayer.PlayerUID);
+                        if (religionForKick != null && religionForKick.FounderUID == fromPlayer.PlayerUID)
+                        {
+                            if (packet.TargetPlayerUID != fromPlayer.PlayerUID)
+                            {
+                                _playerReligionDataManager.LeaveReligion(packet.TargetPlayerUID);
+                                message = $"Kicked player from religion.";
+                                success = true;
+
+                                // Notify kicked player if online
+                                var kickedPlayer = _sapi.World.PlayerByUid(packet.TargetPlayerUID) as IServerPlayer;
+                                if (kickedPlayer != null)
+                                {
+                                    kickedPlayer.SendMessage(0, $"You have been kicked from {religionForKick.ReligionName}.", EnumChatType.Notification);
+                                    SendPlayerDataToClient(kickedPlayer); // Refresh kicked player's HUD
+                                }
+                            }
+                            else
+                            {
+                                message = "You cannot kick yourself.";
+                            }
+                        }
+                        else
+                        {
+                            message = "Only the founder can kick members.";
+                        }
+                        break;
+
+                    case "invite":
+                        var religionForInvite = _religionManager.GetPlayerReligion(fromPlayer.PlayerUID);
+                        if (religionForInvite != null)
+                        {
+                            _religionManager.InvitePlayer(religionForInvite.ReligionUID, packet.TargetPlayerUID, fromPlayer.PlayerUID);
+                            message = "Invitation sent!";
+                            success = true;
+                        }
+                        else
+                        {
+                            message = "You are not in a religion.";
+                        }
+                        break;
+                    case "disband": 
+                        var religionForDisband = _religionManager.GetPlayerReligion(fromPlayer.PlayerUID);
+                        if (religionForDisband != null && religionForDisband.FounderUID == fromPlayer.PlayerUID)
+                        {
+                            string religionName = religionForDisband.ReligionName;
+
+                            // Remove all members
+                            var members = religionForDisband.MemberUIDs.ToList(); // Copy to avoid modification during iteration
+                            foreach (var memberUID in members)
+                            {
+                                _playerReligionDataManager.LeaveReligion(memberUID);
+
+                                // Notify member if online
+                                var memberPlayer = _sapi.World.PlayerByUid(memberUID) as IServerPlayer;
+                                if (memberPlayer != null && memberUID != fromPlayer.PlayerUID)
+                                {
+                                    memberPlayer.SendMessage(
+                                        Vintagestory.API.Config.GlobalConstants.GeneralChatGroup,
+                                        $"{religionName} has been disbanded by its founder",
+                                        EnumChatType.Notification
+                                    );
+                                }
+                            }
+
+                            // Delete the religion
+                            _religionManager.DeleteReligion(religionForDisband.ReligionUID, fromPlayer.PlayerUID);
+                                    
+                            message = $"Successfully disbanded {religionForDisband?.ReligionName ?? "religion"}!";
+
+                        }
+                        else
+                        {
+                            message = "Only the founder can kick members.";
+                        }
+                        break;
+
+                    default:
+                        message = $"Unknown action: {packet.Action}";
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                message = $"Error: {ex.Message}";
+                _sapi.Logger.Error($"[PantheonWars] Religion action error: {ex}");
+            }
+
+            var response = new ReligionActionResponsePacket(success, message, packet.Action);
+            _serverChannel.SendPacket(response, fromPlayer);
+        }
+
+        private void OnCreateReligionRequest(IServerPlayer fromPlayer, CreateReligionRequestPacket packet)
+        {
+            string message;
+            bool success = false;
+            string religionUID = "";
+
+            try
+            {
+                // Validate inputs
+                if (string.IsNullOrWhiteSpace(packet.ReligionName))
+                {
+                    message = "Religion name cannot be empty.";
+                }
+                else if (packet.ReligionName.Length < 3)
+                {
+                    message = "Religion name must be at least 3 characters.";
+                }
+                else if (packet.ReligionName.Length > 32)
+                {
+                    message = "Religion name must be 32 characters or less.";
+                }
+                else if (_religionManager.GetReligionByName(packet.ReligionName) != null)
+                {
+                    message = "A religion with that name already exists.";
+                }
+                else if (_religionManager.HasReligion(fromPlayer.PlayerUID))
+                {
+                    message = "You are already in a religion. Leave your current religion first.";
+                }
+                else if (!Enum.TryParse<DeityType>(packet.Deity, out var deity) || deity == DeityType.None)
+                {
+                    message = "Invalid deity selected.";
+                }
+                else
+                {
+                    // Create the religion
+                    var newReligion = _religionManager.CreateReligion(
+                        packet.ReligionName,
+                        deity,
+                        fromPlayer.PlayerUID,
+                        packet.IsPublic
+                    );
+
+                    // Auto-join the founder
+                    _playerReligionDataManager.JoinReligion(fromPlayer.PlayerUID, newReligion.ReligionUID);
+
+                    religionUID = newReligion.ReligionUID;
+                    message = $"Successfully created {packet.ReligionName}!";
+                    success = true;
+
+                    // Refresh player's HUD
+                    SendPlayerDataToClient(fromPlayer);
+                }
+            }
+            catch (Exception ex)
+            {
+                message = $"Error creating religion: {ex.Message}";
+                _sapi.Logger.Error($"[PantheonWars] Religion creation error: {ex}");
+            }
+
+            var response = new CreateReligionResponsePacket(success, message, religionUID);
+            _serverChannel.SendPacket(response, fromPlayer);
+        }
+
+        private void OnEditDescriptionRequest(IServerPlayer fromPlayer, EditDescriptionRequestPacket packet)
+        {
+            string message;
+            bool success = false;
+
+            try
+            {
+                var religion = _religionManager.GetReligion(packet.ReligionUID);
+
+                if (religion == null)
+                {
+                    message = "Religion not found.";
+                }
+                else if (religion.FounderUID != fromPlayer.PlayerUID)
+                {
+                    message = "Only the founder can edit the description.";
+                }
+                else if (packet.Description.Length > 200)
+                {
+                    message = "Description must be 200 characters or less.";
+                }
+                else
+                {
+                    // Update description
+                    religion.Description = packet.Description;
+                    message = "Description updated successfully!";
+                    success = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                message = $"Error updating description: {ex.Message}";
+                _sapi.Logger.Error($"[PantheonWars] Description edit error: {ex}");
+            }
+
+            var response = new EditDescriptionResponsePacket(success, message);
+            _serverChannel.SendPacket(response, fromPlayer);
         }
 
         private void OnPlayerJoin(IServerPlayer player)
@@ -211,6 +541,11 @@ namespace PantheonWars
         {
             _clientChannel = api.Network.GetChannel(NETWORK_CHANNEL);
             _clientChannel.SetMessageHandler<PlayerReligionDataPacket>(OnServerPlayerDataUpdate);
+            _clientChannel.SetMessageHandler<ReligionListResponsePacket>(OnReligionListResponse);
+            _clientChannel.SetMessageHandler<PlayerReligionInfoResponsePacket>(OnPlayerReligionInfoResponse);
+            _clientChannel.SetMessageHandler<ReligionActionResponsePacket>(OnReligionActionResponse);
+            _clientChannel.SetMessageHandler<CreateReligionResponsePacket>(OnCreateReligionResponse);
+            _clientChannel.SetMessageHandler<EditDescriptionResponsePacket>(OnEditDescriptionResponse);
             _clientChannel.RegisterMessageType(typeof(PlayerReligionDataPacket));
         }
 
@@ -248,6 +583,65 @@ namespace PantheonWars
             _capi.ShowChatMessage($"Selected deity: {selectedDeity}. Use /deity select {selectedDeity} to confirm.");
         }
 
+        private bool OpenReligionManagementDialog(KeyCombination key)
+        {
+            if (_capi == null || _religionDialog == null) return false;
+
+            _religionDialog.TryOpen();
+            return true;
+        }
+
+        private void OnReligionListResponse(ReligionListResponsePacket packet)
+        {
+            _religionDialog?.OnReligionListResponse(packet);
+        }
+
+        private void OnPlayerReligionInfoResponse(PlayerReligionInfoResponsePacket packet)
+        {
+            _religionDialog?.OnPlayerReligionInfoResponse(packet);
+        }
+
+        private void OnReligionActionResponse(ReligionActionResponsePacket packet)
+        {
+            _religionDialog?.OnActionResponse(packet);
+        }
+
+        private void OnCreateReligionResponse(CreateReligionResponsePacket packet)
+        {
+            if (packet.Success)
+            {
+                _capi?.ShowChatMessage(packet.Message);
+                // Refresh religion dialog data
+                if (_religionDialog != null && _religionDialog.IsOpened())
+                {
+                    _religionDialog.TryClose();
+                    _religionDialog.TryOpen(); // Reopen to refresh
+                }
+            }
+            else
+            {
+                _capi?.ShowChatMessage($"Error: {packet.Message}");
+            }
+        }
+
+        private void OnEditDescriptionResponse(EditDescriptionResponsePacket packet)
+        {
+            if (packet.Success)
+            {
+                _capi?.ShowChatMessage(packet.Message);
+                // Refresh religion dialog to show updated description
+                if (_religionDialog != null && _religionDialog.IsOpened())
+                {
+                    _religionDialog.TryClose();
+                    _religionDialog.TryOpen(); // Reopen to refresh
+                }
+            }
+            else
+            {
+                _capi?.ShowChatMessage($"Error: {packet.Message}");
+            }
+        }
+
         #endregion
 
         public override void Dispose()
@@ -256,6 +650,8 @@ namespace PantheonWars
 
             // Cleanup
             _favorHud?.Dispose();
+            _religionDialog?.Dispose();
+            _createReligionDialog?.Dispose();
         }
     }
 }
