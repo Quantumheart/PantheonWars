@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Moq;
 using PantheonWars.Constants;
 using PantheonWars.Data;
@@ -9,6 +10,7 @@ using Vintagestory.API.Server;
 
 namespace PantheonWars.Tests.Commands.Perk;
 
+[ExcludeFromCodeCoverage]
 public class PerkCommandListTests : PerkCommandsTestHelpers
 {
     public PerkCommandListTests()

@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Moq;
 using PantheonWars.Commands;
 using PantheonWars.Systems.Interfaces;
@@ -6,6 +7,7 @@ using Vintagestory.API.Server;
 
 namespace PantheonWars.Tests.Commands.Helpers;
 
+[ExcludeFromCodeCoverage]
 public class PerkCommandsTestHelpers
 {
     protected Mock<ICoreServerAPI> _mockSapi;
