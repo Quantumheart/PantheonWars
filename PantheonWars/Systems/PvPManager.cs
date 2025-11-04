@@ -1,6 +1,6 @@
 using System;
-using PantheonWars.Models;
 using PantheonWars.Models.Enum;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
@@ -10,22 +10,22 @@ namespace PantheonWars.Systems
     /// <summary>
     /// Manages PvP interactions for favor and prestige rewards (Phase 3.2)
     /// </summary>
-    public class PvPManager
+    public class PvPManager : IPvPManager
     {
         private const int BASE_FAVOR_REWARD = 10;
         private const int BASE_PRESTIGE_REWARD = 15;
         private const int DEATH_PENALTY_FAVOR = 5;
 
         private readonly ICoreServerAPI _sapi;
-        private readonly PlayerReligionDataManager _playerReligionDataManager;
-        private readonly ReligionManager _religionManager;
+        private readonly IPlayerReligionDataManager _playerReligionDataManager;
+        private readonly IReligionManager _religionManager;
         private readonly ReligionPrestigeManager _prestigeManager;
         private readonly DeityRegistry _deityRegistry;
 
         public PvPManager(
             ICoreServerAPI sapi,
-            PlayerReligionDataManager playerReligionDataManager,
-            ReligionManager religionManager,
+            IPlayerReligionDataManager playerReligionDataManager,
+            IReligionManager religionManager,
             ReligionPrestigeManager prestigeManager,
             DeityRegistry deityRegistry)
         {

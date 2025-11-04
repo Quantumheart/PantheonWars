@@ -1,9 +1,9 @@
 using System;
-using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
+using IPlayerDataManager = PantheonWars.Systems.Interfaces.IPlayerDataManager;
 
 namespace PantheonWars.Systems
 {
@@ -16,10 +16,10 @@ namespace PantheonWars.Systems
         private const int DEATH_PENALTY_FAVOR = 5;
 
         private readonly ICoreServerAPI _sapi;
-        private readonly PlayerDataManager _playerDataManager;
+        private readonly IPlayerDataManager _playerDataManager;
         private readonly DeityRegistry _deityRegistry;
 
-        public FavorSystem(ICoreServerAPI sapi, PlayerDataManager playerDataManager, DeityRegistry deityRegistry)
+        public FavorSystem(ICoreServerAPI sapi, IPlayerDataManager playerDataManager, DeityRegistry deityRegistry)
         {
             _sapi = sapi;
             _playerDataManager = playerDataManager;
@@ -42,7 +42,7 @@ namespace PantheonWars.Systems
         /// <summary>
         /// Handles player death and awards/penalizes favor
         /// </summary>
-        private void OnPlayerDeath(IServerPlayer deadPlayer, DamageSource damageSource)
+        internal void OnPlayerDeath(IServerPlayer deadPlayer, DamageSource damageSource)
         {
             // Check if death was caused by another player (PvP)
             if (damageSource?.SourceEntity is EntityPlayer attackerEntity)
@@ -60,7 +60,7 @@ namespace PantheonWars.Systems
         /// <summary>
         /// Processes PvP kill and awards favor to the attacker
         /// </summary>
-        private void ProcessPvPKill(IServerPlayer attacker, IServerPlayer victim)
+        internal void ProcessPvPKill(IServerPlayer attacker, IServerPlayer victim)
         {
             var attackerData = _playerDataManager.GetOrCreatePlayerData(attacker);
             var victimData = _playerDataManager.GetOrCreatePlayerData(victim);
@@ -107,7 +107,7 @@ namespace PantheonWars.Systems
         /// <summary>
         /// Applies death penalty to the player
         /// </summary>
-        private void ProcessDeathPenalty(IServerPlayer player)
+        internal void ProcessDeathPenalty(IServerPlayer player)
         {
             var playerData = _playerDataManager.GetOrCreatePlayerData(player);
 
@@ -133,7 +133,7 @@ namespace PantheonWars.Systems
         /// <summary>
         /// Calculates favor reward based on deity relationships
         /// </summary>
-        private int CalculateFavorReward(DeityType attackerDeity, DeityType victimDeity)
+        internal int CalculateFavorReward(DeityType attackerDeity, DeityType victimDeity)
         {
             int baseFavor = BASE_KILL_FAVOR;
 
