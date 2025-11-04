@@ -1,4 +1,4 @@
-namespace PantheonWars.Models
+namespace PantheonWars.Models.Enum
 {
     /// <summary>
     /// Type of perk - determines who benefits and unlock requirements

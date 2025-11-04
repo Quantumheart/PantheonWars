@@ -1,5 +1,6 @@
 using System;
 using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;

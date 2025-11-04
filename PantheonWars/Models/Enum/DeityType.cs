@@ -1,4 +1,4 @@
-namespace PantheonWars.Models
+namespace PantheonWars.Models.Enum
 {
     /// <summary>
     /// Enumeration of all deities in Pantheon Wars

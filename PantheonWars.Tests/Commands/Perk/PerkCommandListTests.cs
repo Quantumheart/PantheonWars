@@ -2,6 +2,7 @@ using Moq;
 using PantheonWars.Constants;
 using PantheonWars.Data;
 using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 using PantheonWars.Tests.Commands.Helpers;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;

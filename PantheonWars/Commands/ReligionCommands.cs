@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 using PantheonWars.Systems;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;

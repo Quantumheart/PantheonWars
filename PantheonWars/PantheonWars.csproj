@@ -63,4 +63,8 @@
     <ItemGroup>
       <Folder Include="assets\" />
     </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="VSImGui" Version="0.0.6"/>
+    </ItemGroup>
 </Project>

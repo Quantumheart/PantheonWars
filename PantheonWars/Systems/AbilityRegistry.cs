@@ -4,6 +4,7 @@ using System.Linq;
 using PantheonWars.Abilities.Khoras;
 using PantheonWars.Abilities.Lysa;
 using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 using Vintagestory.API.Common;
 
 namespace PantheonWars.Systems

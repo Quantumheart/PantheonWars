@@ -1,5 +1,6 @@
 using PantheonWars.GUI;
 using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 
 namespace PantheonWars.Tests.Systems
 {

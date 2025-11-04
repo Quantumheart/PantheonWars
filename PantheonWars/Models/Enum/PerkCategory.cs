@@ -1,4 +1,4 @@
-namespace PantheonWars.Models
+namespace PantheonWars.Models.Enum
 {
     /// <summary>
     /// Category of perk - used for organization and filtering

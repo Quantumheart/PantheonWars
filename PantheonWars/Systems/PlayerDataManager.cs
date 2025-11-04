@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using PantheonWars.Data;
 using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 using Vintagestory.API.Datastructures;

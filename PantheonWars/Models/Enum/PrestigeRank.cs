@@ -1,4 +1,4 @@
-namespace PantheonWars.Models
+namespace PantheonWars.Models.Enum
 {
     /// <summary>
     /// Religion prestige ranks - collective progression for the entire congregation

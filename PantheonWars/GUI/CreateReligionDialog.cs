@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 using PantheonWars.Network;
 using Vintagestory.API.Client;
 

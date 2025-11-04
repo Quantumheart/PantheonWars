@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using PantheonWars.Data;
 using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 
 namespace PantheonWars.Tests.Data
 {

@@ -3,6 +3,7 @@ using System.Linq;
 using PantheonWars.Commands;
 using PantheonWars.GUI;
 using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 using PantheonWars.Network;
 using PantheonWars.Systems;
 using PantheonWars.Systems.BuffSystem;

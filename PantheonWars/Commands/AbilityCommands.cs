@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Text;
+using PantheonWars.Models.Enum;
 using PantheonWars.Systems;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
@@ -81,7 +82,7 @@ namespace PantheonWars.Commands
             {
                 var cooldown = _abilitySystem.GetAbilityCooldown(player, ability.Id);
                 var cooldownStatus = cooldown > 0 ? $" [CD: {cooldown:F1}s]" : " [READY]";
-                var rankReq = ability.MinimumRank > Models.DevotionRank.Initiate ? $" (Requires: {ability.MinimumRank})" : "";
+                var rankReq = ability.MinimumRank > DevotionRank.Initiate ? $" (Requires: {ability.MinimumRank})" : "";
 
                 sb.AppendLine($"{ability.Name}{cooldownStatus} - {ability.FavorCost} favor{rankReq}");
                 sb.AppendLine($"  {ability.Description}");

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using PantheonWars.Data;
 using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 
 namespace PantheonWars.Systems.Interfaces;
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 using ProtoBuf;
 
 namespace PantheonWars.Data

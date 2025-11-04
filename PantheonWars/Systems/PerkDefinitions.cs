@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using PantheonWars.Constants;
 using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 using Vintagestory.GameContent;
 
 namespace PantheonWars.Systems

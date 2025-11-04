@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PantheonWars.Data;
 using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
 

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using PantheonWars.Models.Enum;
 
 namespace PantheonWars.Models
 {
