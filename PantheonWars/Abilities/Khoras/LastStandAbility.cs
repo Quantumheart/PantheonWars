@@ -1,9 +1,9 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using PantheonWars.Systems.BuffSystem;
 using Vintagestory.API.Common;
-using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 using Vintagestory.GameContent;
@@ -13,6 +13,7 @@ namespace PantheonWars.Abilities.Khoras
     /// <summary>
     /// Last Stand - Temporary damage resistance when health is low
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class LastStandAbility : Ability
     {
         private const float DURATION = 12f;

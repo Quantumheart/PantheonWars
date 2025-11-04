@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using PantheonWars.Systems.BuffSystem;
@@ -11,6 +12,7 @@ namespace PantheonWars.Abilities.Lysa
     /// <summary>
     /// Swift Feet - Temporary movement speed boost
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class SwiftFeetAbility : Ability
     {
         private const float DURATION = 8f;

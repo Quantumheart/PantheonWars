@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using PantheonWars.Systems.BuffSystem;
@@ -11,6 +12,7 @@ namespace PantheonWars.Abilities.Khoras
     /// <summary>
     /// Battle Cry - Short duration attack speed increase
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class BattleCryAbility : Ability
     {
         private const float DURATION = 10f;

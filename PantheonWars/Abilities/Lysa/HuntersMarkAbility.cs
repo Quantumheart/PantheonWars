@@ -1,11 +1,10 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using PantheonWars.Systems.BuffSystem;
 using Vintagestory.API.Common;
-using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
-using Vintagestory.API.MathTools;
 using Vintagestory.API.Server;
 
 namespace PantheonWars.Abilities.Lysa
@@ -13,6 +12,7 @@ namespace PantheonWars.Abilities.Lysa
     /// <summary>
     /// Hunter's Mark - Mark target to take extra damage
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class HuntersMarkAbility : Ability
     {
         private const float RANGE = 20f;

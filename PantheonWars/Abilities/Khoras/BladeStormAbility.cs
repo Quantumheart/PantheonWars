@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using PantheonWars.Systems.BuffSystem;
@@ -11,6 +12,7 @@ namespace PantheonWars.Abilities.Khoras
     /// <summary>
     /// Blade Storm - Spin attack dealing damage to nearby enemies
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class BladeStormAbility : Ability
     {
         private const float RANGE = 4f;

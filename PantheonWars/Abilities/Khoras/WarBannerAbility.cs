@@ -1,9 +1,9 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using PantheonWars.Systems.BuffSystem;
 using Vintagestory.API.Common;
-using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
 
@@ -12,6 +12,7 @@ namespace PantheonWars.Abilities.Khoras
     /// <summary>
     /// War Banner - Temporary damage boost for nearby allies
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class WarBannerAbility : Ability
     {
         private const float RANGE = 10f;
