@@ -85,7 +85,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
         _religionManager.Setup(r => r.GetReligion(It.IsAny<string>()))
             .Returns(religion);
         _perkEffectSystem.Setup(p => p.GetActivePerks(player.PlayerUID))
-            .Returns((new List<Models.Perk>(), new List<Models.Perk>()));
+            .Returns((new List<PantheonWars.Models.Perk>(), new List<PantheonWars.Models.Perk>()));
 
         // Act
         var result = _sut!.OnPerksReligion(args);
@@ -109,9 +109,9 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
             ReligionName = "Divine Order"
         };
 
-        var religionPerks = new List<Models.Perk>
+        var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk { Name = "Holy Blessing", Category = PerkCategory.Utility }
+            new PantheonWars.Models.Perk { Name = "Holy Blessing", Category = PerkCategory.Utility }
         };
 
         var args = new TextCommandCallingArgs
@@ -127,7 +127,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
         _religionManager.Setup(r => r.GetReligion(playerData.ReligionUID))
             .Returns(religion);
         _perkEffectSystem.Setup(p => p.GetActivePerks(player.PlayerUID))
-            .Returns((new List<Models.Perk>(), religionPerks));
+            .Returns((new List<PantheonWars.Models.Perk>(), religionPerks));
 
         // Act
         var result = _sut!.OnPerksReligion(args);
@@ -153,9 +153,9 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
             ReligionName = "Divine Order"
         };
 
-        var religionPerks = new List<Models.Perk>
+        var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 Name = "Holy Blessing",
                 Category = PerkCategory.Utility,
@@ -180,7 +180,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
         _religionManager.Setup(r => r.GetReligion(playerData.ReligionUID))
             .Returns(religion);
         _perkEffectSystem.Setup(p => p.GetActivePerks(player.PlayerUID))
-            .Returns((new List<Models.Perk>(), religionPerks));
+            .Returns((new List<PantheonWars.Models.Perk>(), religionPerks));
 
         // Act
         var result = _sut!.OnPerksReligion(args);
@@ -208,11 +208,11 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
             ReligionName = "Divine Order"
         };
 
-        var religionPerks = new List<Models.Perk>
+        var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk { Name = "Holy Blessing", Category = PerkCategory.Utility },
-            new Models.Perk { Name = "Sacred Shield", Category = PerkCategory.Defense },
-            new Models.Perk { Name = "Divine Wrath", Category = PerkCategory.Combat }
+            new PantheonWars.Models.Perk { Name = "Holy Blessing", Category = PerkCategory.Utility },
+            new PantheonWars.Models.Perk { Name = "Sacred Shield", Category = PerkCategory.Defense },
+            new PantheonWars.Models.Perk { Name = "Divine Wrath", Category = PerkCategory.Combat }
         };
 
         var args = new TextCommandCallingArgs
@@ -228,7 +228,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
         _religionManager.Setup(r => r.GetReligion(playerData.ReligionUID))
             .Returns(religion);
         _perkEffectSystem.Setup(p => p.GetActivePerks(player.PlayerUID))
-            .Returns((new List<Models.Perk>(), religionPerks));
+            .Returns((new List<PantheonWars.Models.Perk>(), religionPerks));
 
         // Act
         var result = _sut!.OnPerksReligion(args);
@@ -253,10 +253,10 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
             ReligionName = "Divine Order"
         };
 
-        var religionPerks = new List<Models.Perk>
+        var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk { Name = "Holy Blessing", Category = PerkCategory.Utility },
-            new Models.Perk { Name = "Sacred Shield", Category = PerkCategory.Defense }
+            new PantheonWars.Models.Perk { Name = "Holy Blessing", Category = PerkCategory.Utility },
+            new PantheonWars.Models.Perk { Name = "Sacred Shield", Category = PerkCategory.Defense }
         };
 
         var args = new TextCommandCallingArgs
@@ -272,7 +272,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
         _religionManager.Setup(r => r.GetReligion(playerData.ReligionUID))
             .Returns(religion);
         _perkEffectSystem.Setup(p => p.GetActivePerks(player.PlayerUID))
-            .Returns((new List<Models.Perk>(), religionPerks));
+            .Returns((new List<PantheonWars.Models.Perk>(), religionPerks));
 
         // Act
         var result = _sut!.OnPerksReligion(args);
@@ -298,9 +298,9 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
             ReligionName = "Divine Order"
         };
 
-        var religionPerks = new List<Models.Perk>
+        var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 Name = "Holy Blessing",
                 Category = PerkCategory.Utility,
@@ -321,7 +321,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
         _religionManager.Setup(r => r.GetReligion(playerData.ReligionUID))
             .Returns(religion);
         _perkEffectSystem.Setup(p => p.GetActivePerks(player.PlayerUID))
-            .Returns((new List<Models.Perk>(), religionPerks));
+            .Returns((new List<PantheonWars.Models.Perk>(), religionPerks));
 
         // Act
         var result = _sut!.OnPerksReligion(args);
@@ -346,9 +346,9 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
             ReligionName = "Divine Order"
         };
 
-        var religionPerks = new List<Models.Perk>
+        var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 Name = "Holy Blessing",
                 Category = PerkCategory.Utility,
@@ -373,7 +373,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
         _religionManager.Setup(r => r.GetReligion(playerData.ReligionUID))
             .Returns(religion);
         _perkEffectSystem.Setup(p => p.GetActivePerks(player.PlayerUID))
-            .Returns((new List<Models.Perk>(), religionPerks));
+            .Returns((new List<PantheonWars.Models.Perk>(), religionPerks));
 
         // Act
         var result = _sut!.OnPerksReligion(args);
@@ -398,9 +398,9 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
             ReligionName = "Divine Order"
         };
 
-        var religionPerks = new List<Models.Perk>
+        var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 Name = "Holy Blessing",
                 Category = PerkCategory.Utility,
@@ -425,7 +425,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
         _religionManager.Setup(r => r.GetReligion(playerData.ReligionUID))
             .Returns(religion);
         _perkEffectSystem.Setup(p => p.GetActivePerks(player.PlayerUID))
-            .Returns((new List<Models.Perk>(), religionPerks));
+            .Returns((new List<PantheonWars.Models.Perk>(), religionPerks));
 
         // Act
         var result = _sut!.OnPerksReligion(args);
@@ -450,9 +450,9 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
             ReligionName = "Divine Order"
         };
 
-        var religionPerks = new List<Models.Perk>
+        var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 Name = "Divine Empowerment",
                 Category = PerkCategory.Combat,
@@ -479,7 +479,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
         _religionManager.Setup(r => r.GetReligion(playerData.ReligionUID))
             .Returns(religion);
         _perkEffectSystem.Setup(p => p.GetActivePerks(player.PlayerUID))
-            .Returns((new List<Models.Perk>(), religionPerks));
+            .Returns((new List<PantheonWars.Models.Perk>(), religionPerks));
 
         // Act
         var result = _sut!.OnPerksReligion(args);
@@ -506,14 +506,14 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
             ReligionName = "Divine Order"
         };
 
-        var playerPerks = new List<Models.Perk>
+        var playerPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk { Name = "Personal Blessing", Category = PerkCategory.Utility }
+            new PantheonWars.Models.Perk { Name = "Personal Blessing", Category = PerkCategory.Utility }
         };
 
-        var religionPerks = new List<Models.Perk>
+        var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk { Name = "Holy Blessing", Category = PerkCategory.Utility }
+            new PantheonWars.Models.Perk { Name = "Holy Blessing", Category = PerkCategory.Utility }
         };
 
         var args = new TextCommandCallingArgs

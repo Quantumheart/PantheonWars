@@ -47,10 +47,10 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
         };
 
         _perkEffectSystem.Setup(p => p.GetActivePerks(It.IsAny<string>()))
-            .Returns(new ValueTuple<List<Models.Perk>, List<Models.Perk>>()
+            .Returns(new ValueTuple<List<PantheonWars.Models.Perk>, List<PantheonWars.Models.Perk>>()
             {
-                Item1 = new List<Models.Perk>(),
-                Item2 = new List<Models.Perk>()
+                Item1 = new List<PantheonWars.Models.Perk>(),
+                Item2 = new List<PantheonWars.Models.Perk>()
             }); // Simulate no perks
 
 
@@ -73,9 +73,9 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
             }
         };
 
-        var playerPerks = new List<Models.Perk>
+        var playerPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 Name = "Divine Strike",
                 Category = PerkCategory.Combat,
@@ -88,7 +88,7 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
         };
 
         _perkEffectSystem.Setup(p => p.GetActivePerks(It.IsAny<string>()))
-            .Returns(new ValueTuple<List<Models.Perk>, List<Models.Perk>>()
+            .Returns(new ValueTuple<List<PantheonWars.Models.Perk>, List<PantheonWars.Models.Perk>>()
             {
                 Item1 = playerPerks
             });
@@ -126,14 +126,14 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
             }
         };
 
-        var playerPerks = new List<Models.Perk>
+        var playerPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk { Name = "Divine Strike" },
-            new Models.Perk { Name = "Faithful Guardian" }
+            new PantheonWars.Models.Perk { Name = "Divine Strike" },
+            new PantheonWars.Models.Perk { Name = "Faithful Guardian" }
         };
 
         _perkEffectSystem.Setup(p => p.GetActivePerks(It.IsAny<string>()))
-            .Returns(new ValueTuple<List<Models.Perk>, List<Models.Perk>>()
+            .Returns(new ValueTuple<List<PantheonWars.Models.Perk>, List<PantheonWars.Models.Perk>>()
             {
                 Item1 = playerPerks
             });
@@ -166,14 +166,14 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
         };
 
         var mockPerkEffectSystem = new Mock<IPerkEffectSystem>();
-        var playerPerks = new List<Models.Perk>
+        var playerPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 Name = "Divine Strike",
                 Category = PerkCategory.Combat
             },
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 Name = "Faithful Guardian",
                 Category = PerkCategory.Defense
@@ -181,7 +181,7 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
         };
 
         mockPerkEffectSystem.Setup(p => p.GetActivePerks(It.IsAny<string>()))
-            .Returns(new ValueTuple<List<Models.Perk>, List<Models.Perk>>()
+            .Returns(new ValueTuple<List<PantheonWars.Models.Perk>, List<PantheonWars.Models.Perk>>()
             {
                 Item1 = playerPerks
             });
@@ -216,9 +216,9 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
             }
         };
 
-        var playerPerks = new List<Models.Perk>
+        var playerPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 Name = "Divine Strike",
                 Description = "Deals extra damage to enemies."
@@ -226,7 +226,7 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
         };
 
         _perkEffectSystem.Setup(p => p.GetActivePerks(It.IsAny<string>()))
-            .Returns(new ValueTuple<List<Models.Perk>, List<Models.Perk>>()
+            .Returns(new ValueTuple<List<PantheonWars.Models.Perk>, List<PantheonWars.Models.Perk>>()
             {
                 Item1 = playerPerks
             });
@@ -259,9 +259,9 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
             }
         };
 
-        var playerPerks = new List<Models.Perk>
+        var playerPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 Name = "Divine Strike",
                 Category = PerkCategory.Combat,
@@ -274,7 +274,7 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
         };
 
         _perkEffectSystem.Setup(p => p.GetActivePerks(It.IsAny<string>()))
-            .Returns(new ValueTuple<List<Models.Perk>, List<Models.Perk>>()
+            .Returns(new ValueTuple<List<PantheonWars.Models.Perk>, List<PantheonWars.Models.Perk>>()
             {
                 Item1 = playerPerks
             });
@@ -307,9 +307,9 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
         };
 
         var mockPerkEffectSystem = new Mock<IPerkEffectSystem>();
-        var playerPerks = new List<Models.Perk>
+        var playerPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 Name = "Faithful Guardian",
                 Category = PerkCategory.Defense,
@@ -318,7 +318,7 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
         };
 
         mockPerkEffectSystem.Setup(p => p.GetActivePerks(It.IsAny<string>()))
-            .Returns(new ValueTuple<List<Models.Perk>, List<Models.Perk>>()
+            .Returns(new ValueTuple<List<PantheonWars.Models.Perk>, List<PantheonWars.Models.Perk>>()
             {
                 Item1 = playerPerks
             });
@@ -350,9 +350,9 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
             }
         };
 
-        var playerPerks = new List<Models.Perk>
+        var playerPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 Name = "Divine Strike",
                 Category = PerkCategory.Combat,
@@ -366,7 +366,7 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
         };
 
         _perkEffectSystem.Setup(p => p.GetActivePerks(It.IsAny<string>()))
-            .Returns(new ValueTuple<List<Models.Perk>, List<Models.Perk>>()
+            .Returns(new ValueTuple<List<PantheonWars.Models.Perk>, List<PantheonWars.Models.Perk>>()
             {
                 Item1 = playerPerks
             });
@@ -395,14 +395,14 @@ public class PerkCommandPlayerTests : PerkCommandsTestHelpers
         };
 
 
-        var playerPerks = new List<Models.Perk>
+        var playerPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk { Name = "Divine Strike", Category = PerkCategory.Combat, Description = "Deals extra damage." }
+            new PantheonWars.Models.Perk { Name = "Divine Strike", Category = PerkCategory.Combat, Description = "Deals extra damage." }
         };
 
-        var religionPerks = new List<Models.Perk>
+        var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 Name = "Religion Boon", Category = PerkCategory.Utility, Description = "Bonus for religion members."
             }

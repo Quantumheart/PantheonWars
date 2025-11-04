@@ -33,9 +33,9 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
             ReligionUID = "religion-uid"
         };
 
-        var playerPerks = new List<Models.Perk>
+        var playerPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 PerkId = "perk1",
                 Name = "Divine Strike",
@@ -43,7 +43,7 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
                 RequiredFavorRank = (int)FavorRank.Initiate,
                 Kind = PerkKind.Player
             },
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 PerkId = "perk2",
                 Name = "Faithful Guardian",
@@ -58,9 +58,9 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
             playerData.UnlockPerk(playerPerk.PerkId);
         }
 
-        var religionPerks = new List<Models.Perk>
+        var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new Models.Perk
+            new PantheonWars.Models.Perk
             {
                 PerkId = "religionperk1",
                 Name = "Sacred Flame",
@@ -166,9 +166,9 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
                 .Returns(playerData);
 
             _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Player))
-                .Returns(new List<Models.Perk>());
+                .Returns(new List<PantheonWars.Models.Perk>());
             _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Religion))
-                .Returns(new List<Models.Perk>());
+                .Returns(new List<PantheonWars.Models.Perk>());
 
             // Act
             var result = _sut.OnPerksList(args);
@@ -203,9 +203,9 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
                 .Returns(playerData);
 
             _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Player))
-                .Returns(new List<Models.Perk>());
+                .Returns(new List<PantheonWars.Models.Perk>());
             _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Religion))
-                .Returns(new List<Models.Perk>());
+                .Returns(new List<PantheonWars.Models.Perk>());
 
             // Act
             var result = _sut.OnPerksList(args);
@@ -235,9 +235,9 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
                 ReligionUID = "religion-uid",
             };
 
-            var religionPerks = new List<Models.Perk>
+            var religionPerks = new List<PantheonWars.Models.Perk>
             {
-                new Models.Perk
+                new PantheonWars.Models.Perk
                 {
                     PerkId = "religionperk1",
                     Name = "Sacred Flame",
@@ -254,7 +254,7 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
                 .Returns(religionPerks);
 
             _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Player))
-                .Returns(new List<Models.Perk>());
+                .Returns(new List<PantheonWars.Models.Perk>());
 
             var religion = new ReligionData()
             {
@@ -296,9 +296,9 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
                 ReligionUID = "religion-uid"
             };
 
-            var playerPerks = new List<Models.Perk>
+            var playerPerks = new List<PantheonWars.Models.Perk>
             {
-                new Models.Perk
+                new PantheonWars.Models.Perk
                 {
                     PerkId = "perk_zealot",
                     Name = "Zealot Perk",
@@ -314,7 +314,7 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
             _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Player))
                 .Returns(playerPerks);
             _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Religion))
-                .Returns(new List<Models.Perk>());
+                .Returns(new List<PantheonWars.Models.Perk>());
 
             // Act
             var result = _sut.OnPerksList(args);
@@ -342,9 +342,9 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
                 ReligionUID = "religion-uid"
             };
 
-            var religionPerks = new List<Models.Perk>
+            var religionPerks = new List<PantheonWars.Models.Perk>
             {
-                new Models.Perk
+                new PantheonWars.Models.Perk
                 {
                     PerkId = "perk_established",
                     Name = "Established Perk",
@@ -358,7 +358,7 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
                 .Returns(playerData);
 
             _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Player))
-                .Returns(new List<Models.Perk>());
+                .Returns(new List<PantheonWars.Models.Perk>());
             _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Religion))
                 .Returns(religionPerks);
 
@@ -397,9 +397,9 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
                 ReligionUID = "religion-uid"
             };
 
-            var playerPerks = new List<Models.Perk>
+            var playerPerks = new List<PantheonWars.Models.Perk>
             {
-                new Models.Perk
+                new PantheonWars.Models.Perk
                 {
                     PerkId = "unique_perk_id_123",
                     Name = "Test Perk",
@@ -415,7 +415,7 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
             _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Player))
                 .Returns(playerPerks);
             _perkRegistry.Setup(pr => pr.GetPerksForDeity(DeityType.Aethra, PerkKind.Religion))
-                .Returns(new List<Models.Perk>());
+                .Returns(new List<PantheonWars.Models.Perk>());
 
             // Act
             var result = _sut.OnPerksList(args);
@@ -444,9 +444,9 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
                 ReligionUID = "religion-uid"
             };
 
-            var playerPerks = new List<Models.Perk>
+            var playerPerks = new List<PantheonWars.Models.Perk>
             {
-                new Models.Perk
+                new PantheonWars.Models.Perk
                 {
                     PerkId = "player_perk",
                     Name = "Player Perk",
@@ -456,9 +456,9 @@ public class PerkCommandListTests : PerkCommandsTestHelpers
                 }
             };
 
-            var religionPerks = new List<Models.Perk>
+            var religionPerks = new List<PantheonWars.Models.Perk>
             {
-                new Models.Perk
+                new PantheonWars.Models.Perk
                 {
                     PerkId = "religion_perk",
                     Name = "Religion Perk",
