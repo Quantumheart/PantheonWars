@@ -1,4 +1,3 @@
-using PantheonWars.Models;
 using ProtoBuf;
 
 namespace PantheonWars.Network;
@@ -6,22 +5,6 @@ namespace PantheonWars.Network;
 [ProtoContract]
 public class PlayerReligionDataPacket
 {
-    
-    [ProtoMember(1)]
-    public string ReligionName { get; set; } = string.Empty;
-    
-    [ProtoMember(2)]
-    public string Deity { get; set; } = string.Empty;
-    
-    [ProtoMember(3)]
-    public int Favor { get; set; }
-    [ProtoMember(4)]
-    public string FavorRank { get; set; }
-    [ProtoMember(5)]
-    public int Prestige { get; set; }
-    [ProtoMember(6)]
-    public string PrestigeRank { get; set; }
-
     public PlayerReligionDataPacket()
     {
     }
@@ -40,6 +23,17 @@ public class PlayerReligionDataPacket
         FavorRank = favorRank;
         Prestige = prestige;
         PrestigeRank = prestigeRank;
-        
     }
+
+    [ProtoMember(1)] public string ReligionName { get; set; } = string.Empty;
+
+    [ProtoMember(2)] public string Deity { get; set; } = string.Empty;
+
+    [ProtoMember(3)] public int Favor { get; set; }
+
+    [ProtoMember(4)] public string? FavorRank { get; set; }
+
+    [ProtoMember(5)] public int Prestige { get; set; }
+
+    [ProtoMember(6)] public string? PrestigeRank { get; set; }
 }

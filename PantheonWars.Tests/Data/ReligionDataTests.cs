@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using PantheonWars.Data;
-using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 
 namespace PantheonWars.Tests.Data;
@@ -111,7 +110,7 @@ public class ReligionDataTests
         religion.AddMember(memberUID);
 
         // Act
-        bool result = religion.RemoveMember(memberUID);
+        var result = religion.RemoveMember(memberUID);
 
         // Assert
         Assert.True(result);
@@ -126,7 +125,7 @@ public class ReligionDataTests
         var religion = new ReligionData("uid", "name", DeityType.Khoras, "founder");
 
         // Act
-        bool result = religion.RemoveMember("non-existing-member");
+        var result = religion.RemoveMember("non-existing-member");
 
         // Assert
         Assert.False(result);
@@ -142,7 +141,7 @@ public class ReligionDataTests
         religion.AddMember(memberUID);
 
         // Act
-        bool result = religion.IsMember(memberUID);
+        var result = religion.IsMember(memberUID);
 
         // Assert
         Assert.True(result);
@@ -155,7 +154,7 @@ public class ReligionDataTests
         var religion = new ReligionData("uid", "name", DeityType.Khoras, "founder");
 
         // Act
-        bool result = religion.IsMember("non-existing-member");
+        var result = religion.IsMember("non-existing-member");
 
         // Assert
         Assert.False(result);
@@ -169,7 +168,7 @@ public class ReligionDataTests
         var religion = new ReligionData("uid", "name", DeityType.Khoras, founderUID);
 
         // Act
-        bool result = religion.IsMember(founderUID);
+        var result = religion.IsMember(founderUID);
 
         // Assert
         Assert.True(result);
@@ -185,7 +184,7 @@ public class ReligionDataTests
         religion.AddMember("member-3");
 
         // Act
-        int count = religion.GetMemberCount();
+        var count = religion.GetMemberCount();
 
         // Assert
         Assert.Equal(4, count); // Founder + 3 members
@@ -203,7 +202,7 @@ public class ReligionDataTests
         var religion = new ReligionData("uid", "name", DeityType.Khoras, founderUID);
 
         // Act
-        bool result = religion.IsFounder(founderUID);
+        var result = religion.IsFounder(founderUID);
 
         // Assert
         Assert.True(result);
@@ -218,7 +217,7 @@ public class ReligionDataTests
         religion.AddMember(memberUID);
 
         // Act
-        bool result = religion.IsFounder(memberUID);
+        var result = religion.IsFounder(memberUID);
 
         // Assert
         Assert.False(result);
@@ -231,7 +230,7 @@ public class ReligionDataTests
         var religion = new ReligionData("uid", "name", DeityType.Khoras, "founder");
 
         // Act
-        bool result = religion.IsFounder("random-player");
+        var result = religion.IsFounder("random-player");
 
         // Assert
         Assert.False(result);
@@ -317,7 +316,8 @@ public class ReligionDataTests
     [InlineData(10000, PrestigeRank.Mythic)]
     [InlineData(15000, PrestigeRank.Mythic)]
     [InlineData(99999, PrestigeRank.Mythic)]
-    public void UpdatePrestigeRank_ShouldSetCorrectRankBasedOnTotalPrestige(int totalPrestige, PrestigeRank expectedRank)
+    public void UpdatePrestigeRank_ShouldSetCorrectRankBasedOnTotalPrestige(int totalPrestige,
+        PrestigeRank expectedRank)
     {
         // Arrange
         var religion = new ReligionData("uid", "name", DeityType.Khoras, "founder");
@@ -405,7 +405,7 @@ public class ReligionDataTests
         religion.UnlockPerk(perkId);
 
         // Act
-        bool result = religion.IsPerkUnlocked(perkId);
+        var result = religion.IsPerkUnlocked(perkId);
 
         // Assert
         Assert.True(result);
@@ -418,7 +418,7 @@ public class ReligionDataTests
         var religion = new ReligionData("uid", "name", DeityType.Khoras, "founder");
 
         // Act
-        bool result = religion.IsPerkUnlocked("non-existent-perk");
+        var result = religion.IsPerkUnlocked("non-existent-perk");
 
         // Assert
         Assert.False(result);
@@ -433,7 +433,7 @@ public class ReligionDataTests
         religion.UnlockedPerks[perkId] = false;
 
         // Act
-        bool result = religion.IsPerkUnlocked(perkId);
+        var result = religion.IsPerkUnlocked(perkId);
 
         // Assert
         Assert.False(result);

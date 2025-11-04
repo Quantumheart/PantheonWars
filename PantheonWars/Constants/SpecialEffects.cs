@@ -1,143 +1,142 @@
-namespace PantheonWars.Constants
+namespace PantheonWars.Constants;
+
+/// <summary>
+///     Constants for special effect identifiers used in perks.
+///     These effects are not yet implemented but are reserved for future functionality.
+///     Use these constants instead of hardcoded strings to prevent typos and enable refactoring.
+/// </summary>
+public static class SpecialEffects
 {
+    #region Damage Reduction Effects
+
     /// <summary>
-    /// Constants for special effect identifiers used in perks.
-    /// These effects are not yet implemented but are reserved for future functionality.
-    /// Use these constants instead of hardcoded strings to prevent typos and enable refactoring.
+    ///     Damage Reduction: Reduce incoming damage by 10%
     /// </summary>
-    public static class SpecialEffects
-    {
-        #region Lifesteal Effects
+    public const string DamageReduction10 = "damage_reduction_10";
 
-        /// <summary>
-        /// Lifesteal: Heal for 3% of damage dealt
-        /// </summary>
-        public const string Lifesteal3 = "lifesteal_3";
+    #endregion
 
-        /// <summary>
-        /// Lifesteal: Heal for 10% of damage dealt
-        /// </summary>
-        public const string Lifesteal10 = "lifesteal_10";
+    #region Lifesteal Effects
 
-        /// <summary>
-        /// Lifesteal: Heal for 15% of damage dealt
-        /// </summary>
-        public const string Lifesteal15 = "lifesteal_15";
+    /// <summary>
+    ///     Lifesteal: Heal for 3% of damage dealt
+    /// </summary>
+    public const string Lifesteal3 = "lifesteal_3";
 
-        /// <summary>
-        /// Lifesteal: Heal for 20% of damage dealt
-        /// </summary>
-        public const string Lifesteal20 = "lifesteal_20";
+    /// <summary>
+    ///     Lifesteal: Heal for 10% of damage dealt
+    /// </summary>
+    public const string Lifesteal10 = "lifesteal_10";
 
-        #endregion
+    /// <summary>
+    ///     Lifesteal: Heal for 15% of damage dealt
+    /// </summary>
+    public const string Lifesteal15 = "lifesteal_15";
 
-        #region Damage Over Time Effects
+    /// <summary>
+    ///     Lifesteal: Heal for 20% of damage dealt
+    /// </summary>
+    public const string Lifesteal20 = "lifesteal_20";
 
-        /// <summary>
-        /// Poison: Apply weak poison damage over time
-        /// </summary>
-        public const string PoisonDot = "poison_dot";
+    #endregion
 
-        /// <summary>
-        /// Strong Poison: Apply strong poison damage over time
-        /// </summary>
-        public const string PoisonDotStrong = "poison_dot_strong";
+    #region Damage Over Time Effects
 
-        /// <summary>
-        /// Plague Aura: Nearby enemies take periodic poison damage
-        /// </summary>
-        public const string PlagueAura = "plague_aura";
+    /// <summary>
+    ///     Poison: Apply weak poison damage over time
+    /// </summary>
+    public const string PoisonDot = "poison_dot";
 
-        #endregion
+    /// <summary>
+    ///     Strong Poison: Apply strong poison damage over time
+    /// </summary>
+    public const string PoisonDotStrong = "poison_dot_strong";
 
-        #region Critical Strike Effects
+    /// <summary>
+    ///     Plague Aura: Nearby enemies take periodic poison damage
+    /// </summary>
+    public const string PlagueAura = "plague_aura";
 
-        /// <summary>
-        /// Critical Chance: 10% chance to deal critical damage
-        /// </summary>
-        public const string CriticalChance10 = "critical_chance_10";
+    #endregion
 
-        /// <summary>
-        /// Critical Chance: 20% chance to deal critical damage
-        /// </summary>
-        public const string CriticalChance20 = "critical_chance_20";
+    #region Critical Strike Effects
 
-        /// <summary>
-        /// Headshot Bonus: Increased damage on headshots
-        /// </summary>
-        public const string HeadshotBonus = "headshot_bonus";
+    /// <summary>
+    ///     Critical Chance: 10% chance to deal critical damage
+    /// </summary>
+    public const string CriticalChance10 = "critical_chance_10";
 
-        #endregion
+    /// <summary>
+    ///     Critical Chance: 20% chance to deal critical damage
+    /// </summary>
+    public const string CriticalChance20 = "critical_chance_20";
 
-        #region Damage Reduction Effects
+    /// <summary>
+    ///     Headshot Bonus: Increased damage on headshots
+    /// </summary>
+    public const string HeadshotBonus = "headshot_bonus";
 
-        /// <summary>
-        /// Damage Reduction: Reduce incoming damage by 10%
-        /// </summary>
-        public const string DamageReduction10 = "damage_reduction_10";
+    #endregion
 
-        #endregion
+    #region Combat Special Effects
 
-        #region Combat Special Effects
+    /// <summary>
+    ///     AoE Cleave: Melee attacks hit multiple enemies in an arc
+    /// </summary>
+    public const string AoeCleave = "aoe_cleave";
 
-        /// <summary>
-        /// AoE Cleave: Melee attacks hit multiple enemies in an arc
-        /// </summary>
-        public const string AoeCleave = "aoe_cleave";
+    /// <summary>
+    ///     Multishot: Ranged attacks fire multiple projectiles
+    /// </summary>
+    public const string Multishot = "multishot";
 
-        /// <summary>
-        /// Multishot: Ranged attacks fire multiple projectiles
-        /// </summary>
-        public const string Multishot = "multishot";
+    /// <summary>
+    ///     Death Aura: Enemies near you take periodic damage
+    /// </summary>
+    public const string DeathAura = "death_aura";
 
-        /// <summary>
-        /// Death Aura: Enemies near you take periodic damage
-        /// </summary>
-        public const string DeathAura = "death_aura";
+    /// <summary>
+    ///     Execute Threshold: Instant kill enemies below 15% health
+    /// </summary>
+    public const string ExecuteThreshold = "execute_threshold";
 
-        /// <summary>
-        /// Execute Threshold: Instant kill enemies below 15% health
-        /// </summary>
-        public const string ExecuteThreshold = "execute_threshold";
+    #endregion
 
-        #endregion
+    #region Utility Effects
 
-        #region Utility Effects
+    /// <summary>
+    ///     Stealth Bonus: Reduced detection range by enemies
+    /// </summary>
+    public const string StealthBonus = "stealth_bonus";
 
-        /// <summary>
-        /// Stealth Bonus: Reduced detection range by enemies
-        /// </summary>
-        public const string StealthBonus = "stealth_bonus";
+    /// <summary>
+    ///     Tracking Vision: Enhanced ability to track animals and players
+    /// </summary>
+    public const string TrackingVision = "tracking_vision";
 
-        /// <summary>
-        /// Tracking Vision: Enhanced ability to track animals and players
-        /// </summary>
-        public const string TrackingVision = "tracking_vision";
+    /// <summary>
+    ///     Animal Companion: Summon a companion animal to fight alongside you
+    /// </summary>
+    public const string AnimalCompanion = "animal_companion";
 
-        /// <summary>
-        /// Animal Companion: Summon a companion animal to fight alongside you
-        /// </summary>
-        public const string AnimalCompanion = "animal_companion";
+    #endregion
 
-        #endregion
+    #region Religion-Specific Effects
 
-        #region Religion-Specific Effects
+    /// <summary>
+    ///     War Cry: Religion-wide buff that boosts damage for all members temporarily
+    /// </summary>
+    public const string ReligionWarCry = "religion_war_cry";
 
-        /// <summary>
-        /// War Cry: Religion-wide buff that boosts damage for all members temporarily
-        /// </summary>
-        public const string ReligionWarCry = "religion_war_cry";
+    /// <summary>
+    ///     Pack Tracking: Religion members can see each other's positions and tracks
+    /// </summary>
+    public const string ReligionPackTracking = "religion_pack_tracking";
 
-        /// <summary>
-        /// Pack Tracking: Religion members can see each other's positions and tracks
-        /// </summary>
-        public const string ReligionPackTracking = "religion_pack_tracking";
+    /// <summary>
+    ///     Death Mark: Religion-wide debuff on enemies that increases damage taken
+    /// </summary>
+    public const string ReligionDeathMark = "religion_death_mark";
 
-        /// <summary>
-        /// Death Mark: Religion-wide debuff on enemies that increases damage taken
-        /// </summary>
-        public const string ReligionDeathMark = "religion_death_mark";
-
-        #endregion
-    }
+    #endregion
 }

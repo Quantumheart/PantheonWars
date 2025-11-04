@@ -1,18 +1,17 @@
-namespace PantheonWars.Models.Enum
+namespace PantheonWars.Models.Enum;
+
+/// <summary>
+///     Type of perk - determines who benefits and unlock requirements
+/// </summary>
+public enum PerkKind
 {
     /// <summary>
-    /// Type of perk - determines who benefits and unlock requirements
+    ///     Personal perk - unlocked by player favor rank, benefits individual player
     /// </summary>
-    public enum PerkKind
-    {
-        /// <summary>
-        /// Personal perk - unlocked by player favor rank, benefits individual player
-        /// </summary>
-        Player,
+    Player,
 
-        /// <summary>
-        /// Religion perk - unlocked by religion prestige rank, benefits all congregation members
-        /// </summary>
-        Religion
-    }
+    /// <summary>
+    ///     Religion perk - unlocked by religion prestige rank, benefits all congregation members
+    /// </summary>
+    Religion
 }

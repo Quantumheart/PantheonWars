@@ -10,12 +10,12 @@ namespace PantheonWars.Tests.Commands.Helpers;
 [ExcludeFromCodeCoverage]
 public class PerkCommandsTestHelpers
 {
-    protected Mock<ICoreServerAPI> _mockSapi;
     protected Mock<ICoreAPI> _mockApi;
+    protected Mock<ICoreServerAPI> _mockSapi;
+    protected Mock<IPerkEffectSystem> _perkEffectSystem;
     protected Mock<IPerkRegistry> _perkRegistry;
     protected Mock<IPlayerReligionDataManager> _playerReligionDataManager;
     protected Mock<IReligionManager> _religionManager;
-    protected Mock<IPerkEffectSystem> _perkEffectSystem;
     protected PerkCommands? _sut;
 
     protected PerkCommandsTestHelpers()
@@ -32,10 +32,9 @@ public class PerkCommandsTestHelpers
         _playerReligionDataManager = new Mock<IPlayerReligionDataManager>();
         _perkEffectSystem = new Mock<IPerkEffectSystem>();
     }
-    
+
     protected PerkCommands InitializeMocksAndSut()
     {
-
         return new PerkCommands(
             _mockSapi.Object,
             _perkRegistry.Object,

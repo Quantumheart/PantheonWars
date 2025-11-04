@@ -1,12 +1,11 @@
-namespace PantheonWars.Models.Enum
+namespace PantheonWars.Models.Enum;
+
+/// <summary>
+///     Moral alignment of a deity
+/// </summary>
+public enum DeityAlignment
 {
-    /// <summary>
-    /// Moral alignment of a deity
-    /// </summary>
-    public enum DeityAlignment
-    {
-        Lawful,
-        Neutral,
-        Chaotic
-    }
+    Lawful,
+    Neutral,
+    Chaotic
 }

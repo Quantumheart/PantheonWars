@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using Moq;
 using PantheonWars.Constants;
 using PantheonWars.Data;
-using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using PantheonWars.Tests.Commands.Helpers;
 using Vintagestory.API.Common;
@@ -64,11 +63,11 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
     {
         // Arrange
         var player = new Mock<IServerPlayer>().Object;
-        var playerData = new PlayerReligionData()
+        var playerData = new PlayerReligionData
         {
             ReligionUID = "foobar"
         };
-        var religion = new ReligionData()
+        var religion = new ReligionData
         {
             ReligionUID = "foobar"
         };
@@ -100,11 +99,11 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
     {
         // Arrange
         var player = new Mock<IServerPlayer>().Object;
-        var playerData = new PlayerReligionData()
+        var playerData = new PlayerReligionData
         {
             ReligionUID = "test-religion-uid"
         };
-        var religion = new ReligionData()
+        var religion = new ReligionData
         {
             ReligionUID = "test-religion-uid",
             ReligionName = "Divine Order"
@@ -112,7 +111,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
 
         var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new PantheonWars.Models.Perk { Name = "Holy Blessing", Category = PerkCategory.Utility }
+            new() { Name = "Holy Blessing", Category = PerkCategory.Utility }
         };
 
         var args = new TextCommandCallingArgs
@@ -144,11 +143,11 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
     {
         // Arrange
         var player = new Mock<IServerPlayer>().Object;
-        var playerData = new PlayerReligionData()
+        var playerData = new PlayerReligionData
         {
             ReligionUID = "test-religion-uid"
         };
-        var religion = new ReligionData()
+        var religion = new ReligionData
         {
             ReligionUID = "test-religion-uid",
             ReligionName = "Divine Order"
@@ -156,7 +155,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
 
         var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new PantheonWars.Models.Perk
+            new()
             {
                 Name = "Holy Blessing",
                 Category = PerkCategory.Utility,
@@ -188,8 +187,11 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
 
         // Assert
         var message = result.StatusMessage;
-        Assert.Contains(string.Format(FormatStringConstants.FormatPerkNameCategory, "Holy Blessing", "Utility"), message);
-        Assert.Contains(string.Format(FormatStringConstants.FormatDescription, "Grants divine protection to all members."), message);
+        Assert.Contains(string.Format(FormatStringConstants.FormatPerkNameCategory, "Holy Blessing", "Utility"),
+            message);
+        Assert.Contains(
+            string.Format(FormatStringConstants.FormatDescription, "Grants divine protection to all members."),
+            message);
         Assert.Contains(FormatStringConstants.LabelEffectsForAllMembers, message);
         Assert.Contains(string.Format(FormatStringConstants.FormatStatModifier, "Defense", 15), message);
     }
@@ -199,11 +201,11 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
     {
         // Arrange
         var player = new Mock<IServerPlayer>().Object;
-        var playerData = new PlayerReligionData()
+        var playerData = new PlayerReligionData
         {
             ReligionUID = "test-religion-uid"
         };
-        var religion = new ReligionData()
+        var religion = new ReligionData
         {
             ReligionUID = "test-religion-uid",
             ReligionName = "Divine Order"
@@ -211,9 +213,9 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
 
         var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new PantheonWars.Models.Perk { Name = "Holy Blessing", Category = PerkCategory.Utility },
-            new PantheonWars.Models.Perk { Name = "Sacred Shield", Category = PerkCategory.Defense },
-            new PantheonWars.Models.Perk { Name = "Divine Wrath", Category = PerkCategory.Combat }
+            new() { Name = "Holy Blessing", Category = PerkCategory.Utility },
+            new() { Name = "Sacred Shield", Category = PerkCategory.Defense },
+            new() { Name = "Divine Wrath", Category = PerkCategory.Combat }
         };
 
         var args = new TextCommandCallingArgs
@@ -244,11 +246,11 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
     {
         // Arrange
         var player = new Mock<IServerPlayer>().Object;
-        var playerData = new PlayerReligionData()
+        var playerData = new PlayerReligionData
         {
             ReligionUID = "test-religion-uid"
         };
-        var religion = new ReligionData()
+        var religion = new ReligionData
         {
             ReligionUID = "test-religion-uid",
             ReligionName = "Divine Order"
@@ -256,8 +258,8 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
 
         var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new PantheonWars.Models.Perk { Name = "Holy Blessing", Category = PerkCategory.Utility },
-            new PantheonWars.Models.Perk { Name = "Sacred Shield", Category = PerkCategory.Defense }
+            new() { Name = "Holy Blessing", Category = PerkCategory.Utility },
+            new() { Name = "Sacred Shield", Category = PerkCategory.Defense }
         };
 
         var args = new TextCommandCallingArgs
@@ -280,8 +282,10 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
 
         // Assert
         var message = result.StatusMessage;
-        Assert.Contains(string.Format(FormatStringConstants.FormatPerkNameCategory, "Holy Blessing", "Utility"), message);
-        Assert.Contains(string.Format(FormatStringConstants.FormatPerkNameCategory, "Sacred Shield", "Defense"), message);
+        Assert.Contains(string.Format(FormatStringConstants.FormatPerkNameCategory, "Holy Blessing", "Utility"),
+            message);
+        Assert.Contains(string.Format(FormatStringConstants.FormatPerkNameCategory, "Sacred Shield", "Defense"),
+            message);
     }
 
     [Fact]
@@ -289,11 +293,11 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
     {
         // Arrange
         var player = new Mock<IServerPlayer>().Object;
-        var playerData = new PlayerReligionData()
+        var playerData = new PlayerReligionData
         {
             ReligionUID = "test-religion-uid"
         };
-        var religion = new ReligionData()
+        var religion = new ReligionData
         {
             ReligionUID = "test-religion-uid",
             ReligionName = "Divine Order"
@@ -301,7 +305,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
 
         var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new PantheonWars.Models.Perk
+            new()
             {
                 Name = "Holy Blessing",
                 Category = PerkCategory.Utility,
@@ -329,7 +333,9 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
 
         // Assert
         var message = result.StatusMessage;
-        Assert.Contains(string.Format(FormatStringConstants.FormatDescription, "Grants divine protection to all members."), message);
+        Assert.Contains(
+            string.Format(FormatStringConstants.FormatDescription, "Grants divine protection to all members."),
+            message);
     }
 
     [Fact]
@@ -337,11 +343,11 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
     {
         // Arrange
         var player = new Mock<IServerPlayer>().Object;
-        var playerData = new PlayerReligionData()
+        var playerData = new PlayerReligionData
         {
             ReligionUID = "test-religion-uid"
         };
-        var religion = new ReligionData()
+        var religion = new ReligionData
         {
             ReligionUID = "test-religion-uid",
             ReligionName = "Divine Order"
@@ -349,7 +355,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
 
         var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new PantheonWars.Models.Perk
+            new()
             {
                 Name = "Holy Blessing",
                 Category = PerkCategory.Utility,
@@ -389,11 +395,11 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
     {
         // Arrange
         var player = new Mock<IServerPlayer>().Object;
-        var playerData = new PlayerReligionData()
+        var playerData = new PlayerReligionData
         {
             ReligionUID = "test-religion-uid"
         };
-        var religion = new ReligionData()
+        var religion = new ReligionData
         {
             ReligionUID = "test-religion-uid",
             ReligionName = "Divine Order"
@@ -401,7 +407,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
 
         var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new PantheonWars.Models.Perk
+            new()
             {
                 Name = "Holy Blessing",
                 Category = PerkCategory.Utility,
@@ -441,11 +447,11 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
     {
         // Arrange
         var player = new Mock<IServerPlayer>().Object;
-        var playerData = new PlayerReligionData()
+        var playerData = new PlayerReligionData
         {
             ReligionUID = "test-religion-uid"
         };
-        var religion = new ReligionData()
+        var religion = new ReligionData
         {
             ReligionUID = "test-religion-uid",
             ReligionName = "Divine Order"
@@ -453,7 +459,7 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
 
         var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new PantheonWars.Models.Perk
+            new()
             {
                 Name = "Divine Empowerment",
                 Category = PerkCategory.Combat,
@@ -497,11 +503,11 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
     {
         // Arrange
         var player = new Mock<IServerPlayer>().Object;
-        var playerData = new PlayerReligionData()
+        var playerData = new PlayerReligionData
         {
             ReligionUID = "test-religion-uid"
         };
-        var religion = new ReligionData()
+        var religion = new ReligionData
         {
             ReligionUID = "test-religion-uid",
             ReligionName = "Divine Order"
@@ -509,12 +515,12 @@ public class PerkCommandReligionTests : PerkCommandsTestHelpers
 
         var playerPerks = new List<PantheonWars.Models.Perk>
         {
-            new PantheonWars.Models.Perk { Name = "Personal Blessing", Category = PerkCategory.Utility }
+            new() { Name = "Personal Blessing", Category = PerkCategory.Utility }
         };
 
         var religionPerks = new List<PantheonWars.Models.Perk>
         {
-            new PantheonWars.Models.Perk { Name = "Holy Blessing", Category = PerkCategory.Utility }
+            new() { Name = "Holy Blessing", Category = PerkCategory.Utility }
         };
 
         var args = new TextCommandCallingArgs

@@ -12,7 +12,7 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
         <Optimize>True</Optimize>
     </PropertyGroup>
-    
+
     <PropertyGroup>
         <PlatformTarget>AnyCPU</PlatformTarget>
         <GenerateDocumentationFile>false</GenerateDocumentationFile>
@@ -61,11 +61,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="assets\" />
+        <Folder Include="assets\"/>
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="VSImGui" Version="0.0.6"/>
-        <PackageReference Include="VSImGui_DebugTools" Version="0.0.6" />
+        <PackageReference Include="VSImGui_DebugTools" Version="0.0.6"/>
     </ItemGroup>
 </Project>
