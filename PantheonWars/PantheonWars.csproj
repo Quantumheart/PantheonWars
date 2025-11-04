@@ -66,5 +66,6 @@
 
     <ItemGroup>
         <PackageReference Include="VSImGui" Version="0.0.6"/>
+        <PackageReference Include="VSImGui_DebugTools" Version="0.0.6" />
     </ItemGroup>
 </Project>
