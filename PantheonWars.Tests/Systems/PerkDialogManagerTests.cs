@@ -1,9 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using PantheonWars.GUI;
-using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 
 namespace PantheonWars.Tests.Systems
 {
+    [ExcludeFromCodeCoverage]
     public class PerkDialogManagerTests
     {
         [Fact]

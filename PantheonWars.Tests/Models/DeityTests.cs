@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 
 namespace PantheonWars.Tests.Models
 {
+    [ExcludeFromCodeCoverage]
     public class DeityTests
     {
         [Fact]
