@@ -79,5 +79,22 @@ internal static class PerkUIRenderer
 
         // Update manager's hovering state
         manager.HoveringPerkId = hoveringPerkId;
+
+        // === 5. TOOLTIPS (Draw last, on top of everything) ===
+        if (!string.IsNullOrEmpty(hoveringPerkId))
+        {
+            var hoveredState = manager.GetPerkState(hoveringPerkId);
+            if (hoveredState != null)
+            {
+                var mousePos = ImGui.GetMousePos();
+                var viewport = ImGui.GetMainViewport();
+                TooltipRenderer.Draw(
+                    manager, api,
+                    hoveredState,
+                    mousePos.X, mousePos.Y,
+                    viewport.Size.X, viewport.Size.Y
+                );
+            }
+        }
     }
 }

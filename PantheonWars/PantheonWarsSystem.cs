@@ -66,7 +66,9 @@ public class PantheonWarsSystem : ModSystem
             .RegisterMessageType<CreateReligionRequestPacket>()
             .RegisterMessageType<CreateReligionResponsePacket>()
             .RegisterMessageType<EditDescriptionRequestPacket>()
-            .RegisterMessageType<EditDescriptionResponsePacket>();
+            .RegisterMessageType<EditDescriptionResponsePacket>()
+            .RegisterMessageType<PerkUnlockRequestPacket>()
+            .RegisterMessageType<PerkUnlockResponsePacket>();
     }
 
     public override void StartServerSide(ICoreServerAPI api)
@@ -212,6 +214,7 @@ public class PantheonWarsSystem : ModSystem
         _serverChannel.SetMessageHandler<ReligionActionRequestPacket>(OnReligionActionRequest);
         _serverChannel.SetMessageHandler<CreateReligionRequestPacket>(OnCreateReligionRequest);
         _serverChannel.SetMessageHandler<EditDescriptionRequestPacket>(OnEditDescriptionRequest);
+        _serverChannel.SetMessageHandler<PerkUnlockRequestPacket>(OnPerkUnlockRequest);
     }
 
     private void OnServerMessageReceived(IServerPlayer fromPlayer, PlayerReligionDataPacket packet)
@@ -530,6 +533,113 @@ public class PantheonWarsSystem : ModSystem
         _serverChannel!.SendPacket(response, fromPlayer);
     }
 
+    private void OnPerkUnlockRequest(IServerPlayer fromPlayer, PerkUnlockRequestPacket packet)
+    {
+        string errorMessage = "";
+        var success = false;
+        var perkName = "";
+
+        try
+        {
+            // Validate perk ID
+            if (string.IsNullOrEmpty(packet.PerkId))
+            {
+                errorMessage = "Invalid perk ID.";
+            }
+            else
+            {
+                var perk = _perkRegistry?.GetPerk(packet.PerkId);
+                if (perk == null)
+                {
+                    errorMessage = $"Perk '{packet.PerkId}' not found.";
+                }
+                else
+                {
+                    perkName = perk.Name;
+                    var playerData = _playerReligionDataManager?.GetOrCreatePlayerData(fromPlayer.PlayerUID);
+                    var religion = playerData?.ReligionUID != null
+                        ? _religionManager?.GetReligion(playerData.ReligionUID)
+                        : null;
+
+                    // Check if perk can be unlocked
+                    var (canUnlock, reason) = _perkRegistry.CanUnlockPerk(playerData!, religion, perk);
+                    if (!canUnlock)
+                    {
+                        errorMessage = reason;
+                    }
+                    else
+                    {
+                        // Unlock the perk
+                        if (perk.Kind == PerkKind.Player)
+                        {
+                            if (religion == null)
+                            {
+                                errorMessage = "You must be in a religion to unlock player perks.";
+                            }
+                            else
+                            {
+                                success = _playerReligionDataManager!.UnlockPlayerPerk(fromPlayer.PlayerUID, packet.PerkId);
+                                if (!success)
+                                {
+                                    errorMessage = "Failed to unlock perk.";
+                                }
+                                else
+                                {
+                                    _perkEffectSystem?.RefreshPlayerPerks(fromPlayer.PlayerUID);
+                                    _sapi!.Logger.Notification($"[PantheonWars] {fromPlayer.PlayerName} unlocked player perk: {perk.Name}");
+                                }
+                            }
+                        }
+                        else // Religion perk
+                        {
+                            if (religion == null)
+                            {
+                                errorMessage = "You must be in a religion to unlock religion perks.";
+                            }
+                            else if (!religion.IsFounder(fromPlayer.PlayerUID))
+                            {
+                                errorMessage = "Only the religion founder can unlock religion perks.";
+                            }
+                            else
+                            {
+                                religion.UnlockedPerks[packet.PerkId] = true;
+                                _perkEffectSystem?.RefreshReligionPerks(religion.ReligionUID);
+                                success = true;
+
+                                // Notify all religion members
+                                foreach (var memberUid in religion.MemberUIDs)
+                                {
+                                    var member = _sapi!.World.PlayerByUid(memberUid) as IServerPlayer;
+                                    member?.SendMessage(
+                                        GlobalConstants.GeneralChatGroup,
+                                        $"Religion perk unlocked: {perk.Name}",
+                                        EnumChatType.Notification
+                                    );
+                                }
+
+                                _sapi!.Logger.Notification($"[PantheonWars] {religion.ReligionName} unlocked religion perk: {perk.Name}");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error unlocking perk: {ex.Message}";
+            _sapi!.Logger.Error($"[PantheonWars] Perk unlock error: {ex}");
+        }
+
+        var response = new PerkUnlockResponsePacket
+        {
+            Success = success,
+            ErrorMessage = errorMessage,
+            PerkId = packet.PerkId,
+            PerkName = perkName
+        };
+        _serverChannel!.SendPacket(response, fromPlayer);
+    }
+
     private void OnPlayerJoin(IServerPlayer player)
     {
         // Send initial player data to client
@@ -569,6 +679,7 @@ public class PantheonWarsSystem : ModSystem
         _clientChannel.SetMessageHandler<ReligionActionResponsePacket>(OnReligionActionResponse);
         _clientChannel.SetMessageHandler<CreateReligionResponsePacket>(OnCreateReligionResponse);
         _clientChannel.SetMessageHandler<EditDescriptionResponsePacket>(OnEditDescriptionResponse);
+        _clientChannel.SetMessageHandler<PerkUnlockResponsePacket>(OnPerkUnlockResponse);
         _clientChannel.RegisterMessageType(typeof(PlayerReligionDataPacket));
     }
 
@@ -660,6 +771,20 @@ public class PantheonWarsSystem : ModSystem
         else
         {
             _capi?.ShowChatMessage($"Error: {packet.Message}");
+        }
+    }
+
+    private void OnPerkUnlockResponse(PerkUnlockResponsePacket packet)
+    {
+        if (packet.Success)
+        {
+            _capi?.ShowChatMessage($"Successfully unlocked: {packet.PerkName}!");
+            // TODO: Trigger perk dialog refresh (will be handled by PerkDialog in Phase 6)
+            // The perk dialog should listen for this event and update its state
+        }
+        else
+        {
+            _capi?.ShowChatMessage($"Failed to unlock perk: {packet.ErrorMessage}");
         }
     }
 

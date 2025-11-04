@@ -223,9 +223,52 @@ public class PerkDialog : ModSystem
             return CallbackGUIStatus.Closed;
         }
 
+        // Update glow animations for unlockable perks
+        UpdateGlowAnimations(deltaSeconds);
+
         DrawWindow();
 
         return CallbackGUIStatus.GrabMouse;
+    }
+
+    /// <summary>
+    ///     Update glow animations for unlockable perks (Phase 5)
+    ///     Pulsing effect: sine wave oscillation between 0.3 and 1.0
+    /// </summary>
+    private void UpdateGlowAnimations(float deltaSeconds)
+    {
+        if (_manager == null) return;
+
+        var elapsedSeconds = _stopwatch!.Elapsed.TotalSeconds;
+
+        // Animate player perks
+        foreach (var state in _manager.PlayerPerkStates.Values)
+        {
+            if (state.VisualState == PerkNodeVisualState.Unlockable)
+            {
+                // Sine wave: oscillates between -1 and 1, map to 0.3-1.0
+                var sineWave = (float)Math.Sin(elapsedSeconds * 2.0); // 2.0 = speed
+                state.GlowAlpha = 0.65f + sineWave * 0.35f; // Range: 0.3 to 1.0
+            }
+            else
+            {
+                state.GlowAlpha = 0f; // No glow for locked/unlocked perks
+            }
+        }
+
+        // Animate religion perks
+        foreach (var state in _manager.ReligionPerkStates.Values)
+        {
+            if (state.VisualState == PerkNodeVisualState.Unlockable)
+            {
+                var sineWave = (float)Math.Sin(elapsedSeconds * 2.0);
+                state.GlowAlpha = 0.65f + sineWave * 0.35f;
+            }
+            else
+            {
+                state.GlowAlpha = 0f;
+            }
+        }
     }
 
     /// <summary>
@@ -321,9 +364,18 @@ public class PerkDialog : ModSystem
         var selectedState = _manager!.GetSelectedPerkState();
         if (selectedState == null || !selectedState.CanUnlock || selectedState.IsUnlocked) return;
 
-        // TODO: Phase 6 - Send unlock request to server via PerkCommands
+        // Send perk unlock request to server
         _capi!.Logger.Debug($"[PantheonWars] Unlock requested: {selectedState.Perk.Name}");
-        _capi.ShowChatMessage($"Unlock perk: {selectedState.Perk.Name} (Phase 6: Connect to server)");
+
+        var channel = _capi.Network.GetChannel("pantheonwars");
+        var packet = new Network.PerkUnlockRequestPacket
+        {
+            PerkId = selectedState.Perk.PerkId
+        };
+        channel.SendPacket(packet);
+
+        // TODO: Add click sound in Phase 5 (optional)
+        // _capi.Gui.PlaySound(new AssetLocation("pantheonwars", "sounds/click.ogg"), false, 0.3f);
     }
 
     /// <summary>
