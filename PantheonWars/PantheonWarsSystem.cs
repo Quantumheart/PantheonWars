@@ -124,6 +124,9 @@ namespace PantheonWars
             _perkEffectSystem = new PerkEffectSystem(api, _perkRegistry, _playerReligionDataManager, _religionManager);
             _perkEffectSystem.Initialize();
 
+            // Connect perk systems to religion prestige manager
+            _religionPrestigeManager.SetPerkSystems(_perkRegistry, _perkEffectSystem);
+
             // Register commands
             _deityCommands = new DeityCommands(api, _deityRegistry, _playerDataManager);
             _deityCommands.RegisterCommands();

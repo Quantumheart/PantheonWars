@@ -14,6 +14,8 @@ namespace PantheonWars.Systems
     {
         private readonly ICoreServerAPI _sapi;
         private readonly ReligionManager _religionManager;
+        private PerkRegistry? _perkRegistry;
+        private PerkEffectSystem? _perkEffectSystem;
 
         // Prestige rank thresholds
         private const int FLEDGLING_THRESHOLD = 0;
@@ -26,6 +28,15 @@ namespace PantheonWars.Systems
         {
             _sapi = sapi;
             _religionManager = religionManager;
+        }
+
+        /// <summary>
+        /// Sets the perk registry and effect system (called after they're initialized)
+        /// </summary>
+        public void SetPerkSystems(PerkRegistry perkRegistry, PerkEffectSystem perkEffectSystem)
+        {
+            _perkRegistry = perkRegistry;
+            _perkEffectSystem = perkEffectSystem;
         }
 
         /// <summary>
@@ -112,8 +123,92 @@ namespace PantheonWars.Systems
         /// </summary>
         private void CheckForNewPerkUnlocks(string religionUID, PrestigeRank newRank)
         {
-            // This will be expanded in Phase 3.3 when perk registry is implemented
-            _sapi.Logger.Debug($"[PantheonWars] Checking for new perk unlocks for religion {religionUID} at rank {newRank}");
+            if (_perkRegistry == null)
+            {
+                _sapi.Logger.Debug($"[PantheonWars] Perk registry not yet initialized, skipping perk unlock check");
+                return;
+            }
+
+            var religion = _religionManager.GetReligion(religionUID);
+            if (religion == null)
+            {
+                return;
+            }
+
+            // Get all religion perks for this deity
+            var allReligionPerks = _perkRegistry.GetPerksForDeity(religion.Deity, PerkKind.Religion);
+
+            // Find perks that are now unlockable at the new rank
+            var newlyUnlockablePerks = new List<Perk>();
+
+            foreach (var perk in allReligionPerks)
+            {
+                // Check if this perk requires the new rank (or lower)
+                if ((int)perk.RequiredPrestigeRank > (int)newRank)
+                {
+                    continue; // Not yet available
+                }
+
+                // Check if already unlocked
+                if (religion.UnlockedPerks.TryGetValue(perk.PerkId, out bool unlocked) && unlocked)
+                {
+                    continue; // Already unlocked
+                }
+
+                // Check if all prerequisites are met
+                bool allPrereqsMet = true;
+                foreach (var prereqId in perk.PrerequisitePerks)
+                {
+                    if (!religion.UnlockedPerks.TryGetValue(prereqId, out bool prereqUnlocked) || !prereqUnlocked)
+                    {
+                        allPrereqsMet = false;
+                        break;
+                    }
+                }
+
+                if (allPrereqsMet)
+                {
+                    newlyUnlockablePerks.Add(perk);
+                }
+            }
+
+            // Notify religion members about newly unlockable perks
+            if (newlyUnlockablePerks.Count > 0)
+            {
+                NotifyNewPerksAvailable(religionUID, newlyUnlockablePerks);
+            }
+            else
+            {
+                _sapi.Logger.Debug($"[PantheonWars] No new perks available for religion {religion.ReligionName} at rank {newRank}");
+            }
+        }
+
+        /// <summary>
+        /// Notifies all religion members about newly available perks
+        /// </summary>
+        private void NotifyNewPerksAvailable(string religionUID, List<Perk> newPerks)
+        {
+            var religion = _religionManager.GetReligion(religionUID);
+            if (religion == null) return;
+
+            string perkNames = string.Join(", ", newPerks.Select(p => p.Name));
+            string message = $"New perks available for '{religion.ReligionName}': {perkNames}. Use /perks religion to view and /perks unlock to unlock them.";
+
+            // Notify all members
+            foreach (var memberUID in religion.MemberUIDs)
+            {
+                var player = _sapi.World.PlayerByUid(memberUID) as IServerPlayer;
+                if (player != null)
+                {
+                    player.SendMessage(
+                        Vintagestory.API.Config.GlobalConstants.GeneralChatGroup,
+                        message,
+                        Vintagestory.API.Common.EnumChatType.Notification
+                    );
+                }
+            }
+
+            _sapi.Logger.Notification($"[PantheonWars] Religion {religion.ReligionName} has {newPerks.Count} new perks available: {perkNames}");
         }
 
         /// <summary>
@@ -172,15 +267,23 @@ namespace PantheonWars.Systems
         }
 
         /// <summary>
-        /// Triggers perk effect refresh for all members (to be expanded in Phase 3.3)
+        /// Triggers perk effect refresh for all members
         /// </summary>
         private void TriggerPerkEffectRefresh(string religionUID)
         {
+            if (_perkEffectSystem == null)
+            {
+                _sapi.Logger.Debug($"[PantheonWars] Perk effect system not yet initialized, skipping perk refresh");
+                return;
+            }
+
             var religion = _religionManager.GetReligion(religionUID);
             if (religion == null) return;
 
             _sapi.Logger.Debug($"[PantheonWars] Triggering perk effect refresh for religion {religion.ReligionName}");
-            // This will be implemented in Phase 3.3 when PerkEffectSystem is created
+
+            // Refresh perk effects for all members
+            _perkEffectSystem.RefreshReligionPerks(religionUID);
         }
 
         /// <summary>

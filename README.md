@@ -1,10 +1,15 @@
 # Pantheon Wars
 
+**Version:** 1.0.0-beta
+**Status:** Release Candidate - Ready for Testing
+
 A religion-based PvP mod for Vintage Story featuring custom religions, competing deities, and passive perk trees with dual progression systems.
 
 ## Overview
 
 Pantheon Wars introduces a comprehensive religion and deity worship system where players create or join custom religions dedicated to different gods. Each religion unlocks unique passive perk trees that enhance all members. Players earn individual Divine Favor and collective Religion Prestige through PvP combat, unlocking powerful perks and progressing through dual ranking systems.
+
+**v1.0 ships with all 80 perks providing functional stat modifiers.** Advanced special effects (lifesteal, poison, critical strikes, etc.) will be added in post-launch patches based on player feedback.
 
 ## Features
 
@@ -28,13 +33,13 @@ Pantheon Wars introduces a comprehensive religion and deity worship system where
 - **Divine Favor Currency**: Earned through PvP combat with deity relationship multipliers
 - **Religion Prestige**: Earned collectively by all religion members through PvP
 
-### Perk System ⚠️ (60% Complete)
-- **160 Passive Perks**: 20 perks per deity (10 player perks + 10 religion perks)
+### Perk System ✅ (v1.0 - Stat Modifiers Complete)
+- **80 Passive Perks**: 10 perks per deity (6 player perks + 4 religion perks)
 - **Player Perks**: Unlock based on your individual Favor Rank
 - **Religion Perks**: Unlock based on your religion's Prestige Rank, benefit all members
-- **Stat Modifiers**: Perks provide passive bonuses (damage, defense, speed, etc.)
-- **Special Effects**: Unique deity-themed abilities (lifesteal, poison, critical hits, etc.)
-- **Perk Trees**: Visual progression with prerequisites and tiers
+- **Stat Modifiers**: Perks provide passive bonuses (damage, defense, speed, health, armor, etc.) ✅ **Working**
+- **Special Effects**: Unique deity-themed abilities (lifesteal, poison, critical hits, etc.) ⚠️ **Coming in patches**
+- **Perk Trees**: Command-based tree viewer with unlock status
 
 ### PvP Features ⚠️ (Planned - Phase 4)
 - **Divine Duels**: Formal 1v1 challenges with favor stakes
@@ -132,7 +137,11 @@ PantheonWars/
 │   │   └── PlayerReligionData.cs ✅ NEW
 │   ├── GUI/                # User interface
 │   │   ├── DeitySelectionDialog.cs (legacy)
-│   │   └── FavorHudElement.cs (updated for Phase 3)
+│   │   ├── FavorHudElement.cs (updated for Phase 3) ✅
+│   │   ├── ReligionManagementDialog.cs ✅ NEW
+│   │   ├── CreateReligionDialog.cs ✅ NEW
+│   │   ├── InvitePlayerDialog.cs ✅ NEW
+│   │   └── EditDescriptionDialog.cs ✅ NEW
 │   ├── Models/             # Core data models
 │   │   ├── Deity.cs
 │   │   ├── Perk.cs ✅ NEW
@@ -151,15 +160,15 @@ PantheonWars/
 │   │   ├── ReligionPrestigeManager.cs ✅ NEW
 │   │   ├── PerkRegistry.cs ✅ NEW
 │   │   ├── PerkEffectSystem.cs ✅ NEW
-│   │   ├── PerkDefinitions/ ✅ NEW
-│   │   │   ├── KhorasPerks.cs (War - complete)
-│   │   │   ├── LysaPerks.cs (Hunt - complete)
-│   │   │   ├── MorthenPerks.cs (Death - complete)
-│   │   │   ├── AethraPerks.cs (Light - stub)
-│   │   │   ├── UmbrosPerks.cs (Shadows - stub)
-│   │   │   ├── TharosPerks.cs (Storms - stub)
-│   │   │   ├── GaiaPerks.cs (Earth - stub)
-│   │   │   └── VexPerks.cs (Madness - stub)
+│   │   ├── PerkDefinitions.cs ✅ NEW (all 80 perks)
+│   │   │   ├── Khoras (War - 10 perks) ✅
+│   │   │   ├── Lysa (Hunt - 10 perks) ✅
+│   │   │   ├── Morthen (Death - 10 perks) ✅
+│   │   │   ├── Aethra (Light - 10 perks) ✅
+│   │   │   ├── Umbros (Shadows - 10 perks) ✅
+│   │   │   ├── Tharos (Storms - 10 perks) ✅
+│   │   │   ├── Gaia (Earth - 10 perks) ✅
+│   │   │   └── Vex (Madness - 10 perks) ✅
 │   │   ├── BuffSystem/ ✅ (Phase 2)
 │   │   │   ├── BuffManager.cs
 │   │   │   ├── ActiveEffect.cs
@@ -182,9 +191,25 @@ PantheonWars/
 └── README.md
 ```
 
-## Current Status (v0.3.5 - Phase 3.3 Complete)
+## Current Status (v1.0.0-beta - Release Candidate)
 
-The mod is currently **60% complete** with core religion and perk systems functional. Phase 3 is in active development.
+The mod is **ready for launch** with all core religion and perk systems functional. Stat modifiers work perfectly - special effects deferred to post-launch patches.
+
+### What's New in v1.0 🎉
+
+**Complete Systems:**
+- ✅ **All 8 Deities Implemented** - 80 perks fully defined across all deities
+- ✅ **Functional Stat Modifiers** - Perks apply real gameplay bonuses
+- ✅ **Religion Management GUI** - Full tabbed interface for managing religions
+- ✅ **Automatic Perk Notifications** - Religion members notified when new perks unlock
+- ✅ **Perk Effect Refresh** - Stat modifiers auto-apply on unlock
+- ✅ **All Core Systems Working** - Religion, progression, perks, persistence
+
+**Scope Reduction (160→80 Perks):**
+- Better balance with fewer perk interactions
+- Each perk is more meaningful and impactful
+- Achievable endgame (players can max out deity trees)
+- Faster development and iteration
 
 ### Implemented Systems ✅
 
@@ -195,51 +220,61 @@ The mod is currently **60% complete** with core religion and perk systems functi
 - ✅ Founder privileges (kick members, disband, set description)
 - ✅ 7-day switching cooldown with penalties
 - ✅ Full persistence and save/load
+- ✅ **Religion Management GUI** with tabbed interface
 
 **Dual Ranking System:**
 - ✅ Player Favor Ranks (Initiate → Avatar) - Individual progression
 - ✅ Religion Prestige Ranks (Fledgling → Mythic) - Collective progression
 - ✅ PvP favor/prestige earning with deity relationship multipliers
 - ✅ Rank-up notifications for both systems
+- ✅ **Automatic perk unlock notifications** on rank-up
 - ✅ Network synchronization
 
 **Perk System:**
-- ✅ PerkRegistry with 160 perks registered
+- ✅ PerkRegistry with **80/80 perks registered** (100% complete)
 - ✅ Perk unlock validation (rank requirements, prerequisites)
-- ✅ Stat modifier calculation and application (using VS Stats API)
+- ✅ **Stat modifier calculation and application working** (using VS Stats API)
 - ✅ Perk persistence across sessions
 - ✅ Combined player + religion perk effects
-- ⚠️ 60/160 perks fully designed (3/8 deities complete)
+- ✅ **All 8 deities fully designed** (10 perks each)
+- ⚠️ Special effect handlers deferred to post-launch patches
 
-**Available Deity Perk Trees (3/8):**
-- ✅ **Khoras (War)** - 20 perks (combat, damage, defense)
-- ✅ **Lysa (Hunt)** - 20 perks (tracking, ranged, mobility)
-- ✅ **Morthen (Death)** - 20 perks (life drain, DoT, survivability)
-- ⚠️ **Aethra (Light)** - Empty stub (20 perks needed)
-- ⚠️ **Umbros (Shadows)** - Empty stub (20 perks needed)
-- ⚠️ **Tharos (Storms)** - Empty stub (20 perks needed)
-- ⚠️ **Gaia (Earth)** - Empty stub (20 perks needed)
-- ⚠️ **Vex (Madness)** - Empty stub (20 perks needed)
+**Available Deity Perk Trees (8/8 - All Complete!):**
+- ✅ **Khoras (War)** - 10 perks (combat, damage, defense)
+- ✅ **Lysa (Hunt)** - 10 perks (tracking, precision, ranged combat)
+- ✅ **Morthen (Death)** - 10 perks (life drain, DoT, survivability)
+- ✅ **Aethra (Light)** - 10 perks (healing, shields, buffs)
+- ✅ **Umbros (Shadows)** - 10 perks (stealth, backstab, evasion)
+- ✅ **Tharos (Storms)** - 10 perks (AoE, lightning, mobility)
+- ✅ **Gaia (Earth)** - 10 perks (defense, regeneration, durability)
+- ✅ **Vex (Madness)** - 10 perks (chaos, confusion, unpredictability)
 
 **User Interface:**
 - ✅ Enhanced HUD showing religion, deity, both ranks, favor/prestige
+- ✅ **Religion Management GUI** - Create, browse, and manage religions
 - ✅ All commands functional (17 commands total)
-- ❌ Perk Tree Viewer GUI - Not yet implemented (Phase 3.5)
-- ❌ Religion Management GUI - Not yet implemented (Phase 3.5)
+- ⚠️ Visual Perk Tree Viewer - Optional feature, command-based tree works
 
 ## Development Roadmap
 
-**Current Status:** Phase 3 In Progress (60% Complete - Phase 3.3 Complete)
+**Current Status:** Phase 3 Nearly Complete (~90% - v1.0 Release Candidate)
 
 - ✅ **Phase 1:** Foundation (MVP) - Complete
 - ✅ **Phase 2:** Combat Integration - Complete
-- ⚠️ **Phase 3:** Religion-Based Deity System with Perk Trees - 60% Complete
+- ✅ **Phase 3:** Religion-Based Deity System with Perk Trees - 90% Complete (**v1.0 Release**)
   - ✅ Phase 3.1: Foundation (Religion system, commands, persistence)
   - ✅ Phase 3.2: Ranking Systems (Dual progression, PvP integration)
   - ✅ Phase 3.3: Perk System Core (Registry, stat application, commands)
-  - ⚠️ Phase 3.4: Deity Perk Trees (3/8 deities complete, 60/160 perks designed)
-  - 🔲 Phase 3.5: Integration & Polish (UI, migration, testing)
+  - ✅ Phase 3.4: Deity Perk Trees (8/8 deities complete, 80/80 perks defined)
+  - ⚠️ Phase 3.5: Integration & Polish (30% - Religion GUI done, perk tree viewer optional)
 - 🔲 **Phase 4:** Advanced Features - Planned (Divine duels, crusades, relics, apostates)
+
+**Post-Launch Roadmap:**
+- **Patch 1.1:** Core special effects (critical strikes, damage reduction, lifesteal)
+- **Patch 1.2:** Advanced combat effects (AoE cleave, execute threshold, headshot bonus)
+- **Patch 1.3:** Tactical effects (stealth, tracking vision, multishot)
+- **Patch 1.4:** Status effects (poison DoT, plague aura, death aura, companions)
+- **Patch 1.5+:** Visual perk tree GUI, balance tuning, community feedback
 
 For detailed phase breakdowns, tasks, and timeline, see the **[Implementation Guide](docs/implementation_guide.md)**.
 
@@ -266,16 +301,37 @@ For detailed phase breakdowns, tasks, and timeline, see the **[Implementation Gu
 - `/perks unlock <perkid>` - Unlock a perk (if requirements met)
 - `/perks active` - Show all active perks affecting you
 
-**Legacy Commands (Phase 1-2 - Will be removed in Phase 3.5):**
+**Legacy Commands (Phase 1-2 - Will be removed in future patch):**
 - `/deity list` - Show all available deities
 - `/deity info <deity>` - Get detailed deity information
 - `/deity status` - View your current deity status
 - `/favor` - Check your current divine favor
 - `/ability list` - Show available abilities (deprecated)
 
+## Known Limitations (v1.0)
+
+**Deferred to Post-Launch Patches:**
+- **Special Effects:** Perks that reference special effects (lifesteal, poison_dot, critical_strike, etc.) currently provide only their stat modifiers. The special mechanics will be added incrementally in patches 1.1-1.4.
+- **Visual Perk Tree:** No GUI perk tree viewer yet. Use `/perks tree` command for text-based view.
+- **Old Ability System:** Phase 1-2 ability system still exists but will be removed in a future patch.
+
+**What Works Perfectly:**
+- All stat modifier bonuses (damage, health, armor, speed, attack speed, walk speed, etc.)
+- Religion creation, management, and progression
+- Perk unlocking and persistence
+- Dual ranking system (Favor + Prestige)
+- All 17 commands
+- Religion Management GUI
+
 ## Contributing
 
-This mod is currently in early development. Contributions, suggestions, and feedback are welcome!
+**v1.0 is now in beta testing!** We're looking for:
+- **Testers:** Try the mod and report bugs or balance issues
+- **Feedback:** Which special effects should be prioritized in patches?
+- **Balance Data:** How do the stat modifiers feel in actual gameplay?
+- **Feature Requests:** What would make the religion system more engaging?
+
+Contributions, suggestions, and feedback are welcome! Please open an issue or discussion on the repository.
 
 ## License
 

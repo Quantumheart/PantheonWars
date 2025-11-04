@@ -1,6 +1,123 @@
 ### Scope Reduction Strategy for PantheonWars
 
-Good instinct - **160 perks is excessive** for a mod of this scale. Let me provide a concrete reduction plan.
+This document tracks two major scope reductions made to ensure timely delivery:
+
+1. **Perk Count Reduction (Phase 1):** 160 perks → 80 perks (50% reduction)
+2. **Phased Feature Release (Phase 2):** Stat modifiers in v1.0, special effects in post-launch patches
+
+---
+
+## 🚀 Phase 2 Scope Reduction: Phased Feature Release (Nov 2025)
+
+### **Decision: Ship v1.0 with Stat Modifiers Only**
+
+After completing all 80 perk definitions, analysis showed that special effects handlers account for ~8-10 hours of the remaining ~22-28 hours to completion. By deferring special effects to post-launch patches, we can ship sooner and iterate based on player feedback.
+
+### **v1.0 Launch Scope (Shippable in ~10-12 hours)**
+
+**What Ships:**
+- ✅ All 8 deities with unique identities
+- ✅ All 80 perks fully defined and registered
+- ✅ **Functional stat modifiers** (damage, health, speed, armor, attack speed, walk speed, etc.)
+- ✅ Complete religion system (create, join, leave, manage)
+- ✅ Dual ranking progression (Favor + Prestige)
+- ✅ Perk unlocking, persistence, and validation
+- ✅ All 17 commands (10 religion + 7 perk)
+- ✅ Religion Management GUI with tabbed interface
+- ✅ HUD displaying ranks, favor, prestige, and religion info
+- ✅ Network synchronization (6 packet types)
+- ⚠️ **NO special effects handlers** (deferred to patches)
+
+**What Players Get:**
+- Choose from 8 unique deity paths with different themes
+- Measurable power increase from stat-based perks
+- Working religion competition and PvP rewards
+- Visible progression through dual ranking systems
+- 80 perks to unlock across player and religion trees
+
+**Deferred to Post-Launch:**
+- Special effect handlers (lifesteal, poison_dot, critical_strike, stealth_bonus, etc.)
+- Perk Tree Viewer GUI (optional - command-based tree works)
+- Old ability system removal (low priority cleanup)
+- Advanced data migration (can ship with basic migration)
+
+### **Post-Launch Patch Roadmap**
+
+**Patch 1.1 - "Core Combat Effects" (~3-4 hours)**
+- `CriticalChance10` / `CriticalChance20` - Simple probability-based damage multiplier
+- `DamageReduction10` - Reduce incoming damage by percentage
+- `Lifesteal3` / `Lifesteal10` - Basic life drain on damage dealt
+
+**Patch 1.2 - "Advanced Combat" (~2-3 hours)**
+- `AoeCleave` - Melee attacks hit multiple enemies
+- `ExecuteThreshold` - Bonus damage to low-health enemies
+- `HeadshotBonus` - Bonus damage for headshots/critical hits
+
+**Patch 1.3 - "Tactical Effects" (~3-4 hours)**
+- `StealthBonus` - Reduced detection range
+- `TrackingVision` - Enhanced enemy visibility
+- `Multishot` - Ranged attacks hit multiple targets
+
+**Patch 1.4 - "Status Effects" (~3-4 hours)**
+- `PoisonDot` - Damage over time
+- `PlagueAura` - Spread poison to nearby enemies
+- `DeathAura` - Area damage aura
+- `AnimalCompanion` - Summoned helper entity
+
+### **Benefits of Phased Approach**
+
+**Development:**
+- ✅ Ship 50% faster (~10-12 hours vs ~22-28 hours)
+- ✅ Avoid scope creep and feature bloat
+- ✅ Focus on core systems first
+- ✅ Test infrastructure before complex features
+
+**Design:**
+- ✅ Iterate based on actual player feedback
+- ✅ Prioritize effects players actually want
+- ✅ Balance based on real gameplay data
+- ✅ Avoid wasted work on unpopular features
+
+**Player Experience:**
+- ✅ Get content sooner
+- ✅ See regular updates and improvements
+- ✅ Influence development direction through feedback
+- ✅ Build community engagement
+
+### **Why This Works**
+
+1. **Stat modifiers are already functional** - The core perk system works perfectly
+2. **Special effects are isolated** - They're defined but not implemented, easy to add later
+3. **Players won't miss them yet** - Stat boosts provide clear, immediate value
+4. **Iterative is better** - Launch, gather feedback, iterate
+5. **Time-to-market matters** - Ship sooner, improve based on real usage
+
+### **What This Doesn't Compromise**
+
+- ❌ Core gameplay loop - Religion/perk progression works
+- ❌ Player choice - All 8 deities and 80 perks available
+- ❌ Balance - Stat modifiers can be tuned without special effects
+- ❌ Content volume - 100% of perks ship, just simpler mechanics initially
+- ❌ Future expansion - Special effects add easily in patches
+
+### **Time Savings Analysis**
+
+**Original Plan (with special effects in v1.0):**
+- Special effect handlers: ~8-10 hours
+- Balance testing with effects: ~2-3 hours
+- Bug fixing for effects: ~2-3 hours
+- **Total: ~12-16 hours**
+
+**Phased Plan (defer to patches):**
+- Ship v1.0 immediately: ~10-12 hours
+- Add effects incrementally over 4 patches: ~11-15 hours total (spread over weeks/months)
+- **Immediate savings: Ship 12-16 hours sooner**
+
+---
+
+## 📊 Phase 1 Scope Reduction: 160 Perks → 80 Perks (Original Reduction)
+
+Good instinct - **160 perks is excessive** for a mod of this scale. Below is the original reduction plan.
 
 ---
 
