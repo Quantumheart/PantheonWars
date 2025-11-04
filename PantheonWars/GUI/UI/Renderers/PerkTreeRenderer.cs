@@ -167,15 +167,17 @@ internal static class PerkTreeRenderer
         ImGui.BeginChild(childId, new Vector2(width, height), true,
             ImGuiWindowFlags.HorizontalScrollbar);
 
-        // Get mouse position relative to this panel
+        // Get mouse position (in screen space)
         var mousePos = ImGui.GetMousePos();
         var childWindowPos = ImGui.GetWindowPos(); // Position of child window in screen space
-        var localMouseX = mousePos.X - childWindowPos.X;
-        var localMouseY = mousePos.Y - childWindowPos.Y;
 
         // Get scroll position
         scrollX = ImGui.GetScrollX();
         scrollY = ImGui.GetScrollY();
+
+        // Calculate drawing offset (accounts for scroll)
+        var drawOffsetX = childWindowPos.X + padding - scrollX;
+        var drawOffsetY = childWindowPos.Y + padding - scrollY;
 
         // Draw connection lines first (behind nodes)
         foreach (var state in perkStates.Values)
@@ -184,7 +186,7 @@ internal static class PerkTreeRenderer
                     if (perkStates.TryGetValue(prereqId, out var prereqState))
                         PerkNodeRenderer.DrawConnectionLine(
                             prereqState, state,
-                            childWindowPos.X + padding, childWindowPos.Y + padding
+                            drawOffsetX, drawOffsetY
                         );
 
         // Draw perk nodes
@@ -193,8 +195,8 @@ internal static class PerkTreeRenderer
             var isSelected = manager.SelectedPerkId == state.Perk.PerkId;
             var isHovering = PerkNodeRenderer.DrawNode(
                 state, api,
-                childWindowPos.X + padding, childWindowPos.Y + padding,
-                localMouseX, localMouseY,
+                drawOffsetX, drawOffsetY,
+                mousePos.X, mousePos.Y,  // Pass screen-space mouse coordinates
                 isSelected
             );
 
