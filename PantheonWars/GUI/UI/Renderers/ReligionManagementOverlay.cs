@@ -615,6 +615,21 @@ internal static class ReligionManagementOverlay
             drawList.AddText(textPos, textColor, currentValue);
         }
 
+        // Draw blinking cursor when active
+        if (isActive && (int)(ImGui.GetTime() * 2) % 2 == 0)
+        {
+            // Calculate cursor position at end of text
+            var lines = (currentValue ?? "").Split('\n');
+            var lastLine = lines.Length > 0 ? lines[lines.Length - 1] : "";
+            var lastLineWidth = ImGui.CalcTextSize(lastLine).X;
+            var cursorY = y + 8f + (lines.Length - 1) * 16f; // Approximate line height
+            var cursorX = x + 8f + lastLineWidth;
+
+            // Draw cursor line
+            drawList.AddLine(new Vector2(cursorX, cursorY), new Vector2(cursorX, cursorY + 16f),
+                ImGui.ColorConvertFloat4ToU32(ColorWhite), 2f);
+        }
+
         return currentValue ?? "";
     }
 
