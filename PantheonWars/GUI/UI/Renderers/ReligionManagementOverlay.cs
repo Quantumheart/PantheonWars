@@ -151,7 +151,7 @@ internal static class ReligionManagementOverlay
         currentY += 25f;
 
         var inviteInputWidth = overlayWidth - padding * 2 - 120f;
-        _invitePlayerName = DrawTextInput(drawList, _invitePlayerName, overlayX + padding, currentY, inviteInputWidth, 32f, "Player name...");
+        _invitePlayerName = DrawTextInput(drawList, "##invite_input", _invitePlayerName, overlayX + padding, currentY, inviteInputWidth, 32f, "Player name...");
 
         // Invite button
         var inviteButtonX = overlayX + padding + inviteInputWidth + 10f;
@@ -173,7 +173,7 @@ internal static class ReligionManagementOverlay
         currentY += 25f;
 
         const float descHeight = 80f;
-        _description = DrawMultilineTextInput(drawList, _description, overlayX + padding, currentY, overlayWidth - padding * 2, descHeight);
+        _description = DrawMultilineTextInput(drawList, "##description_input", _description, overlayX + padding, currentY, overlayWidth - padding * 2, descHeight);
         currentY += descHeight + 5f;
 
         // Save Description button
@@ -469,7 +469,7 @@ internal static class ReligionManagementOverlay
     /// <summary>
     ///     Draw text input (same as CreateReligionOverlay)
     /// </summary>
-    private static string DrawTextInput(ImDrawListPtr drawList, string currentValue, float x, float y, float width, float height, string placeholder)
+    private static string DrawTextInput(ImDrawListPtr drawList, string id, string currentValue, float x, float y, float width, float height, string placeholder)
     {
         var inputStart = new Vector2(x, y);
         var inputEnd = new Vector2(x + width, y + height);
@@ -481,7 +481,7 @@ internal static class ReligionManagementOverlay
         drawList.AddRect(inputStart, inputEnd, borderColor, 4f, ImDrawFlags.None, 1f);
 
         ImGui.SetCursorScreenPos(inputStart);
-        ImGui.InvisibleButton("textinput", new Vector2(width, height));
+        ImGui.InvisibleButton(id, new Vector2(width, height));
         var isActive = ImGui.IsItemActive() || ImGui.IsItemFocused();
         var wasClicked = ImGui.IsItemClicked();
 
@@ -538,7 +538,7 @@ internal static class ReligionManagementOverlay
     /// <summary>
     ///     Draw multiline text input
     /// </summary>
-    private static string DrawMultilineTextInput(ImDrawListPtr drawList, string currentValue, float x, float y, float width, float height)
+    private static string DrawMultilineTextInput(ImDrawListPtr drawList, string id, string currentValue, float x, float y, float width, float height)
     {
         var inputStart = new Vector2(x, y);
         var inputEnd = new Vector2(x + width, y + height);
@@ -550,7 +550,7 @@ internal static class ReligionManagementOverlay
         drawList.AddRect(inputStart, inputEnd, borderColor, 4f, ImDrawFlags.None, 1f);
 
         ImGui.SetCursorScreenPos(inputStart);
-        ImGui.InvisibleButton("multilineinput", new Vector2(width, height));
+        ImGui.InvisibleButton(id, new Vector2(width, height));
         var isActive = ImGui.IsItemActive() || ImGui.IsItemFocused();
         var wasClicked = ImGui.IsItemClicked();
 
