@@ -48,14 +48,14 @@ internal static class PerkActionsRenderer
         DrawButton("Close", closeButtonX, y, ButtonWidth, ButtonHeight,
             ColorButtonNormal, ColorTextNormal, true, onCloseClicked);
 
-        // Unlock button - only show if perk is selected
+        // Unlock button - only show if perk is selected and not already unlocked
         var selectedState = manager.GetSelectedPerkState();
-        if (selectedState != null)
+        if (selectedState != null && !selectedState.IsUnlocked)
         {
             var unlockButtonX = closeButtonX - ButtonWidth - ButtonSpacing;
-            var canUnlock = selectedState.CanUnlock && !selectedState.IsUnlocked;
+            var canUnlock = selectedState.CanUnlock;
 
-            var buttonText = selectedState.IsUnlocked ? "Unlocked" : "Unlock";
+            var buttonText = "Unlock";
             var buttonColor = canUnlock ? ColorButtonActive : ColorButtonDisabled;
             var textColor = canUnlock ? ColorTextNormal : ColorTextDisabled;
 
@@ -64,8 +64,10 @@ internal static class PerkActionsRenderer
 
             // Show tooltip on hover if disabled
             if (!canUnlock && IsMouseInRect(unlockButtonX, y, ButtonWidth, ButtonHeight))
+            {
                 // TODO: Phase 5 - Show detailed tooltip with unlock requirements
                 ImGui.SetMouseCursor(ImGuiMouseCursor.NotAllowed);
+            }
         }
 
         return ButtonHeight;

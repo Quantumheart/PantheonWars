@@ -71,7 +71,8 @@ public class PantheonWarsSystem : ModSystem
             .RegisterMessageType<PerkUnlockRequestPacket>()
             .RegisterMessageType<PerkUnlockResponsePacket>()
             .RegisterMessageType<PerkDataRequestPacket>()
-            .RegisterMessageType<PerkDataResponsePacket>();
+            .RegisterMessageType<PerkDataResponsePacket>()
+            .RegisterMessageType<ReligionStateChangedPacket>();
     }
 
     public override void StartServerSide(ICoreServerAPI api)
@@ -144,7 +145,7 @@ public class PantheonWarsSystem : ModSystem
         _favorCommands = new FavorCommands(api, _deityRegistry, _playerDataManager);
         _favorCommands.RegisterCommands();
 
-        _religionCommands = new ReligionCommands(api, _religionManager, _playerReligionDataManager);
+        _religionCommands = new ReligionCommands(api, _religionManager, _playerReligionDataManager, _serverChannel);
         _religionCommands.RegisterCommands();
 
         _perkCommands = new PerkCommands(api, _perkRegistry, _playerReligionDataManager, _religionManager,
@@ -327,10 +328,19 @@ public class PantheonWarsSystem : ModSystem
                     var currentReligion = _religionManager!.GetPlayerReligion(fromPlayer.PlayerUID);
                     if (currentReligion != null)
                     {
+                        var religionNameForLeave = currentReligion.ReligionName;
                         _playerReligionDataManager!.LeaveReligion(fromPlayer.PlayerUID);
-                        message = $"Left {currentReligion.ReligionName}.";
+                        message = $"Left {religionNameForLeave}.";
                         success = true;
                         SendPlayerDataToClient(fromPlayer); // Refresh player's HUD
+
+                        // Send religion state changed packet
+                        var statePacket = new ReligionStateChangedPacket
+                        {
+                            Reason = $"You left {religionNameForLeave}",
+                            HasReligion = false
+                        };
+                        _serverChannel!.SendPacket(statePacket, fromPlayer);
                     }
                     else
                     {
@@ -357,6 +367,14 @@ public class PantheonWarsSystem : ModSystem
                                     $"You have been kicked from {religionForKick.ReligionName}.",
                                     EnumChatType.Notification);
                                 SendPlayerDataToClient(kickedPlayer); // Refresh kicked player's HUD
+
+                                // Send religion state changed packet
+                                var statePacket = new ReligionStateChangedPacket
+                                {
+                                    Reason = $"You have been kicked from {religionForKick.ReligionName}",
+                                    HasReligion = false
+                                };
+                                _serverChannel!.SendPacket(statePacket, kickedPlayer);
                             }
                         }
                         else
@@ -401,12 +419,24 @@ public class PantheonWarsSystem : ModSystem
 
                             // Notify member if online
                             var memberPlayer = _sapi!.World.PlayerByUid(memberUID) as IServerPlayer;
-                            if (memberPlayer != null && memberUID != fromPlayer.PlayerUID)
-                                memberPlayer.SendMessage(
-                                    GlobalConstants.GeneralChatGroup,
-                                    $"{religionName} has been disbanded by its founder",
-                                    EnumChatType.Notification
-                                );
+                            if (memberPlayer != null)
+                            {
+                                // Send chat notification to other members
+                                if (memberUID != fromPlayer.PlayerUID)
+                                    memberPlayer.SendMessage(
+                                        GlobalConstants.GeneralChatGroup,
+                                        $"{religionName} has been disbanded by its founder",
+                                        EnumChatType.Notification
+                                    );
+
+                                // Send religion state changed packet to all members (including founder)
+                                var statePacket = new ReligionStateChangedPacket
+                                {
+                                    Reason = $"{religionName} has been disbanded",
+                                    HasReligion = false
+                                };
+                                _serverChannel!.SendPacket(statePacket, memberPlayer);
+                            }
                         }
 
                         // Delete the religion
@@ -760,6 +790,7 @@ public class PantheonWarsSystem : ModSystem
         _clientChannel.SetMessageHandler<EditDescriptionResponsePacket>(OnEditDescriptionResponse);
         _clientChannel.SetMessageHandler<PerkUnlockResponsePacket>(OnPerkUnlockResponse);
         _clientChannel.SetMessageHandler<PerkDataResponsePacket>(OnPerkDataResponse);
+        _clientChannel.SetMessageHandler<ReligionStateChangedPacket>(OnReligionStateChanged);
         _clientChannel.RegisterMessageType(typeof(PlayerReligionDataPacket));
     }
 
@@ -882,6 +913,17 @@ public class PantheonWarsSystem : ModSystem
         PerkDataReceived?.Invoke(packet);
     }
 
+    private void OnReligionStateChanged(ReligionStateChangedPacket packet)
+    {
+        _capi?.Logger.Notification($"[PantheonWars] Religion state changed: {packet.Reason}");
+
+        // Show notification to user
+        _capi?.ShowChatMessage(packet.Reason);
+
+        // Trigger event for PerkDialog to refresh its data
+        ReligionStateChanged?.Invoke(packet);
+    }
+
     /// <summary>
     /// Request perk data from the server
     /// </summary>
@@ -924,6 +966,11 @@ public class PantheonWarsSystem : ModSystem
     /// Parameters: (perkId, success)
     /// </summary>
     public event Action<string, bool>? PerkUnlocked;
+
+    /// <summary>
+    /// Event fired when the player's religion state changes (disbanded, kicked, etc.)
+    /// </summary>
+    public event Action<ReligionStateChangedPacket>? ReligionStateChanged;
 
     #endregion
 }

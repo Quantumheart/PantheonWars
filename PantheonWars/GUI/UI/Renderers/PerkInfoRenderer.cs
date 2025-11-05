@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.Models;
@@ -127,12 +128,12 @@ internal static class PerkInfoRenderer
 
             // Rank requirement
             var rankReq = selectedState.Perk.Kind == PerkKind.Player
-                ? $"• Favor Rank: {GetRankName(selectedState.Perk.RequiredFavorRank, true)}"
-                : $"• Prestige Rank: {GetRankName(selectedState.Perk.RequiredPrestigeRank, false)}";
+                ? $"  Favor Rank: {GetRankName(selectedState.Perk.RequiredFavorRank, true)}"
+                : $"  Prestige Rank: {GetRankName(selectedState.Perk.RequiredPrestigeRank, false)}";
 
-            drawList.AddText(ImGui.GetFont(), 12f, new Vector2(x + padding + 8, currentY), descriptionColorU32,
+            drawList.AddText(ImGui.GetFont(), 14f, new Vector2(x + padding + 8, currentY), descriptionColorU32,
                 rankReq);
-            currentY += 16f;
+            currentY += 18f;
 
             // Prerequisites
             if (selectedState.Perk.PrerequisitePerks != null && selectedState.Perk.PrerequisitePerks.Count > 0)
@@ -140,14 +141,14 @@ internal static class PerkInfoRenderer
                 {
                     var prereqState = manager.GetPerkState(prereqId);
                     var prereqName = prereqState?.Perk.Name ?? prereqId;
-                    var prereqText = $"• Unlock: {prereqName}";
+                    var prereqText = $"  Unlock: {prereqName}";
 
                     var prereqColor = prereqState?.IsUnlocked ?? false ? ColorGreen : ColorRed;
                     var prereqColorU32 = ImGui.ColorConvertFloat4ToU32(prereqColor);
 
-                    drawList.AddText(ImGui.GetFont(), 12f, new Vector2(x + padding + 8, currentY),
+                    drawList.AddText(ImGui.GetFont(), 14f, new Vector2(x + padding + 8, currentY),
                         prereqColorU32, prereqText);
-                    currentY += 16f;
+                    currentY += 18f;
                 }
         }
 
@@ -156,9 +157,9 @@ internal static class PerkInfoRenderer
         {
             currentY += 8f;
             var statsTitleColorU32 = ImGui.ColorConvertFloat4ToU32(ColorGold);
-            drawList.AddText(ImGui.GetFont(), 14f, new Vector2(x + padding, currentY), statsTitleColorU32,
+            drawList.AddText(ImGui.GetFont(), 16f, new Vector2(x + padding, currentY), statsTitleColorU32,
                 "Effects:");
-            currentY += 18f;
+            currentY += 22f;
 
             foreach (var stat in selectedState.Perk.StatModifiers)
             {
@@ -166,9 +167,9 @@ internal static class PerkInfoRenderer
                 var statText = FormatStatModifier(stat.Key, stat.Value);
                 var statColorU32 = ImGui.ColorConvertFloat4ToU32(ColorGreen);
 
-                drawList.AddText(ImGui.GetFont(), 12f, new Vector2(x + padding + 8, currentY), statColorU32,
+                drawList.AddText(ImGui.GetFont(), 14f, new Vector2(x + padding + 8, currentY), statColorU32,
                     statText);
-                currentY += 16f;
+                currentY += 18f;
 
                 // Prevent overflow
                 if (currentY > y + height - 20f) break;
@@ -217,30 +218,44 @@ internal static class PerkInfoRenderer
     /// </summary>
     private static string FormatStatModifier(string statName, float value)
     {
-        var percentageStats = new[] { "walkspeed", "meleeDamage", "rangedDamage", "maxhealthExtraMultiplier" };
-        var isPercentage = false;
+        // Normalize stat name to lowercase for matching
+        var statLower = statName.ToLower();
 
-        foreach (var percentStat in percentageStats)
-            if (statName.Contains(percentStat))
-            {
-                isPercentage = true;
-                break;
-            }
-
-        var displayName = statName switch
+        // Check if this is a percentage stat
+        var percentageStats = new[]
         {
-            "walkspeed" => "Movement Speed",
-            "meleeDamage" => "Melee Damage",
-            "rangedDamage" => "Ranged Damage",
-            "maxhealthExtraMultiplier" => "Max Health",
-            _ => statName
+            "walkspeed",
+            "meleeDamage",
+            "meleeweaponsdamage",
+            "rangedDamage",
+            "rangedweaponsdamage",
+            "maxhealthExtraMultiplier",
+            "maxhealthextramultiplier"
+        };
+
+        var isPercentage = percentageStats.Any(ps => statLower.Contains(ps.ToLower()));
+
+        // Map stat names to friendly display names
+        var displayName = statLower switch
+        {
+            var s when s.Contains("walkspeed") => "Movement Speed",
+            var s when s.Contains("meleeDamage") || s.Contains("meleeweaponsdamage") => "Melee Damage",
+            var s when s.Contains("rangedDamage") || s.Contains("rangedweaponsdamage") => "Ranged Damage",
+            var s when s.Contains("maxhealth") && s.Contains("multiplier") => "Max Health",
+            var s when s.Contains("maxhealth") && s.Contains("points") => "Max Health",
+            var s when s.Contains("maxhealth") => "Max Health",
+            var s when s.Contains("armor") => "Armor",
+            var s when s.Contains("speed") => "Speed",
+            var s when s.Contains("damage") => "Damage",
+            var s when s.Contains("health") => "Health",
+            _ => statName // Fallback to original name
         };
 
         var sign = value >= 0 ? "+" : "";
 
-        if (isPercentage) return $"• {sign}{value * 100:0.#}% {displayName}";
+        if (isPercentage) return $"  {sign}{value * 100:0.#}% {displayName}";
 
-        return $"• {sign}{value:0.#} {displayName}";
+        return $"  {sign}{value:0.#} {displayName}";
     }
 
     /// <summary>

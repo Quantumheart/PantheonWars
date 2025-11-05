@@ -72,6 +72,7 @@ public class PerkDialog : ModSystem
         {
             _pantheonWarsSystem.PerkUnlocked += OnPerkUnlockedFromServer;
             _pantheonWarsSystem.PerkDataReceived += OnPerkDataReceived;
+            _pantheonWarsSystem.ReligionStateChanged += OnReligionStateChanged;
         }
         else
         {
@@ -183,6 +184,28 @@ public class PerkDialog : ModSystem
             _imguiModSystem.Show();
             _capi.Logger.Debug("[PantheonWars] Perk Dialog opened after data load");
         }
+    }
+
+    /// <summary>
+    ///     Handle religion state change (religion disbanded, kicked, etc.)
+    /// </summary>
+    private void OnReligionStateChanged(ReligionStateChangedPacket packet)
+    {
+        _capi!.Logger.Notification($"[PantheonWars] Religion state changed: {packet.Reason}");
+
+        // Reset perk dialog state
+        _manager!.Reset();
+        _isReady = false;
+
+        // If dialog is currently open, close it
+        if (_isOpen)
+        {
+            Close();
+            _capi.ShowChatMessage("Perk dialog closed - your religion status has changed");
+        }
+
+        // Request fresh data from server (in case player joined a new religion)
+        _pantheonWarsSystem?.RequestPerkData();
     }
 
     /// <summary>
@@ -399,6 +422,7 @@ public class PerkDialog : ModSystem
         {
             _pantheonWarsSystem.PerkUnlocked -= OnPerkUnlockedFromServer;
             _pantheonWarsSystem.PerkDataReceived -= OnPerkDataReceived;
+            _pantheonWarsSystem.ReligionStateChanged -= OnReligionStateChanged;
         }
 
         _capi?.Logger.Notification("[PantheonWars] Perk Dialog disposed");

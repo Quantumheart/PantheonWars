@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using PantheonWars.Data;
 using PantheonWars.Models.Enum;
+using PantheonWars.Network;
 using PantheonWars.Systems;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -18,13 +19,15 @@ public class ReligionCommands
     private readonly PlayerReligionDataManager _playerReligionDataManager;
     private readonly ReligionManager _religionManager;
     private readonly ICoreServerAPI _sapi;
+    private readonly IServerNetworkChannel? _serverChannel;
 
     public ReligionCommands(ICoreServerAPI sapi, ReligionManager religionManager,
-        PlayerReligionDataManager playerReligionDataManager)
+        PlayerReligionDataManager playerReligionDataManager, IServerNetworkChannel? serverChannel = null)
     {
         _sapi = sapi;
         _religionManager = religionManager;
         _playerReligionDataManager = playerReligionDataManager;
+        _serverChannel = serverChannel;
     }
 
     /// <summary>
@@ -420,12 +423,27 @@ public class ReligionCommands
 
             // Notify member if online
             var memberPlayer = _sapi.World.PlayerByUid(memberUID) as IServerPlayer;
-            if (memberPlayer != null && memberUID != player.PlayerUID)
-                memberPlayer.SendMessage(
-                    GlobalConstants.GeneralChatGroup,
-                    $"{religionName} has been disbanded by its founder",
-                    EnumChatType.Notification
-                );
+            if (memberPlayer != null)
+            {
+                // Send chat notification to other members
+                if (memberUID != player.PlayerUID)
+                    memberPlayer.SendMessage(
+                        GlobalConstants.GeneralChatGroup,
+                        $"{religionName} has been disbanded by its founder",
+                        EnumChatType.Notification
+                    );
+
+                // Send religion state changed packet to all members (including founder)
+                if (_serverChannel != null)
+                {
+                    var statePacket = new ReligionStateChangedPacket
+                    {
+                        Reason = $"{religionName} has been disbanded",
+                        HasReligion = false
+                    };
+                    _serverChannel.SendPacket(statePacket, memberPlayer);
+                }
+            }
         }
 
         // Delete the religion

@@ -83,7 +83,28 @@ internal static class PerkNodeRenderer
 
         // Draw perk name (abbreviated if too long)
         var perkName = state.Perk.Name;
-        if (perkName.Length > 12) perkName = perkName.Substring(0, 10) + "..";
+        const float fontSize = 14f; // Increased from 12f for better readability
+
+        // Calculate text size with actual font
+        var fullTextSize = ImGui.CalcTextSize(perkName);
+        var maxWidth = radius * 1.8f; // Allow text slightly wider than node
+
+        // Truncate if needed
+        if (fullTextSize.X > maxWidth)
+        {
+            // Find how many characters fit
+            var charCount = perkName.Length;
+            while (charCount > 3)
+            {
+                var testName = perkName.Substring(0, charCount - 3) + "...";
+                if (ImGui.CalcTextSize(testName).X <= maxWidth)
+                {
+                    perkName = testName;
+                    break;
+                }
+                charCount--;
+            }
+        }
 
         var textSize = ImGui.CalcTextSize(perkName);
         var textPos = new Vector2(
@@ -97,7 +118,7 @@ internal static class PerkNodeRenderer
             : new Vector4(0.9f, 0.9f, 0.9f, 1.0f); // Light text on dark
 
         var textColorU32 = ImGui.ColorConvertFloat4ToU32(textColor);
-        drawList.AddText(ImGui.GetFont(), 12f, textPos, textColorU32, perkName);
+        drawList.AddText(ImGui.GetFont(), fontSize, textPos, textColorU32, perkName);
 
         // Draw tier indicator (small number at bottom)
         var tierText = $"T{state.Tier}";

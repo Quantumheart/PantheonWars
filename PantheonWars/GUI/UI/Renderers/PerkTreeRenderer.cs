@@ -164,8 +164,9 @@ internal static class PerkTreeRenderer
         ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, new Vector2(padding, padding));
         ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0.1f, 0.08f, 0.06f, 0.5f));
 
+        // Enable scrolling with mouse wheel - border=true enables scrollbar
         ImGui.BeginChild(childId, new Vector2(width, height), true,
-            ImGuiWindowFlags.HorizontalScrollbar);
+            ImGuiWindowFlags.HorizontalScrollbar | ImGuiWindowFlags.AlwaysVerticalScrollbar);
 
         // Get mouse position (in screen space)
         var mousePos = ImGui.GetMousePos();
@@ -218,7 +219,8 @@ internal static class PerkTreeRenderer
         }
 
         // Set child window content size for scrolling
-        ImGui.SetCursorPos(new Vector2(totalWidth + padding * 2, totalHeight + padding * 2));
+        // We need to use Dummy to actually reserve the space since we're using DrawList
+        ImGui.Dummy(new Vector2(totalWidth + padding * 2, totalHeight + padding * 2));
 
         ImGui.EndChild();
         ImGui.PopStyleColor();
