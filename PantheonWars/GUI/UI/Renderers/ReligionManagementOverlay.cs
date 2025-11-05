@@ -482,11 +482,18 @@ internal static class ReligionManagementOverlay
 
         ImGui.SetCursorScreenPos(inputStart);
         ImGui.InvisibleButton("textinput", new Vector2(width, height));
-        var isActive = ImGui.IsItemActive();
+        var isActive = ImGui.IsItemActive() || ImGui.IsItemFocused();
+        var wasClicked = ImGui.IsItemClicked();
 
         if (isActive || ImGui.IsItemHovered())
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.TextInput);
+        }
+
+        // Set keyboard focus when clicked
+        if (wasClicked)
+        {
+            ImGui.SetKeyboardFocusHere(-1);
         }
 
         if (isActive)
@@ -544,11 +551,18 @@ internal static class ReligionManagementOverlay
 
         ImGui.SetCursorScreenPos(inputStart);
         ImGui.InvisibleButton("multilineinput", new Vector2(width, height));
-        var isActive = ImGui.IsItemActive();
+        var isActive = ImGui.IsItemActive() || ImGui.IsItemFocused();
+        var wasClicked = ImGui.IsItemClicked();
 
         if (isActive || ImGui.IsItemHovered())
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.TextInput);
+        }
+
+        // Set keyboard focus when clicked
+        if (wasClicked)
+        {
+            ImGui.SetKeyboardFocusHere(-1);
         }
 
         if (isActive)
