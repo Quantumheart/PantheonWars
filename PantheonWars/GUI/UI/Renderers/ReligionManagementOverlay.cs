@@ -102,17 +102,31 @@ internal static class ReligionManagementOverlay
         var borderColor = ImGui.ColorConvertFloat4ToU32(ColorGold * 0.7f);
         drawList.AddRect(panelStart, panelEnd, borderColor, 8f, ImDrawFlags.None, 2f);
 
+        // Create invisible child window for input handling
+        ImGui.SetNextWindowPos(panelStart);
+        ImGui.SetNextWindowSize(new Vector2(overlayWidth, overlayHeight));
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0, 0, 0, 0)); // Transparent background
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
+        ImGui.BeginChild("##religion_mgmt_overlay", new Vector2(overlayWidth, overlayHeight), false, ImGuiWindowFlags.NoScrollbar);
+
         // Check if data loaded
         if (_religionInfo == null || !_religionInfo.HasReligion)
         {
             DrawLoadingOrError(drawList, overlayX, overlayY, overlayWidth, overlayHeight, onClose, onRequestRefresh, api);
+            ImGui.EndChild();
+            ImGui.PopStyleVar();
+            ImGui.PopStyleColor();
             return true;
         }
 
         // Disband confirmation dialog
         if (_showDisbandConfirm)
         {
-            return DrawDisbandConfirmation(drawList, api, overlayX, overlayY, overlayWidth, overlayHeight, onDisband);
+            var result = DrawDisbandConfirmation(drawList, api, overlayX, overlayY, overlayWidth, overlayHeight, onDisband);
+            ImGui.EndChild();
+            ImGui.PopStyleVar();
+            ImGui.PopStyleColor();
+            return result;
         }
 
         var currentY = overlayY + padding;
@@ -151,7 +165,7 @@ internal static class ReligionManagementOverlay
         currentY += 25f;
 
         var inviteInputWidth = overlayWidth - padding * 2 - 120f;
-        _invitePlayerName = DrawTextInput(drawList, _invitePlayerName, overlayX + padding, currentY, inviteInputWidth, 32f, "Player name...");
+        _invitePlayerName = DrawTextInput(drawList, "##invite_input", _invitePlayerName, overlayX + padding, currentY, inviteInputWidth, 32f, "Player name...");
 
         // Invite button
         var inviteButtonX = overlayX + padding + inviteInputWidth + 10f;
@@ -173,7 +187,7 @@ internal static class ReligionManagementOverlay
         currentY += 25f;
 
         const float descHeight = 80f;
-        _description = DrawMultilineTextInput(drawList, _description, overlayX + padding, currentY, overlayWidth - padding * 2, descHeight);
+        _description = DrawMultilineTextInput(drawList, "##description_input", _description, overlayX + padding, currentY, overlayWidth - padding * 2, descHeight);
         currentY += descHeight + 5f;
 
         // Save Description button
@@ -208,6 +222,9 @@ internal static class ReligionManagementOverlay
             _showDisbandConfirm = true;
         }
 
+        ImGui.EndChild();
+        ImGui.PopStyleVar();
+        ImGui.PopStyleColor();
         return true;
     }
 
@@ -469,7 +486,7 @@ internal static class ReligionManagementOverlay
     /// <summary>
     ///     Draw text input (same as CreateReligionOverlay)
     /// </summary>
-    private static string DrawTextInput(ImDrawListPtr drawList, string currentValue, float x, float y, float width, float height, string placeholder)
+    private static string DrawTextInput(ImDrawListPtr drawList, string id, string currentValue, float x, float y, float width, float height, string placeholder)
     {
         var inputStart = new Vector2(x, y);
         var inputEnd = new Vector2(x + width, y + height);
@@ -481,12 +498,19 @@ internal static class ReligionManagementOverlay
         drawList.AddRect(inputStart, inputEnd, borderColor, 4f, ImDrawFlags.None, 1f);
 
         ImGui.SetCursorScreenPos(inputStart);
-        ImGui.InvisibleButton("textinput", new Vector2(width, height));
-        var isActive = ImGui.IsItemActive();
+        ImGui.InvisibleButton(id, new Vector2(width, height));
+        var isActive = ImGui.IsItemActive() || ImGui.IsItemFocused();
+        var wasClicked = ImGui.IsItemClicked();
 
         if (isActive || ImGui.IsItemHovered())
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.TextInput);
+        }
+
+        // Set keyboard focus when clicked
+        if (wasClicked)
+        {
+            ImGui.SetKeyboardFocusHere(-1);
         }
 
         if (isActive)
@@ -531,7 +555,7 @@ internal static class ReligionManagementOverlay
     /// <summary>
     ///     Draw multiline text input
     /// </summary>
-    private static string DrawMultilineTextInput(ImDrawListPtr drawList, string currentValue, float x, float y, float width, float height)
+    private static string DrawMultilineTextInput(ImDrawListPtr drawList, string id, string currentValue, float x, float y, float width, float height)
     {
         var inputStart = new Vector2(x, y);
         var inputEnd = new Vector2(x + width, y + height);
@@ -543,12 +567,19 @@ internal static class ReligionManagementOverlay
         drawList.AddRect(inputStart, inputEnd, borderColor, 4f, ImDrawFlags.None, 1f);
 
         ImGui.SetCursorScreenPos(inputStart);
-        ImGui.InvisibleButton("multilineinput", new Vector2(width, height));
-        var isActive = ImGui.IsItemActive();
+        ImGui.InvisibleButton(id, new Vector2(width, height));
+        var isActive = ImGui.IsItemActive() || ImGui.IsItemFocused();
+        var wasClicked = ImGui.IsItemClicked();
 
         if (isActive || ImGui.IsItemHovered())
         {
             ImGui.SetMouseCursor(ImGuiMouseCursor.TextInput);
+        }
+
+        // Set keyboard focus when clicked
+        if (wasClicked)
+        {
+            ImGui.SetKeyboardFocusHere(-1);
         }
 
         if (isActive)
@@ -582,6 +613,29 @@ internal static class ReligionManagementOverlay
         if (!string.IsNullOrEmpty(currentValue))
         {
             drawList.AddText(textPos, textColor, currentValue);
+        }
+
+        // Draw blinking cursor when active
+        if (isActive && (int)(ImGui.GetTime() * 2) % 2 == 0)
+        {
+            // Calculate cursor position at end of text
+            var text = currentValue ?? "";
+            var lines = text.Split('\n');
+            var lastLine = lines.Length > 0 ? lines[lines.Length - 1] : "";
+
+            // Calculate cursor position - handle empty strings
+            var lastLineWidth = 0f;
+            if (!string.IsNullOrEmpty(lastLine))
+            {
+                lastLineWidth = ImGui.CalcTextSize(lastLine).X;
+            }
+
+            var cursorY = y + 8f + (lines.Length - 1) * 16f; // Approximate line height
+            var cursorX = x + 8f + lastLineWidth;
+
+            // Draw cursor line
+            drawList.AddLine(new Vector2(cursorX, cursorY), new Vector2(cursorX, cursorY + 16f),
+                ImGui.ColorConvertFloat4ToU32(ColorWhite), 2f);
         }
 
         return currentValue ?? "";
