@@ -44,6 +44,7 @@ public class PerkDialog : ModSystem
     private bool _showReligionBrowser;
     private bool _showReligionManagement;
     private bool _showCreateReligion;
+    private bool _showLeaveConfirmation;
 
     public override bool ShouldLoad(EnumAppSide forSide)
     {
@@ -403,6 +404,18 @@ public class PerkDialog : ModSystem
             );
         }
 
+        if (_showLeaveConfirmation)
+        {
+            _showLeaveConfirmation = UI.Renderers.LeaveReligionConfirmOverlay.Draw(
+                _capi,
+                windowWidth,
+                windowHeight,
+                _manager!.CurrentReligionName ?? "Unknown Religion",
+                OnLeaveReligionCancelled,
+                OnLeaveReligionConfirmed
+            );
+        }
+
         ImGui.End();
         ImGui.PopStyleColor(); // Pop window background color
         ImGui.PopStyleVar(4); // Pop all 4 style vars
@@ -499,8 +512,16 @@ public class PerkDialog : ModSystem
         {
             _capi.ShowChatMessage(packet.Message);
 
-            // Close browser overlay if open
+            // Close any open overlays
             _showReligionBrowser = false;
+            _showLeaveConfirmation = false;
+
+            // If leaving religion, reset perk dialog state immediately
+            if (packet.Action == "leave")
+            {
+                _capi.Logger.Debug("[PantheonWars] Resetting perk dialog after leaving religion");
+                _manager!.Reset();
+            }
 
             // Request fresh perk data (religion may have changed)
             _pantheonWarsSystem?.RequestPerkData();
@@ -540,11 +561,10 @@ public class PerkDialog : ModSystem
     {
         _capi!.Logger.Debug("[PantheonWars] Leave Religion clicked");
 
-        // TODO: Add confirmation dialog before leaving
-        // For now, send leave request directly
         if (_manager!.HasReligion())
         {
-            _pantheonWarsSystem?.RequestReligionAction("leave", _manager.CurrentReligionUID ?? "");
+            // Show confirmation dialog
+            _showLeaveConfirmation = true;
         }
         else
         {
@@ -552,6 +572,25 @@ public class PerkDialog : ModSystem
             _capi.World.PlaySoundAt(new AssetLocation("pantheonwars:sounds/error"),
                 _capi.World.Player.Entity, null, false, 8f, 0.3f);
         }
+    }
+
+    /// <summary>
+    ///     Handle leave religion confirmation
+    /// </summary>
+    private void OnLeaveReligionConfirmed()
+    {
+        _capi!.Logger.Debug("[PantheonWars] Leave religion confirmed");
+        _pantheonWarsSystem?.RequestReligionAction("leave", _manager!.CurrentReligionUID ?? "");
+        _showLeaveConfirmation = false;
+    }
+
+    /// <summary>
+    ///     Handle leave religion cancelled
+    /// </summary>
+    private void OnLeaveReligionCancelled()
+    {
+        _capi!.Logger.Debug("[PantheonWars] Leave religion cancelled");
+        _showLeaveConfirmation = false;
     }
 
     /// <summary>
@@ -572,8 +611,12 @@ public class PerkDialog : ModSystem
         _capi!.Logger.Debug($"[PantheonWars] Creating religion: {religionName}, Deity: {deity}, Public: {isPublic}");
         _pantheonWarsSystem?.RequestCreateReligion(religionName, deity, isPublic);
 
-        // Close create form
+        // Close create form and show browser to see the new religion
         _showCreateReligion = false;
+        _showReligionBrowser = true;
+
+        // Request updated religion list to show the newly created religion
+        _pantheonWarsSystem?.RequestReligionList("");
     }
 
     /// <summary>

@@ -82,6 +82,10 @@ public class PerkDialogManager
         ReligionTreeScrollX = 0f;
         ReligionTreeScrollY = 0f;
         IsDataLoaded = false;
+
+        // Clear perk trees
+        PlayerPerkStates.Clear();
+        ReligionPerkStates.Clear();
     }
 
     /// <summary>
