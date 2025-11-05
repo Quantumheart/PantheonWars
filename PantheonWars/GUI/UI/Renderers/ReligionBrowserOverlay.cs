@@ -61,6 +61,7 @@ internal static class ReligionBrowserOverlay
     /// <param name="onJoinReligion">Callback when join button clicked (religionUID)</param>
     /// <param name="onRequestRefresh">Callback when refresh requested (deityFilter)</param>
     /// <param name="onCreateReligion">Callback when create religion clicked</param>
+    /// <param name="userHasReligion">Whether the user already has a religion</param>
     /// <returns>True if overlay should remain open</returns>
     public static bool Draw(
         ICoreClientAPI api,
@@ -69,7 +70,8 @@ internal static class ReligionBrowserOverlay
         Action onClose,
         Action<string> onJoinReligion,
         Action<string> onRequestRefresh,
-        Action onCreateReligion)
+        Action onCreateReligion,
+        bool userHasReligion)
     {
         const float overlayWidth = 800f;
         const float overlayHeight = 600f;
@@ -162,35 +164,61 @@ internal static class ReligionBrowserOverlay
         const float buttonWidth = 180f;
         const float buttonHeight = 36f;
         const float buttonSpacing = 12f;
-        var totalButtonWidth = buttonWidth * 2 + buttonSpacing;
-        var buttonsStartX = overlayX + (overlayWidth - totalButtonWidth) / 2;
-
-        // Create Religion button
-        var createButtonX = buttonsStartX;
         var buttonY = currentY;
-        if (DrawActionButton(drawList, "Create Religion", createButtonX, buttonY, buttonWidth, buttonHeight, true, true))
-        {
-            api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
-                api.World.Player.Entity, null, false, 8f, 0.5f);
-            onCreateReligion.Invoke();
-        }
-
-        // Join Religion button
-        var joinButtonX = buttonsStartX + buttonWidth + buttonSpacing;
         var canJoin = !string.IsNullOrEmpty(_selectedReligionUID);
-        if (DrawActionButton(drawList, canJoin ? "Join Religion" : "Select a religion", joinButtonX, buttonY, buttonWidth, buttonHeight, false, canJoin))
+
+        // Only show Create button if user doesn't have a religion
+        if (!userHasReligion)
         {
-            if (canJoin)
+            // Show both Create and Join buttons
+            var totalButtonWidth = buttonWidth * 2 + buttonSpacing;
+            var buttonsStartX = overlayX + (overlayWidth - totalButtonWidth) / 2;
+
+            // Create Religion button
+            var createButtonX = buttonsStartX;
+            if (DrawActionButton(drawList, "Create Religion", createButtonX, buttonY, buttonWidth, buttonHeight, true, true))
             {
                 api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                     api.World.Player.Entity, null, false, 8f, 0.5f);
-                onJoinReligion.Invoke(_selectedReligionUID!);
-                return false; // Close overlay after join
+                onCreateReligion.Invoke();
             }
-            else
+
+            // Join Religion button
+            var joinButtonX = buttonsStartX + buttonWidth + buttonSpacing;
+            if (DrawActionButton(drawList, canJoin ? "Join Religion" : "Select a religion", joinButtonX, buttonY, buttonWidth, buttonHeight, false, canJoin))
             {
-                api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/error"),
-                    api.World.Player.Entity, null, false, 8f, 0.3f);
+                if (canJoin)
+                {
+                    api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
+                        api.World.Player.Entity, null, false, 8f, 0.5f);
+                    onJoinReligion.Invoke(_selectedReligionUID!);
+                    return false; // Close overlay after join
+                }
+                else
+                {
+                    api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/error"),
+                        api.World.Player.Entity, null, false, 8f, 0.3f);
+                }
+            }
+        }
+        else
+        {
+            // User has religion - only show centered Join button (for switching religions)
+            var joinButtonX = overlayX + (overlayWidth - buttonWidth) / 2;
+            if (DrawActionButton(drawList, canJoin ? "Join Religion" : "Select a religion", joinButtonX, buttonY, buttonWidth, buttonHeight, false, canJoin))
+            {
+                if (canJoin)
+                {
+                    api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
+                        api.World.Player.Entity, null, false, 8f, 0.5f);
+                    onJoinReligion.Invoke(_selectedReligionUID!);
+                    return false; // Close overlay after join
+                }
+                else
+                {
+                    api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/error"),
+                        api.World.Player.Entity, null, false, 8f, 0.3f);
+                }
             }
         }
 

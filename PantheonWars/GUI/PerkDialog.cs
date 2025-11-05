@@ -374,7 +374,8 @@ public class PerkDialog : ModSystem
                 () => _showReligionBrowser = false,
                 OnJoinReligionClicked,
                 OnRefreshReligionList,
-                OnCreateReligionClicked
+                OnCreateReligionClicked,
+                _manager!.HasReligion()
             );
         }
 
