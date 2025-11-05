@@ -195,6 +195,9 @@ public class PerkDialog : ModSystem
         _capi.Logger.Notification(
             $"[PantheonWars] Loaded {playerPerks.Count} player perks and {religionPerks.Count} religion perks for {packet.Deity}");
 
+        // Request player religion info to get founder status (needed for Manage Religion button)
+        _pantheonWarsSystem?.RequestPlayerReligionInfo();
+
         // If dialog should be open, open it now that data is ready
         if (!_isOpen && _imguiModSystem != null)
         {
@@ -625,7 +628,20 @@ public class PerkDialog : ModSystem
     /// </summary>
     private void OnPlayerReligionInfoReceived(PlayerReligionInfoResponsePacket packet)
     {
-        _capi!.Logger.Debug($"[PantheonWars] Received player religion info: HasReligion={packet.HasReligion}");
+        _capi!.Logger.Debug($"[PantheonWars] Received player religion info: HasReligion={packet.HasReligion}, IsFounder={packet.IsFounder}");
+
+        // Update manager with player's role (enables Manage Religion button for leaders)
+        if (packet.HasReligion)
+        {
+            _manager!.PlayerRoleInReligion = packet.IsFounder ? "Leader" : "Member";
+            _capi!.Logger.Debug($"[PantheonWars] Set PlayerRoleInReligion to: {_manager.PlayerRoleInReligion}");
+        }
+        else
+        {
+            _manager!.PlayerRoleInReligion = null;
+            _capi!.Logger.Debug("[PantheonWars] Cleared PlayerRoleInReligion (no religion)");
+        }
+
         UI.Renderers.ReligionManagementOverlay.UpdateReligionInfo(packet);
     }
 

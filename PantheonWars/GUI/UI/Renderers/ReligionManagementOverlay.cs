@@ -492,6 +492,8 @@ internal static class ReligionManagementOverlay
         if (isActive)
         {
             var io = ImGui.GetIO();
+            io.WantCaptureKeyboard = true; // Block game input while typing
+
             if (ImGui.IsKeyPressed(ImGuiKey.Backspace) && currentValue.Length > 0)
             {
                 currentValue = currentValue.Substring(0, currentValue.Length - 1);
@@ -552,6 +554,8 @@ internal static class ReligionManagementOverlay
         if (isActive)
         {
             var io = ImGui.GetIO();
+            io.WantCaptureKeyboard = true; // Block game input while typing
+
             if (ImGui.IsKeyPressed(ImGuiKey.Backspace) && currentValue.Length > 0)
             {
                 currentValue = currentValue.Substring(0, currentValue.Length - 1);
