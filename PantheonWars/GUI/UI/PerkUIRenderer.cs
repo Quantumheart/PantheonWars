@@ -18,15 +18,23 @@ internal static class PerkUIRenderer
     /// <param name="api">Client API</param>
     /// <param name="windowWidth">Total window width</param>
     /// <param name="windowHeight">Total window height</param>
+    /// <param name="deltaTime">Time elapsed since last frame (for animations)</param>
     /// <param name="onUnlockClicked">Callback when unlock button clicked</param>
     /// <param name="onCloseClicked">Callback when close button clicked</param>
+    /// <param name="onChangeReligionClicked">Callback when Change Religion button clicked</param>
+    /// <param name="onManageReligionClicked">Callback when Manage Religion button clicked</param>
+    /// <param name="onLeaveReligionClicked">Callback when Leave Religion button clicked</param>
     public static void Draw(
         PerkDialogManager manager,
         ICoreClientAPI api,
         int windowWidth,
         int windowHeight,
+        float deltaTime,
         Action? onUnlockClicked,
-        Action? onCloseClicked)
+        Action? onCloseClicked,
+        Action? onChangeReligionClicked = null,
+        Action? onManageReligionClicked = null,
+        Action? onLeaveReligionClicked = null)
     {
         const float padding = 16f;
         const float infoPanelHeight = 200f;
@@ -46,7 +54,10 @@ internal static class PerkUIRenderer
         // === 1. RELIGION HEADER (Top Banner) ===
         var usedHeight = ReligionHeaderRenderer.Draw(
             manager, api,
-            windowPos.X + currentX, windowPos.Y + currentY, contentWidth
+            windowPos.X + currentX, windowPos.Y + currentY, contentWidth,
+            onChangeReligionClicked,
+            onManageReligionClicked,
+            onLeaveReligionClicked
         );
         currentY += usedHeight + padding;
 
@@ -56,6 +67,7 @@ internal static class PerkUIRenderer
         PerkTreeRenderer.Draw(
             manager, api,
             windowPos.X + currentX, windowPos.Y + currentY, contentWidth, treeHeight,
+            deltaTime,
             ref hoveringPerkId
         );
         currentY += treeHeight + padding;
@@ -79,5 +91,41 @@ internal static class PerkUIRenderer
 
         // Update manager's hovering state
         manager.HoveringPerkId = hoveringPerkId;
+
+        // === 5. TOOLTIPS (Rendered Last, On Top of Everything) ===
+        if (!string.IsNullOrEmpty(hoveringPerkId))
+        {
+            var hoveringState = manager.GetPerkState(hoveringPerkId);
+            if (hoveringState != null)
+            {
+                // Get all perks for registry (needed for prerequisite names)
+                var allPerks = new System.Collections.Generic.Dictionary<string, Models.Perk>();
+                foreach (var state in manager.PlayerPerkStates.Values)
+                    if (!allPerks.ContainsKey(state.Perk.PerkId))
+                        allPerks[state.Perk.PerkId] = state.Perk;
+                foreach (var state in manager.ReligionPerkStates.Values)
+                    if (!allPerks.ContainsKey(state.Perk.PerkId))
+                        allPerks[state.Perk.PerkId] = state.Perk;
+
+                // Build tooltip data
+                var tooltipData = Models.PerkTooltipData.FromPerkAndState(
+                    hoveringState.Perk,
+                    hoveringState,
+                    allPerks
+                );
+
+                // Get mouse position
+                var mousePos = ImGui.GetMousePos();
+
+                // Render tooltip
+                TooltipRenderer.Draw(
+                    tooltipData,
+                    mousePos.X,
+                    mousePos.Y,
+                    windowWidth,
+                    windowHeight
+                );
+            }
+        }
     }
 }

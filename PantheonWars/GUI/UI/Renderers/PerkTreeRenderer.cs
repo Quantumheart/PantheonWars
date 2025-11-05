@@ -28,12 +28,14 @@ internal static class PerkTreeRenderer
     /// <param name="y">Y position</param>
     /// <param name="width">Total available width</param>
     /// <param name="height">Total available height</param>
+    /// <param name="deltaTime">Time elapsed since last frame (for animations)</param>
     /// <param name="hoveringPerkId">Output: ID of currently hovered perk</param>
     /// <returns>Height used by this renderer</returns>
     public static float Draw(
         PerkDialogManager manager,
         ICoreClientAPI api,
         float x, float y, float width, float height,
+        float deltaTime,
         ref string? hoveringPerkId)
     {
         const float labelHeight = 30f;
@@ -60,6 +62,7 @@ internal static class PerkTreeRenderer
             manager, api, drawList,
             leftX, treeY, panelWidth, treeAreaHeight,
             manager.PlayerPerkStates,
+            deltaTime,
             ref playerScrollX,
             ref playerScrollY,
             ref hoveringPerkId
@@ -88,6 +91,7 @@ internal static class PerkTreeRenderer
             manager, api, drawList,
             rightX, treeY, panelWidth, treeAreaHeight,
             manager.ReligionPerkStates,
+            deltaTime,
             ref religionScrollX,
             ref religionScrollY,
             ref hoveringPerkId
@@ -130,6 +134,7 @@ internal static class PerkTreeRenderer
         ImDrawListPtr drawList,
         float x, float y, float width, float height,
         Dictionary<string, PerkNodeState> perkStates,
+        float deltaTime,
         ref float scrollX, ref float scrollY,
         ref string? hoveringPerkId)
     {
@@ -198,6 +203,7 @@ internal static class PerkTreeRenderer
                 state, api,
                 drawOffsetX, drawOffsetY,
                 mousePos.X, mousePos.Y,  // Pass screen-space mouse coordinates
+                deltaTime,
                 isSelected
             );
 
@@ -213,7 +219,10 @@ internal static class PerkTreeRenderer
                     api.Logger.Notification($"[PantheonWars] Clicked perk: {state.Perk.Name}");
                     manager.SelectPerk(state.Perk.PerkId);
                     api.Logger.Notification($"[PantheonWars] Selected perk ID: {manager.SelectedPerkId}");
-                    // TODO: Phase 5 - Add click sound
+
+                    // Play click sound
+                    api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
+                        api.World.Player.Entity, null, false, 8f, 0.5f);
                 }
             }
         }

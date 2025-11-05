@@ -45,8 +45,15 @@ internal static class PerkActionsRenderer
     {
         // Close button is always visible and enabled
         var closeButtonX = x - ButtonWidth;
-        DrawButton("Close", closeButtonX, y, ButtonWidth, ButtonHeight,
+        var closeClicked = DrawButton("Close", closeButtonX, y, ButtonWidth, ButtonHeight,
             ColorButtonNormal, ColorTextNormal, true, onCloseClicked);
+
+        if (closeClicked)
+        {
+            // Play click sound
+            api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
+                api.World.Player.Entity, null, false, 8f, 0.5f);
+        }
 
         // Unlock button - only show if perk is selected and not already unlocked
         var selectedState = manager.GetSelectedPerkState();
@@ -62,11 +69,25 @@ internal static class PerkActionsRenderer
             var clicked = DrawButton(buttonText, unlockButtonX, y, ButtonWidth, ButtonHeight,
                 buttonColor, textColor, canUnlock, canUnlock ? onUnlockClicked : null);
 
+            if (clicked && canUnlock)
+            {
+                // Play click sound when unlock button pressed
+                // Unlock success sound will play when server confirms
+                api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
+                    api.World.Player.Entity, null, false, 8f, 0.5f);
+            }
+
             // Show tooltip on hover if disabled
             if (!canUnlock && IsMouseInRect(unlockButtonX, y, ButtonWidth, ButtonHeight))
             {
-                // TODO: Phase 5 - Show detailed tooltip with unlock requirements
                 ImGui.SetMouseCursor(ImGuiMouseCursor.NotAllowed);
+
+                // Play error sound on click if locked
+                if (ImGui.IsMouseClicked(ImGuiMouseButton.Left))
+                {
+                    api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/error"),
+                        api.World.Player.Entity, null, false, 8f, 0.3f);
+                }
             }
         }
 

@@ -169,31 +169,9 @@ public class PantheonWarsSystem : ModSystem
         _capi = api;
         api.Logger.Notification("[PantheonWars] Initializing client-side systems...");
 
-        // Initialize client-side deity registry (for GUI purposes)
-        _clientDeityRegistry = new DeityRegistry(api);
-        _clientDeityRegistry.Initialize();
-
         // Setup network handlers
         SetupClientNetworking(api);
-
-        // Initialize HUD
-        _favorHud = new FavorHudElement(api);
-        _favorHud.TryOpen();
-
-        // Initialize religion management dialog
-        _religionDialog = new ReligionManagementDialog(api, _clientChannel!);
-
-        // Initialize create religion dialog
-        _createReligionDialog = new CreateReligionDialog(api, _clientChannel!);
-
-        // Register deity selection dialog opener command
-        api.Input.RegisterHotKey("opendeityselection", "Open Deity Selection", GlKeys.K, HotkeyType.GUIOrOtherControls);
-        api.Input.SetHotKeyHandler("opendeityselection", OpenDeitySelectionDialog);
-
-        // Register religion dialog opener command
-        api.Input.RegisterHotKey("openreligionmanagement", "Open Religion Management", GlKeys.R,
-            HotkeyType.GUIOrOtherControls);
-        api.Input.SetHotKeyHandler("openreligionmanagement", OpenReligionManagementDialog);
+        
 
         api.Logger.Notification("[PantheonWars] Client-side initialization complete");
     }
@@ -837,16 +815,19 @@ public class PantheonWarsSystem : ModSystem
     private void OnReligionListResponse(ReligionListResponsePacket packet)
     {
         _religionDialog?.OnReligionListResponse(packet);
+        ReligionListReceived?.Invoke(packet);
     }
 
     private void OnPlayerReligionInfoResponse(PlayerReligionInfoResponsePacket packet)
     {
         _religionDialog?.OnPlayerReligionInfoResponse(packet);
+        PlayerReligionInfoReceived?.Invoke(packet);
     }
 
     private void OnReligionActionResponse(ReligionActionResponsePacket packet)
     {
         _religionDialog?.OnActionResponse(packet);
+        ReligionActionCompleted?.Invoke(packet);
     }
 
     private void OnCreateReligionResponse(CreateReligionResponsePacket packet)
@@ -854,16 +835,29 @@ public class PantheonWarsSystem : ModSystem
         if (packet.Success)
         {
             _capi?.ShowChatMessage(packet.Message);
+
             // Refresh religion dialog data
             if (_religionDialog != null && _religionDialog.IsOpened())
             {
                 _religionDialog.TryClose();
                 _religionDialog.TryOpen(); // Reopen to refresh
             }
+
+            // Request fresh perk data (now in a religion)
+            // Use a small delay to ensure server has processed the religion creation
+            _capi?.Event.RegisterCallback((dt) =>
+            {
+                var request = new PerkDataRequestPacket();
+                _clientChannel?.SendPacket(request);
+            }, 100);
         }
         else
         {
             _capi?.ShowChatMessage($"Error: {packet.Message}");
+
+            // Play error sound
+            _capi?.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/error"),
+                _capi.World.Player.Entity, null, false, 8f, 0.3f);
         }
     }
 
@@ -957,6 +951,86 @@ public class PantheonWarsSystem : ModSystem
     }
 
     /// <summary>
+    /// Request religion list from the server
+    /// </summary>
+    public void RequestReligionList(string deityFilter = "")
+    {
+        if (_clientChannel == null)
+        {
+            _capi?.Logger.Error("[PantheonWars] Cannot request religion list: client channel not initialized");
+            return;
+        }
+
+        var request = new ReligionListRequestPacket(deityFilter);
+        _clientChannel.SendPacket(request);
+        _capi?.Logger.Debug($"[PantheonWars] Sent religion list request with filter: {deityFilter}");
+    }
+
+    /// <summary>
+    /// Send a religion action request to the server (join, leave, kick, invite)
+    /// </summary>
+    public void RequestReligionAction(string action, string religionUID = "", string targetPlayerUID = "")
+    {
+        if (_clientChannel == null)
+        {
+            _capi?.Logger.Error("[PantheonWars] Cannot perform religion action: client channel not initialized");
+            return;
+        }
+
+        var request = new ReligionActionRequestPacket(action, religionUID, targetPlayerUID);
+        _clientChannel.SendPacket(request);
+        _capi?.Logger.Debug($"[PantheonWars] Sent religion action request: {action}");
+    }
+
+    /// <summary>
+    /// Request to create a new religion
+    /// </summary>
+    public void RequestCreateReligion(string religionName, string deity, bool isPublic)
+    {
+        if (_clientChannel == null)
+        {
+            _capi?.Logger.Error("[PantheonWars] Cannot create religion: client channel not initialized");
+            return;
+        }
+
+        var request = new CreateReligionRequestPacket(religionName, deity, isPublic);
+        _clientChannel.SendPacket(request);
+        _capi?.Logger.Debug($"[PantheonWars] Sent create religion request: {religionName}, {deity}");
+    }
+
+    /// <summary>
+    /// Request player's religion info (for management overlay)
+    /// </summary>
+    public void RequestPlayerReligionInfo()
+    {
+        if (_clientChannel == null)
+        {
+            _capi?.Logger.Error("[PantheonWars] Cannot request religion info: client channel not initialized");
+            return;
+        }
+
+        var request = new PlayerReligionInfoRequestPacket();
+        _clientChannel.SendPacket(request);
+        _capi?.Logger.Debug("[PantheonWars] Sent player religion info request");
+    }
+
+    /// <summary>
+    /// Request to edit religion description
+    /// </summary>
+    public void RequestEditDescription(string religionUID, string description)
+    {
+        if (_clientChannel == null)
+        {
+            _capi?.Logger.Error("[PantheonWars] Cannot edit description: client channel not initialized");
+            return;
+        }
+
+        var request = new EditDescriptionRequestPacket(religionUID, description);
+        _clientChannel.SendPacket(request);
+        _capi?.Logger.Debug("[PantheonWars] Sent edit description request");
+    }
+
+    /// <summary>
     /// Event fired when perk data is received from the server
     /// </summary>
     public event Action<PerkDataResponsePacket>? PerkDataReceived;
@@ -971,6 +1045,21 @@ public class PantheonWarsSystem : ModSystem
     /// Event fired when the player's religion state changes (disbanded, kicked, etc.)
     /// </summary>
     public event Action<ReligionStateChangedPacket>? ReligionStateChanged;
+
+    /// <summary>
+    /// Event fired when religion list is received from server
+    /// </summary>
+    public event Action<ReligionListResponsePacket>? ReligionListReceived;
+
+    /// <summary>
+    /// Event fired when religion action is completed (join, leave, etc.)
+    /// </summary>
+    public event Action<ReligionActionResponsePacket>? ReligionActionCompleted;
+
+    /// <summary>
+    /// Event fired when player religion info is received from server
+    /// </summary>
+    public event Action<PlayerReligionInfoResponsePacket>? PlayerReligionInfoReceived;
 
     #endregion
 }

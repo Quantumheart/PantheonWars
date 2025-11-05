@@ -21,6 +21,8 @@ public class PerkDialogManager
     public string? CurrentReligionUID { get; set; }
     public DeityType CurrentDeity { get; set; } = DeityType.None;
     public string? CurrentReligionName { get; set; }
+    public int ReligionMemberCount { get; set; } = 0;
+    public string? PlayerRoleInReligion { get; set; } // "Leader", "Member", etc.
 
     // Player progression state
     public int CurrentFavorRank { get; set; } = 0;

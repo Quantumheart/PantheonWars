@@ -18,6 +18,9 @@ internal static class PerkNodeRenderer
     private static readonly Vector4 ColorSelected = new(1.0f, 1.0f, 1.0f, 1.0f); // White border
     private static readonly Vector4 ColorHover = new(0.8f, 0.8f, 1.0f, 1.0f); // Light blue tint
 
+    // Static field for glow animation timing
+    private static float _glowAnimationTime = 0f;
+
     /// <summary>
     ///     Draw a single perk node
     /// </summary>
@@ -27,6 +30,7 @@ internal static class PerkNodeRenderer
     /// <param name="offsetY">Scroll offset Y</param>
     /// <param name="mouseX">Mouse X position (world space)</param>
     /// <param name="mouseY">Mouse Y position (world space)</param>
+    /// <param name="deltaTime">Time elapsed since last frame (for animations)</param>
     /// <param name="isSelected">Whether this node is currently selected</param>
     /// <returns>True if mouse is hovering over this node</returns>
     public static bool DrawNode(
@@ -34,6 +38,7 @@ internal static class PerkNodeRenderer
         ICoreClientAPI api,
         float offsetX, float offsetY,
         float mouseX, float mouseY,
+        float deltaTime,
         bool isSelected)
     {
         var drawList = ImGui.GetWindowDrawList();
@@ -46,13 +51,20 @@ internal static class PerkNodeRenderer
         var isHovering = mouseX >= screenX && mouseX <= screenX + state.Width &&
                          mouseY >= screenY && mouseY <= screenY + state.Height;
 
-        // Draw glow effect for unlockable perks (Phase 5 will animate this)
-        if (state.VisualState == PerkNodeVisualState.Unlockable && state.GlowAlpha > 0)
+        // Animate glow effect for unlockable perks
+        if (state.VisualState == PerkNodeVisualState.Unlockable)
         {
+            // Update animation time (shared across all unlockable perks for synchronized pulse)
+            _glowAnimationTime += deltaTime;
+
+            // Pulse glow alpha between 0.3 and 1.0 using sine wave
+            // Period of 2 seconds for smooth, noticeable pulsing
+            var glowAlpha = 0.5f + 0.5f * (float)Math.Sin(_glowAnimationTime * Math.PI); // 0 to 1
+
             var glowPadding = 8f;
             var glowPos1 = new Vector2(screenX - glowPadding, screenY - glowPadding);
             var glowPos2 = new Vector2(screenX + state.Width + glowPadding, screenY + state.Height + glowPadding);
-            var glowColor = ColorUnlockable * new Vector4(1, 1, 1, state.GlowAlpha * 0.3f);
+            var glowColor = ColorUnlockable * new Vector4(1, 1, 1, glowAlpha * 0.4f);
             var glowColorU32 = ImGui.ColorConvertFloat4ToU32(glowColor);
             drawList.AddRectFilled(glowPos1, glowPos2, glowColorU32, 8f);
         }
