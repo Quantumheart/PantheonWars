@@ -619,9 +619,17 @@ internal static class ReligionManagementOverlay
         if (isActive && (int)(ImGui.GetTime() * 2) % 2 == 0)
         {
             // Calculate cursor position at end of text
-            var lines = (currentValue ?? "").Split('\n');
+            var text = currentValue ?? "";
+            var lines = text.Split('\n');
             var lastLine = lines.Length > 0 ? lines[lines.Length - 1] : "";
-            var lastLineWidth = ImGui.CalcTextSize(lastLine).X;
+
+            // Calculate cursor position - handle empty strings
+            var lastLineWidth = 0f;
+            if (!string.IsNullOrEmpty(lastLine))
+            {
+                lastLineWidth = ImGui.CalcTextSize(lastLine).X;
+            }
+
             var cursorY = y + 8f + (lines.Length - 1) * 16f; // Approximate line height
             var cursorX = x + 8f + lastLineWidth;
 
