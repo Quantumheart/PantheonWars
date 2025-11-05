@@ -22,6 +22,10 @@ public class PerkDialogManager
     public DeityType CurrentDeity { get; set; } = DeityType.None;
     public string? CurrentReligionName { get; set; }
 
+    // Player progression state
+    public int CurrentFavorRank { get; set; } = 0;
+    public int CurrentPrestigeRank { get; set; } = 0;
+
     // Perk selection state
     public string? SelectedPerkId { get; set; }
     public string? HoveringPerkId { get; set; }
@@ -42,11 +46,14 @@ public class PerkDialogManager
     /// <summary>
     ///     Initialize dialog state from player's current religion data
     /// </summary>
-    public void Initialize(string? religionUID, DeityType deity, string? religionName)
+    public void Initialize(string? religionUID, DeityType deity, string? religionName, int favorRank = 0,
+        int prestigeRank = 0)
     {
         CurrentReligionUID = religionUID;
         CurrentDeity = deity;
         CurrentReligionName = religionName;
+        CurrentFavorRank = favorRank;
+        CurrentPrestigeRank = prestigeRank;
         IsDataLoaded = true;
 
         // Reset selection and scroll
@@ -162,8 +169,52 @@ public class PerkDialogManager
     /// </summary>
     public void RefreshAllPerkStates()
     {
-        foreach (var state in PlayerPerkStates.Values) state.UpdateVisualState();
+        // Update CanUnlock status for all player perks
+        foreach (var state in PlayerPerkStates.Values)
+        {
+            state.CanUnlock = CanUnlockPerk(state);
+            state.UpdateVisualState();
+        }
 
-        foreach (var state in ReligionPerkStates.Values) state.UpdateVisualState();
+        // Update CanUnlock status for all religion perks
+        foreach (var state in ReligionPerkStates.Values)
+        {
+            state.CanUnlock = CanUnlockPerk(state);
+            state.UpdateVisualState();
+        }
+    }
+
+    /// <summary>
+    ///     Check if a perk can be unlocked based on prerequisites and rank requirements
+    ///     This is a client-side validation - server will do final validation
+    /// </summary>
+    private bool CanUnlockPerk(PerkNodeState state)
+    {
+        // Already unlocked
+        if (state.IsUnlocked) return false;
+
+        // Check prerequisites
+        if (state.Perk.PrerequisitePerks != null && state.Perk.PrerequisitePerks.Count > 0)
+        {
+            foreach (var prereqId in state.Perk.PrerequisitePerks)
+            {
+                var prereqState = GetPerkState(prereqId);
+                if (prereqState == null || !prereqState.IsUnlocked) return false; // Prerequisite not unlocked
+            }
+        }
+
+        // Check rank requirements based on perk kind
+        if (state.Perk.Kind == PerkKind.Player)
+        {
+            // Player perks require favor rank
+            if (state.Perk.RequiredFavorRank > CurrentFavorRank) return false;
+        }
+        else if (state.Perk.Kind == PerkKind.Religion)
+        {
+            // Religion perks require prestige rank
+            if (state.Perk.RequiredPrestigeRank > CurrentPrestigeRank) return false;
+        }
+
+        return true; // All requirements met
     }
 }

@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
+using PantheonWars.Network;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using VSImGui;
@@ -26,6 +28,7 @@ public class PerkDialog : ModSystem
     private ICoreClientAPI? _capi;
     private long _checkDataId;
     private ImGuiModSystem? _imguiModSystem;
+    private PantheonWarsSystem? _pantheonWarsSystem;
 
     private bool _isOpen;
     private bool _isReady;
@@ -63,6 +66,18 @@ public class PerkDialog : ModSystem
         // Initialize manager
         _manager = new PerkDialogManager(_capi);
 
+        // Get PantheonWarsSystem for network communication
+        _pantheonWarsSystem = _capi.ModLoader.GetModSystem<PantheonWarsSystem>();
+        if (_pantheonWarsSystem != null)
+        {
+            _pantheonWarsSystem.PerkUnlocked += OnPerkUnlockedFromServer;
+            _pantheonWarsSystem.PerkDataReceived += OnPerkDataReceived;
+        }
+        else
+        {
+            _capi.Logger.Error("[PantheonWars] PantheonWarsSystem not found! Perk unlocking will not work.");
+        }
+
         // Get ImGui mod system
         _imguiModSystem = _capi.ModLoader.GetModSystem<ImGuiModSystem>();
         if (_imguiModSystem != null)
@@ -88,71 +103,85 @@ public class PerkDialog : ModSystem
     {
         if (_isReady) return;
 
-        // TODO: In Phase 6, connect to PlayerReligionDataManager to get current religion/deity
-        // For now, we'll just mark as ready and load test data
-        _isReady = true;
-        LoadTestData(); // Phase 4: Load test perks for visual testing
-
-        if (_isReady)
+        // Request perk data from server
+        if (_pantheonWarsSystem != null)
         {
+            _pantheonWarsSystem.RequestPerkData();
+            // Don't set _isReady yet - wait for server response in OnPerkDataReceived
             _capi!.Event.UnregisterGameTickListener(_checkDataId);
-            _capi.Logger.Debug("[PantheonWars] Perk Dialog ready");
         }
     }
 
     /// <summary>
-    ///     Load test perk data for visual testing (Phase 4)
+    ///     Handle perk data received from server
     /// </summary>
-    private void LoadTestData()
+    private void OnPerkDataReceived(PerkDataResponsePacket packet)
     {
-        // Initialize test religion data
-        _manager!.Initialize("test_religion_uid", DeityType.Khoras, "Test Religion of Khoras");
+        _capi!.Logger.Debug($"[PantheonWars] Processing perk data: HasReligion={packet.HasReligion}");
 
-        // Create test perks
-        var testPlayerPerks = new List<Perk>
+        if (!packet.HasReligion)
         {
-            new("khoras_warriors_resolve", "Warrior's Resolve", DeityType.Khoras)
-            {
-                Kind = PerkKind.Player,
-                Category = PerkCategory.Combat,
-                Description = "Increases melee damage and health in combat.",
-                RequiredFavorRank = 0,
-                StatModifiers = new Dictionary<string, float>
-                {
-                    { "meleeDamage", 0.1f },
-                    { "maxhealthExtraMultiplier", 0.1f }
-                }
-            },
-            new("khoras_bloodlust", "Bloodlust", DeityType.Khoras)
-            {
-                Kind = PerkKind.Player,
-                Category = PerkCategory.Combat,
-                Description = "Gain attack speed after killing an enemy.",
-                RequiredFavorRank = 1,
-                PrerequisitePerks = new List<string> { "khoras_warriors_resolve" }
-            }
-        };
+            _capi.Logger.Warning("[PantheonWars] Player has no religion - cannot load perk data");
+            _manager!.Reset();
+            _isReady = false;
+            return;
+        }
 
-        var testReligionPerks = new List<Perk>
+        // Parse deity type from string
+        if (!Enum.TryParse<DeityType>(packet.Deity, out var deityType))
         {
-            new("khoras_war_banner", "War Banner", DeityType.Khoras)
-            {
-                Kind = PerkKind.Religion,
-                Category = PerkCategory.Combat,
-                Description = "All religion members gain bonus damage when fighting together.",
-                RequiredPrestigeRank = 1
-            }
-        };
+            _capi.Logger.Error($"[PantheonWars] Invalid deity type: {packet.Deity}");
+            return;
+        }
 
-        _manager.LoadPerkStates(testPlayerPerks, testReligionPerks);
+        // Initialize manager with real data
+        _manager!.Initialize(packet.ReligionUID, deityType, packet.ReligionName, packet.FavorRank,
+            packet.PrestigeRank);
 
-        // Mark first perk as unlockable for testing
-        _manager.SetPerkUnlocked("khoras_warriors_resolve", false);
-        var firstPerk = _manager.GetPerkState("khoras_warriors_resolve");
-        if (firstPerk != null)
+        // Convert packet perks to Perk objects
+        var playerPerks = packet.PlayerPerks.Select(p => new Perk(p.PerkId, p.Name, deityType)
         {
-            firstPerk.CanUnlock = true;
-            firstPerk.GlowAlpha = 0.5f; // Test glow effect
+            Kind = PerkKind.Player,
+            Category = (PerkCategory)p.Category,
+            Description = p.Description,
+            RequiredFavorRank = p.RequiredFavorRank,
+            RequiredPrestigeRank = p.RequiredPrestigeRank,
+            PrerequisitePerks = p.PrerequisitePerks,
+            StatModifiers = p.StatModifiers
+        }).ToList();
+
+        var religionPerks = packet.ReligionPerks.Select(p => new Perk(p.PerkId, p.Name, deityType)
+        {
+            Kind = PerkKind.Religion,
+            Category = (PerkCategory)p.Category,
+            Description = p.Description,
+            RequiredFavorRank = p.RequiredFavorRank,
+            RequiredPrestigeRank = p.RequiredPrestigeRank,
+            PrerequisitePerks = p.PrerequisitePerks,
+            StatModifiers = p.StatModifiers
+        }).ToList();
+
+        // Load perk states into manager
+        _manager.LoadPerkStates(playerPerks, religionPerks);
+
+        // Mark unlocked perks
+        foreach (var perkId in packet.UnlockedPlayerPerks) _manager.SetPerkUnlocked(perkId, true);
+
+        foreach (var perkId in packet.UnlockedReligionPerks) _manager.SetPerkUnlocked(perkId, true);
+
+        // Refresh states to update can-unlock status
+        _manager.RefreshAllPerkStates();
+
+        _isReady = true;
+        _capi.Logger.Notification(
+            $"[PantheonWars] Loaded {playerPerks.Count} player perks and {religionPerks.Count} religion perks for {packet.Deity}");
+
+        // If dialog should be open, open it now that data is ready
+        if (!_isOpen && _imguiModSystem != null)
+        {
+            _isOpen = true;
+            _imguiModSystem.Show();
+            _capi.Logger.Debug("[PantheonWars] Perk Dialog opened after data load");
         }
     }
 
@@ -177,12 +206,10 @@ public class PerkDialog : ModSystem
 
         if (!_isReady)
         {
-            OnCheckDataAvailability(0);
-            if (!_isReady)
-            {
-                _capi!.ShowChatMessage("Perk system not ready yet. Please try again in a moment.");
-                return;
-            }
+            // Request data from server
+            _pantheonWarsSystem?.RequestPerkData();
+            _capi!.ShowChatMessage("Loading perk data...");
+            return;
         }
 
         _isOpen = true;
@@ -321,9 +348,16 @@ public class PerkDialog : ModSystem
         var selectedState = _manager!.GetSelectedPerkState();
         if (selectedState == null || !selectedState.CanUnlock || selectedState.IsUnlocked) return;
 
-        // TODO: Phase 6 - Send unlock request to server via PerkCommands
-        _capi!.Logger.Debug($"[PantheonWars] Unlock requested: {selectedState.Perk.Name}");
-        _capi.ShowChatMessage($"Unlock perk: {selectedState.Perk.Name} (Phase 6: Connect to server)");
+        // Client-side validation before sending request
+        if (string.IsNullOrEmpty(selectedState.Perk.PerkId))
+        {
+            _capi!.ShowChatMessage("Error: Invalid perk ID");
+            return;
+        }
+
+        // Send unlock request to server
+        _capi!.Logger.Debug($"[PantheonWars] Sending unlock request for: {selectedState.Perk.Name}");
+        _pantheonWarsSystem?.RequestPerkUnlock(selectedState.Perk.PerkId);
     }
 
     /// <summary>
@@ -334,11 +368,38 @@ public class PerkDialog : ModSystem
         Close();
     }
 
+    /// <summary>
+    ///     Handle perk unlock response from server
+    /// </summary>
+    private void OnPerkUnlockedFromServer(string perkId, bool success)
+    {
+        if (!success)
+        {
+            _capi!.Logger.Debug($"[PantheonWars] Perk unlock failed: {perkId}");
+            return;
+        }
+
+        _capi!.Logger.Debug($"[PantheonWars] Perk unlocked from server: {perkId}");
+
+        // Update manager state
+        _manager?.SetPerkUnlocked(perkId, true);
+
+        // Refresh all perk states to update prerequisites and glow effects
+        _manager?.RefreshAllPerkStates();
+    }
+
     public override void Dispose()
     {
         base.Dispose();
 
         if (_capi != null && _checkDataId != 0) _capi.Event.UnregisterGameTickListener(_checkDataId);
+
+        // Unsubscribe from events
+        if (_pantheonWarsSystem != null)
+        {
+            _pantheonWarsSystem.PerkUnlocked -= OnPerkUnlockedFromServer;
+            _pantheonWarsSystem.PerkDataReceived -= OnPerkDataReceived;
+        }
 
         _capi?.Logger.Notification("[PantheonWars] Perk Dialog disposed");
     }
