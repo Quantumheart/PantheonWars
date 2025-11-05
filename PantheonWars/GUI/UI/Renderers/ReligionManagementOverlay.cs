@@ -102,17 +102,31 @@ internal static class ReligionManagementOverlay
         var borderColor = ImGui.ColorConvertFloat4ToU32(ColorGold * 0.7f);
         drawList.AddRect(panelStart, panelEnd, borderColor, 8f, ImDrawFlags.None, 2f);
 
+        // Create invisible child window for input handling
+        ImGui.SetNextWindowPos(panelStart);
+        ImGui.SetNextWindowSize(new Vector2(overlayWidth, overlayHeight));
+        ImGui.PushStyleColor(ImGuiCol.ChildBg, new Vector4(0, 0, 0, 0)); // Transparent background
+        ImGui.PushStyleVar(ImGuiStyleVar.WindowPadding, Vector2.Zero);
+        ImGui.BeginChild("##religion_mgmt_overlay", new Vector2(overlayWidth, overlayHeight), false, ImGuiWindowFlags.NoScrollbar);
+
         // Check if data loaded
         if (_religionInfo == null || !_religionInfo.HasReligion)
         {
             DrawLoadingOrError(drawList, overlayX, overlayY, overlayWidth, overlayHeight, onClose, onRequestRefresh, api);
+            ImGui.EndChild();
+            ImGui.PopStyleVar();
+            ImGui.PopStyleColor();
             return true;
         }
 
         // Disband confirmation dialog
         if (_showDisbandConfirm)
         {
-            return DrawDisbandConfirmation(drawList, api, overlayX, overlayY, overlayWidth, overlayHeight, onDisband);
+            var result = DrawDisbandConfirmation(drawList, api, overlayX, overlayY, overlayWidth, overlayHeight, onDisband);
+            ImGui.EndChild();
+            ImGui.PopStyleVar();
+            ImGui.PopStyleColor();
+            return result;
         }
 
         var currentY = overlayY + padding;
@@ -208,6 +222,9 @@ internal static class ReligionManagementOverlay
             _showDisbandConfirm = true;
         }
 
+        ImGui.EndChild();
+        ImGui.PopStyleVar();
+        ImGui.PopStyleColor();
         return true;
     }
 
