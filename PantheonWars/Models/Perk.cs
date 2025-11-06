@@ -69,7 +69,7 @@ public class Perk : Trait
     /// <summary>
     ///     List of prerequisite perk IDs that must be unlocked first
     /// </summary>
-    public List<string> PrerequisitePerks { get; set; } = new();
+    public List<string>? PrerequisitePerks { get; set; } = new();
 
     /// <summary>
     ///     Dictionary of stat modifiers this perk provides

@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
+using PantheonWars.GUI.UI.Utilities;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
-using Vintagestory.API.Client;
 
 namespace PantheonWars.GUI.UI.Renderers;
 
@@ -13,19 +13,10 @@ namespace PantheonWars.GUI.UI.Renderers;
 /// </summary>
 internal static class TooltipRenderer
 {
-    // Color constants
-    private static readonly Vector4 ColorGold = new(0.996f, 0.682f, 0.204f, 1.0f); // #feae34
-    private static readonly Vector4 ColorWhite = new(0.9f, 0.9f, 0.9f, 1.0f);
-    private static readonly Vector4 ColorGrey = new(0.573f, 0.502f, 0.416f, 1.0f); // #92806a
-    private static readonly Vector4 ColorGreen = new(0.478f, 0.776f, 0.184f, 1.0f); // #7ac62f
-    private static readonly Vector4 ColorRed = new(0.8f, 0.2f, 0.2f, 1.0f);
-    private static readonly Vector4 ColorDarkBrown = new(0.16f, 0.12f, 0.09f, 0.95f); // #2a1f16
-    private static readonly Vector4 ColorBorderGold = new(0.996f, 0.682f, 0.204f, 0.6f);
-
-    private const float TooltipMaxWidth = 320f;
-    private const float TooltipPadding = 12f;
-    private const float LineSpacing = 4f;
-    private const float SectionSpacing = 8f;
+    private const float TOOLTIP_MAX_WIDTH = 320f;
+    private const float TOOLTIP_PADDING = 12f;
+    private const float LINE_SPACING = 4f;
+    private const float SECTION_SPACING = 8f;
 
     /// <summary>
     ///     Draw a tooltip for a perk node when hovering
@@ -36,7 +27,7 @@ internal static class TooltipRenderer
     /// <param name="windowWidth">Window width for edge detection</param>
     /// <param name="windowHeight">Window height for edge detection</param>
     public static void Draw(
-        PerkTooltipData tooltipData,
+        PerkTooltipData? tooltipData,
         float mouseX,
         float mouseY,
         float windowWidth,
@@ -52,8 +43,8 @@ internal static class TooltipRenderer
 
         // Calculate tooltip dimensions
         var contentHeight = CalculateTooltipHeight(lines);
-        var tooltipWidth = TooltipMaxWidth;
-        var tooltipHeight = contentHeight + (TooltipPadding * 2);
+        var tooltipWidth = TOOLTIP_MAX_WIDTH;
+        var tooltipHeight = contentHeight + (TOOLTIP_PADDING * 2);
 
         // Get window position to work in screen space
         var windowPos = ImGui.GetWindowPos();
@@ -84,18 +75,18 @@ internal static class TooltipRenderer
         // Draw tooltip background
         var bgStart = new Vector2(tooltipX, tooltipY);
         var bgEnd = new Vector2(tooltipX + tooltipWidth, tooltipY + tooltipHeight);
-        var bgColor = ImGui.ColorConvertFloat4ToU32(ColorDarkBrown);
+        var bgColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.DarkBrown);
         drawList.AddRectFilled(bgStart, bgEnd, bgColor, 4f);
 
         // Draw border
-        var borderColor = ImGui.ColorConvertFloat4ToU32(ColorBorderGold);
+        var borderColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold * 0.6f);
         drawList.AddRect(bgStart, bgEnd, borderColor, 4f, ImDrawFlags.None, 2f);
 
         // Render content
-        var currentY = tooltipY + TooltipPadding;
+        var currentY = tooltipY + TOOLTIP_PADDING;
         foreach (var line in lines)
         {
-            var textPos = new Vector2(tooltipX + TooltipPadding, currentY);
+            var textPos = new Vector2(tooltipX + TOOLTIP_PADDING, currentY);
             var textColor = ImGui.ColorConvertFloat4ToU32(line.Color);
 
             if (line.IsBold)
@@ -118,10 +109,10 @@ internal static class TooltipRenderer
         lines.Add(new TooltipLine
         {
             Text = data.Name,
-            Color = ColorGold,
+            Color = ColorPalette.Gold,
             FontSize = 18f,
             IsBold = true,
-            SpacingAfter = SectionSpacing
+            SpacingAfter = SECTION_SPACING
         });
 
         // Category and Tier
@@ -132,9 +123,9 @@ internal static class TooltipRenderer
         lines.Add(new TooltipLine
         {
             Text = categoryText,
-            Color = ColorGrey,
+            Color = ColorPalette.Grey,
             FontSize = 12f,
-            SpacingAfter = SectionSpacing
+            SpacingAfter = SECTION_SPACING
         });
 
         // Description
@@ -143,9 +134,9 @@ internal static class TooltipRenderer
             lines.Add(new TooltipLine
             {
                 Text = data.Description,
-                Color = ColorWhite,
+                Color = ColorPalette.White,
                 FontSize = 14f,
-                SpacingAfter = SectionSpacing
+                SpacingAfter = SECTION_SPACING
             });
         }
 
@@ -157,15 +148,15 @@ internal static class TooltipRenderer
                 lines.Add(new TooltipLine
                 {
                     Text = stat,
-                    Color = ColorGreen,
+                    Color = ColorPalette.Green,
                     FontSize = 13f,
-                    SpacingAfter = LineSpacing
+                    SpacingAfter = LINE_SPACING
                 });
             }
 
             // Add spacing after stats section
             if (lines.Count > 0)
-                lines[lines.Count - 1].SpacingAfter = SectionSpacing;
+                lines[lines.Count - 1].SpacingAfter = SECTION_SPACING;
         }
 
         // Special effects
@@ -176,15 +167,15 @@ internal static class TooltipRenderer
                 lines.Add(new TooltipLine
                 {
                     Text = "• " + effect,
-                    Color = ColorWhite,
+                    Color = ColorPalette.White,
                     FontSize = 13f,
-                    SpacingAfter = LineSpacing
+                    SpacingAfter = LINE_SPACING
                 });
             }
 
             // Add spacing after effects section
             if (lines.Count > 0)
-                lines[lines.Count - 1].SpacingAfter = SectionSpacing;
+                lines[lines.Count - 1].SpacingAfter = SECTION_SPACING;
         }
 
         // Requirements section
@@ -194,26 +185,26 @@ internal static class TooltipRenderer
         if (!string.IsNullOrEmpty(data.RequiredFavorRank))
         {
             // Green if unlocked, white if can unlock, red if locked
-            var rankColor = data.IsUnlocked ? ColorGreen : (data.CanUnlock ? ColorWhite : ColorRed);
+            var rankColor = data.IsUnlocked ? ColorPalette.Green : (data.CanUnlock ? ColorPalette.White : ColorPalette.Red);
             lines.Add(new TooltipLine
             {
                 Text = $"Requires: {data.RequiredFavorRank} (Favor)",
                 Color = rankColor,
                 FontSize = 13f,
-                SpacingAfter = LineSpacing
+                SpacingAfter = LINE_SPACING
             });
             hasRequirements = true;
         }
         else if (!string.IsNullOrEmpty(data.RequiredPrestigeRank))
         {
             // Green if unlocked, white if can unlock, red if locked
-            var rankColor = data.IsUnlocked ? ColorGreen : (data.CanUnlock ? ColorWhite : ColorRed);
+            var rankColor = data.IsUnlocked ? ColorPalette.Green : (data.CanUnlock ? ColorPalette.White : ColorPalette.Red);
             lines.Add(new TooltipLine
             {
                 Text = $"Requires: {data.RequiredPrestigeRank} (Prestige)",
                 Color = rankColor,
                 FontSize = 13f,
-                SpacingAfter = LineSpacing
+                SpacingAfter = LINE_SPACING
             });
             hasRequirements = true;
         }
@@ -224,13 +215,13 @@ internal static class TooltipRenderer
             foreach (var prereq in data.PrerequisiteNames)
             {
                 // Green if unlocked, white if can unlock, red if locked
-                var prereqColor = data.IsUnlocked ? ColorGreen : (data.CanUnlock ? ColorWhite : ColorRed);
+                var prereqColor = data.IsUnlocked ? ColorPalette.Green : (data.CanUnlock ? ColorPalette.White : ColorPalette.Red);
                 lines.Add(new TooltipLine
                 {
                     Text = $"Requires: {prereq}",
                     Color = prereqColor,
                     FontSize = 13f,
-                    SpacingAfter = LineSpacing
+                    SpacingAfter = LINE_SPACING
                 });
             }
 
@@ -239,7 +230,7 @@ internal static class TooltipRenderer
 
         // Add spacing after requirements
         if (hasRequirements && lines.Count > 0)
-            lines[lines.Count - 1].SpacingAfter = SectionSpacing;
+            lines[lines.Count - 1].SpacingAfter = SECTION_SPACING;
 
         // Unlock status
         if (data.IsUnlocked)
@@ -247,7 +238,7 @@ internal static class TooltipRenderer
             lines.Add(new TooltipLine
             {
                 Text = "[UNLOCKED]",
-                Color = ColorGreen,
+                Color = ColorPalette.Green,
                 FontSize = 14f,
                 IsBold = true,
                 SpacingAfter = 0
@@ -258,7 +249,7 @@ internal static class TooltipRenderer
             lines.Add(new TooltipLine
             {
                 Text = "Click to unlock",
-                Color = ColorGreen,
+                Color = ColorPalette.Green,
                 FontSize = 13f,
                 SpacingAfter = 0
             });
@@ -273,7 +264,7 @@ internal static class TooltipRenderer
             lines.Add(new TooltipLine
             {
                 Text = lockMessage,
-                Color = ColorRed,
+                Color = ColorPalette.Red,
                 FontSize = 13f,
                 SpacingAfter = 0
             });

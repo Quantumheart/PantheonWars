@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using PantheonWars.GUI.UI.Utilities;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using Vintagestory.API.Client;
@@ -13,14 +14,6 @@ namespace PantheonWars.GUI.UI.Renderers;
 /// </summary>
 internal static class PerkInfoRenderer
 {
-    // Color constants
-    private static readonly Vector4 ColorGold = new(0.996f, 0.682f, 0.204f, 1.0f); // #feae34
-    private static readonly Vector4 ColorWhite = new(0.9f, 0.9f, 0.9f, 1.0f);
-    private static readonly Vector4 ColorGrey = new(0.573f, 0.502f, 0.416f, 1.0f); // #92806a
-    private static readonly Vector4 ColorGreen = new(0.478f, 0.776f, 0.184f, 1.0f); // #7ac62f lime
-    private static readonly Vector4 ColorRed = new(0.749f, 0.400f, 0.247f, 1.0f); // #bf663f
-    private static readonly Vector4 ColorDarkBrown = new(0.16f, 0.12f, 0.09f, 0.9f); // #2a1f16
-
     /// <summary>
     ///     Draw the perk info panel
     /// </summary>
@@ -41,11 +34,11 @@ internal static class PerkInfoRenderer
         var endPos = new Vector2(x + width, y + height);
 
         // Draw panel background
-        var bgColor = ImGui.ColorConvertFloat4ToU32(ColorDarkBrown);
+        var bgColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.DarkBrown);
         drawList.AddRectFilled(startPos, endPos, bgColor, 4f);
 
         // Draw border
-        var borderColor = ImGui.ColorConvertFloat4ToU32(ColorGold * 0.5f);
+        var borderColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold * 0.5f);
         drawList.AddRect(startPos, endPos, borderColor, 4f, ImDrawFlags.None, 2f);
 
         // Get selected perk state
@@ -60,7 +53,7 @@ internal static class PerkInfoRenderer
                 x + (width - textSize.X) / 2,
                 y + (height - textSize.Y) / 2
             );
-            var textColor = ImGui.ColorConvertFloat4ToU32(ColorGrey);
+            var textColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
             drawList.AddText(textPos, textColor, promptText);
 
             return height;
@@ -72,7 +65,7 @@ internal static class PerkInfoRenderer
         var contentWidth = width - padding * 2;
 
         // Perk name (title)
-        var titleColor = selectedState.IsUnlocked ? ColorGold : ColorWhite;
+        var titleColor = selectedState.IsUnlocked ? ColorPalette.Gold : ColorPalette.White;
         var titleColorU32 = ImGui.ColorConvertFloat4ToU32(titleColor);
         drawList.AddText(ImGui.GetFont(), 20f, new Vector2(x + padding, currentY), titleColorU32,
             selectedState.Perk.Name);
@@ -88,9 +81,9 @@ internal static class PerkInfoRenderer
 
         var statusColor = selectedState.VisualState switch
         {
-            PerkNodeVisualState.Unlocked => ColorGold,
-            PerkNodeVisualState.Unlockable => ColorGreen,
-            _ => ColorRed
+            PerkNodeVisualState.Unlocked => ColorPalette.Gold,
+            PerkNodeVisualState.Unlockable => ColorPalette.Green,
+            _ => ColorPalette.Red
         };
 
         var statusColorU32 = ImGui.ColorConvertFloat4ToU32(statusColor);
@@ -99,7 +92,7 @@ internal static class PerkInfoRenderer
 
         // Category and kind
         var metaText = $"{selectedState.Perk.Category} | {selectedState.Perk.Kind} Perk | Tier {selectedState.Tier}";
-        var metaColorU32 = ImGui.ColorConvertFloat4ToU32(ColorGrey);
+        var metaColorU32 = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
         drawList.AddText(ImGui.GetFont(), 12f, new Vector2(x + padding, currentY), metaColorU32, metaText);
         currentY += 20f;
 
@@ -107,12 +100,12 @@ internal static class PerkInfoRenderer
         var lineY = currentY;
         var lineStart = new Vector2(x + padding, lineY);
         var lineEnd = new Vector2(x + width - padding, lineY);
-        var lineColor = ImGui.ColorConvertFloat4ToU32(ColorGrey * 0.5f);
+        var lineColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey * 0.5f);
         drawList.AddLine(lineStart, lineEnd, lineColor, 1f);
         currentY += 8f;
 
         // Description (word-wrapped)
-        var descriptionColorU32 = ImGui.ColorConvertFloat4ToU32(ColorWhite);
+        var descriptionColorU32 = ImGui.ColorConvertFloat4ToU32(ColorPalette.White);
         DrawWrappedText(drawList, selectedState.Perk.Description,
             x + padding, currentY, contentWidth, descriptionColorU32, 14f);
         currentY += 40f; // Approximate space for description
@@ -121,7 +114,7 @@ internal static class PerkInfoRenderer
         if (!selectedState.IsUnlocked)
         {
             currentY += 8f;
-            var reqTitleColorU32 = ImGui.ColorConvertFloat4ToU32(ColorGold);
+            var reqTitleColorU32 = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold);
             drawList.AddText(ImGui.GetFont(), 14f, new Vector2(x + padding, currentY), reqTitleColorU32,
                 "Requirements:");
             currentY += 18f;
@@ -136,14 +129,14 @@ internal static class PerkInfoRenderer
             currentY += 18f;
 
             // Prerequisites
-            if (selectedState.Perk.PrerequisitePerks != null && selectedState.Perk.PrerequisitePerks.Count > 0)
+            if (selectedState.Perk.PrerequisitePerks is { Count: > 0 })
                 foreach (var prereqId in selectedState.Perk.PrerequisitePerks)
                 {
                     var prereqState = manager.GetPerkState(prereqId);
                     var prereqName = prereqState?.Perk.Name ?? prereqId;
                     var prereqText = $"  Unlock: {prereqName}";
 
-                    var prereqColor = prereqState?.IsUnlocked ?? false ? ColorGreen : ColorRed;
+                    var prereqColor = prereqState?.IsUnlocked ?? false ? ColorPalette.Green : ColorPalette.Red;
                     var prereqColorU32 = ImGui.ColorConvertFloat4ToU32(prereqColor);
 
                     drawList.AddText(ImGui.GetFont(), 14f, new Vector2(x + padding + 8, currentY),
@@ -156,7 +149,7 @@ internal static class PerkInfoRenderer
         if (currentY < y + height - 60f && selectedState.Perk.StatModifiers.Count > 0)
         {
             currentY += 8f;
-            var statsTitleColorU32 = ImGui.ColorConvertFloat4ToU32(ColorGold);
+            var statsTitleColorU32 = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold);
             drawList.AddText(ImGui.GetFont(), 16f, new Vector2(x + padding, currentY), statsTitleColorU32,
                 "Effects:");
             currentY += 22f;
@@ -165,7 +158,7 @@ internal static class PerkInfoRenderer
             {
                 // Format stat display
                 var statText = FormatStatModifier(stat.Key, stat.Value);
-                var statColorU32 = ImGui.ColorConvertFloat4ToU32(ColorGreen);
+                var statColorU32 = ImGui.ColorConvertFloat4ToU32(ColorPalette.Green);
 
                 drawList.AddText(ImGui.GetFont(), 14f, new Vector2(x + padding + 8, currentY), statColorU32,
                     statText);

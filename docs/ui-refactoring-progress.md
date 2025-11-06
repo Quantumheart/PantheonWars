@@ -112,14 +112,32 @@ Created utility library in `GUI/UI/Utilities/`:
   - Removed duplicate DrawButton method (~50 lines)
   - Used `customColor` parameter for red warning button
 
+### TooltipRenderer.cs ✅
+- **Before:** 309 lines
+- **After:** 301 lines
+- **Reduction:** 8 lines (3%)
+- **Changes:**
+  - Replaced color constants with `ColorPalette`
+  - Removed 7 color constant declarations
+  - No duplicate methods (tooltip rendering is unique)
+
+### PerkInfoRenderer.cs ✅
+- **Before:** 286 lines
+- **After:** 279 lines
+- **Reduction:** 7 lines (2%)
+- **Changes:**
+  - Replaced color constants with `ColorPalette`
+  - Removed 6 color constant declarations
+  - No duplicate methods (perk info rendering is unique)
+
 ## Impact
 
 ### Code Reduction
-- **Total lines removed:** 821 lines (324 + 290 + 127 + 23 + 57)
-- **Files refactored:** 5 files
-- **Average reduction:** 29% per file
+- **Total lines removed:** 836 lines (324 + 290 + 127 + 23 + 57 + 8 + 7)
+- **Files refactored:** 7 files
+- **Average reduction:** 26% per file
 - **New shared component files:** 6 files, ~450 lines (reusable across all overlays)
-- **Net benefit:** 821 lines of duplication eliminated, with shared components now usable across 8+ overlay files
+- **Net benefit:** 836 lines of duplication eliminated, with shared components now usable across 8+ overlay files
 
 ### Breakdown by File
 | File | Before | After | Reduction | Percentage |
@@ -129,7 +147,9 @@ Created utility library in `GUI/UI/Utilities/`:
 | ReligionBrowserOverlay.cs | 580 | 453 | 127 | 22% |
 | ReligionHeaderRenderer.cs | 309 | 286 | 23 | 7% |
 | LeaveReligionConfirmOverlay.cs | 186 | 129 | 57 | 31% |
-| **Total** | **2536** | **1715** | **821** | **32%** |
+| TooltipRenderer.cs | 309 | 301 | 8 | 3% |
+| PerkInfoRenderer.cs | 286 | 279 | 7 | 2% |
+| **Total** | **3131** | **2295** | **836** | **27%** |
 
 ### Improved Maintainability
 - Color changes now require editing 1 file instead of 8
@@ -140,13 +160,13 @@ Created utility library in `GUI/UI/Utilities/`:
 
 ## Next Steps (Future Work)
 
-### Phase 3: Refactor Remaining Overlays
+### Phase 3: Refactor Remaining Overlays ✅ COMPLETE
 - [x] ReligionManagementOverlay.cs (771 lines) → 481 lines ✅
 - [x] ReligionBrowserOverlay.cs (580 lines) → 453 lines ✅
 - [x] ReligionHeaderRenderer.cs (309 lines) → 286 lines ✅
 - [x] LeaveReligionConfirmOverlay.cs (186 lines) → 129 lines ✅
-- [ ] TooltipRenderer.cs (309 lines)
-- [ ] PerkInfoRenderer.cs (286 lines)
+- [x] TooltipRenderer.cs (309 lines) → 301 lines ✅
+- [x] PerkInfoRenderer.cs (286 lines) → 279 lines ✅
 
 ### Phase 4: Additional Components (If Needed)
 - [ ] Checkbox component (if checkbox is used in multiple files)
@@ -182,12 +202,15 @@ PantheonWars/GUI/UI/Renderers/
 ├── ReligionManagementOverlay.cs (771 → 481 lines)
 ├── ReligionBrowserOverlay.cs (580 → 453 lines)
 ├── ReligionHeaderRenderer.cs (309 → 286 lines)
-└── LeaveReligionConfirmOverlay.cs (186 → 129 lines)
+├── LeaveReligionConfirmOverlay.cs (186 → 129 lines)
+├── TooltipRenderer.cs (309 → 301 lines)
+└── PerkInfoRenderer.cs (286 → 279 lines)
 ```
 
 ---
 
 **Date:** 2025-11-06
-**Status:** Phase 1, 2 & 3 (Partial) Complete ✅
-**Phase 3 Progress:** 5 of 6 major overlays refactored
-**Next:** Optionally refactor TooltipRenderer.cs and PerkInfoRenderer.cs, or test changes
+**Status:** Phase 1, 2 & 3 Complete ✅
+**Phase 3 Progress:** All 7 major overlay/renderer files refactored
+**Summary:** 836 lines of duplicate code eliminated (27% reduction), all files now use shared components
+**Next:** Test changes, or proceed to Phase 4/5 (optional advanced refactoring)
