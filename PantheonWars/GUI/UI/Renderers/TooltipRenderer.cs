@@ -128,16 +128,24 @@ internal static class TooltipRenderer
             SpacingAfter = SECTION_SPACING
         });
 
-        // Description
+        // Description (wrap if too long)
         if (!string.IsNullOrEmpty(data.Description))
         {
-            lines.Add(new TooltipLine
+            var wrappedLines = WrapText(data.Description, TOOLTIP_MAX_WIDTH - (TOOLTIP_PADDING * 2), 14f);
+            foreach (var wrappedLine in wrappedLines)
             {
-                Text = data.Description,
-                Color = ColorPalette.White,
-                FontSize = 14f,
-                SpacingAfter = SECTION_SPACING
-            });
+                lines.Add(new TooltipLine
+                {
+                    Text = wrappedLine,
+                    Color = ColorPalette.White,
+                    FontSize = 14f,
+                    SpacingAfter = LINE_SPACING
+                });
+            }
+
+            // Add section spacing after last description line
+            if (lines.Count > 0)
+                lines[lines.Count - 1].SpacingAfter = SECTION_SPACING;
         }
 
         // Stat modifiers
@@ -159,18 +167,22 @@ internal static class TooltipRenderer
                 lines[lines.Count - 1].SpacingAfter = SECTION_SPACING;
         }
 
-        // Special effects
+        // Special effects (wrap if too long)
         if (data.SpecialEffectDescriptions.Count > 0)
         {
             foreach (var effect in data.SpecialEffectDescriptions)
             {
-                lines.Add(new TooltipLine
+                var wrappedEffects = WrapText("• " + effect, TOOLTIP_MAX_WIDTH - (TOOLTIP_PADDING * 2), 13f);
+                foreach (var wrappedLine in wrappedEffects)
                 {
-                    Text = "• " + effect,
-                    Color = ColorPalette.White,
-                    FontSize = 13f,
-                    SpacingAfter = LINE_SPACING
-                });
+                    lines.Add(new TooltipLine
+                    {
+                        Text = wrappedLine,
+                        Color = ColorPalette.White,
+                        FontSize = 13f,
+                        SpacingAfter = LINE_SPACING
+                    });
+                }
             }
 
             // Add spacing after effects section
@@ -282,6 +294,45 @@ internal static class TooltipRenderer
         foreach (var line in lines) totalHeight += line.Height + line.SpacingAfter;
 
         return totalHeight;
+    }
+
+    /// <summary>
+    ///     Wrap text to fit within max width
+    /// </summary>
+    private static List<string> WrapText(string text, float maxWidth, float fontSize)
+    {
+        var result = new List<string>();
+        if (string.IsNullOrEmpty(text)) return result;
+
+        // Split by words
+        var words = text.Split(' ');
+        var currentLine = "";
+
+        foreach (var word in words)
+        {
+            var testLine = string.IsNullOrEmpty(currentLine) ? word : currentLine + " " + word;
+            var testSize = ImGui.CalcTextSize(testLine);
+
+            // Scale based on font size (CalcTextSize uses default font size)
+            var scaledWidth = testSize.X * (fontSize / ImGui.GetFontSize());
+
+            if (scaledWidth > maxWidth && !string.IsNullOrEmpty(currentLine))
+            {
+                // Line too long, save current line and start new one
+                result.Add(currentLine);
+                currentLine = word;
+            }
+            else
+            {
+                currentLine = testLine;
+            }
+        }
+
+        // Add last line
+        if (!string.IsNullOrEmpty(currentLine))
+            result.Add(currentLine);
+
+        return result;
     }
 
     /// <summary>
