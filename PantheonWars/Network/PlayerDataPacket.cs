@@ -1,46 +1,41 @@
-using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 using ProtoBuf;
 
-namespace PantheonWars.Network
+namespace PantheonWars.Network;
+
+/// <summary>
+///     Network packet for syncing player deity data from server to client
+/// </summary>
+[ProtoContract]
+public class PlayerDataPacket
 {
-    /// <summary>
-    /// Network packet for syncing player deity data from server to client
-    /// </summary>
-    [ProtoContract]
-    public class PlayerDataPacket
+    public PlayerDataPacket()
     {
-        [ProtoMember(1)]
-        public int DeityTypeId { get; set; }
+    }
 
-        [ProtoMember(2)]
-        public int DivineFavor { get; set; }
+    public PlayerDataPacket(DeityType deityType, int favor, DevotionRank rank, string deityName)
+    {
+        DeityTypeId = (int)deityType;
+        DivineFavor = favor;
+        DevotionRankId = (int)rank;
+        DeityName = deityName;
+    }
 
-        [ProtoMember(3)]
-        public int DevotionRankId { get; set; }
+    [ProtoMember(1)] public int DeityTypeId { get; set; }
 
-        [ProtoMember(4)]
-        public string DeityName { get; set; } = string.Empty;
+    [ProtoMember(2)] public int DivineFavor { get; set; }
 
-        public PlayerDataPacket()
-        {
-        }
+    [ProtoMember(3)] public int DevotionRankId { get; set; }
 
-        public PlayerDataPacket(DeityType deityType, int favor, DevotionRank rank, string deityName)
-        {
-            DeityTypeId = (int)deityType;
-            DivineFavor = favor;
-            DevotionRankId = (int)rank;
-            DeityName = deityName;
-        }
+    [ProtoMember(4)] public string DeityName { get; set; } = string.Empty;
 
-        public DeityType GetDeityType()
-        {
-            return (DeityType)DeityTypeId;
-        }
+    public DeityType GetDeityType()
+    {
+        return (DeityType)DeityTypeId;
+    }
 
-        public DevotionRank GetDevotionRank()
-        {
-            return (DevotionRank)DevotionRankId;
-        }
+    public DevotionRank GetDevotionRank()
+    {
+        return (DevotionRank)DevotionRankId;
     }
 }
