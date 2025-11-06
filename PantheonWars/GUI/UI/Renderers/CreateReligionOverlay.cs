@@ -4,7 +4,6 @@ using ImGuiNET;
 using PantheonWars.GUI.UI.Components.Buttons;
 using PantheonWars.GUI.UI.Components.Inputs;
 using PantheonWars.GUI.UI.Utilities;
-using PantheonWars.Models.Enum;
 using Vintagestory.API.Client;
 
 namespace PantheonWars.GUI.UI.Renderers;
@@ -20,7 +19,7 @@ internal static class CreateReligionOverlay
     private static int _selectedDeityIndex = 0; // Khoras
     private static bool _isPublic = true;
     private static string? _errorMessage;
-    private static bool _dropdownOpen = false;
+    private static bool _dropdownOpen;
 
     /// <summary>
     ///     Initialize/reset overlay state
@@ -318,12 +317,12 @@ internal static class CreateReligionOverlay
 
         // Draw checkbox background
         var bgColor = isHovering
-            ? ImGui.ColorConvertFloat4ToU32(ColorLightBrown * 0.7f)
-            : ImGui.ColorConvertFloat4ToU32(ColorDarkBrown * 0.7f);
+            ? ImGui.ColorConvertFloat4ToU32(ColorPalette.LightBrown * 0.7f)
+            : ImGui.ColorConvertFloat4ToU32(ColorPalette.DarkBrown * 0.7f);
         drawList.AddRectFilled(checkboxStart, checkboxEnd, bgColor, 3f);
 
         // Draw border
-        var borderColor = ImGui.ColorConvertFloat4ToU32(isChecked ? ColorGold : ColorGrey * 0.5f);
+        var borderColor = ImGui.ColorConvertFloat4ToU32(isChecked ? ColorPalette.Gold : ColorPalette.Grey * 0.5f);
         drawList.AddRect(checkboxStart, checkboxEnd, borderColor, 3f, ImDrawFlags.None, 1.5f);
 
         if (isHovering)
@@ -334,7 +333,7 @@ internal static class CreateReligionOverlay
         // Draw checkmark if checked
         if (isChecked)
         {
-            var checkColor = ImGui.ColorConvertFloat4ToU32(ColorGold);
+            var checkColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold);
             drawList.AddLine(
                 new Vector2(x + 4f, y + checkboxSize / 2),
                 new Vector2(x + checkboxSize / 2 - 1f, y + checkboxSize - 5f),
@@ -349,7 +348,7 @@ internal static class CreateReligionOverlay
 
         // Draw label
         var labelPos = new Vector2(x + checkboxSize + labelPadding, y + (checkboxSize - 14f) / 2);
-        var labelColor = ImGui.ColorConvertFloat4ToU32(ColorWhite);
+        var labelColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.White);
         drawList.AddText(labelPos, labelColor, label);
 
         // Handle click
