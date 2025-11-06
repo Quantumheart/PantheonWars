@@ -2,6 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
+using PantheonWars.GUI.UI.Components.Buttons;
+using PantheonWars.GUI.UI.Components.Inputs;
+using PantheonWars.GUI.UI.Components.Lists;
+using PantheonWars.GUI.UI.Utilities;
 using PantheonWars.Network;
 using Vintagestory.API.Client;
 
@@ -13,14 +17,6 @@ namespace PantheonWars.GUI.UI.Renderers;
 /// </summary>
 internal static class ReligionManagementOverlay
 {
-    // Color constants
-    private static readonly Vector4 ColorGold = new(0.996f, 0.682f, 0.204f, 1.0f);
-    private static readonly Vector4 ColorWhite = new(0.9f, 0.9f, 0.9f, 1.0f);
-    private static readonly Vector4 ColorGrey = new(0.573f, 0.502f, 0.416f, 1.0f);
-    private static readonly Vector4 ColorDarkBrown = new(0.24f, 0.18f, 0.13f, 1.0f);
-    private static readonly Vector4 ColorLightBrown = new(0.35f, 0.26f, 0.19f, 1.0f);
-    private static readonly Vector4 ColorBackground = new(0.16f, 0.12f, 0.09f, 0.95f);
-    private static readonly Vector4 ColorRed = new(0.8f, 0.2f, 0.2f, 1.0f);
 
     // State
     private static PlayerReligionInfoResponsePacket? _religionInfo;
@@ -95,11 +91,11 @@ internal static class ReligionManagementOverlay
         // Draw main panel
         var panelStart = new Vector2(overlayX, overlayY);
         var panelEnd = new Vector2(overlayX + overlayWidth, overlayY + overlayHeight);
-        var panelColor = ImGui.ColorConvertFloat4ToU32(ColorBackground);
+        var panelColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Background);
         drawList.AddRectFilled(panelStart, panelEnd, panelColor, 8f);
 
         // Draw border
-        var borderColor = ImGui.ColorConvertFloat4ToU32(ColorGold * 0.7f);
+        var borderColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold * 0.7f);
         drawList.AddRect(panelStart, panelEnd, borderColor, 8f, ImDrawFlags.None, 2f);
 
         // Create invisible child window for input handling
@@ -135,14 +131,14 @@ internal static class ReligionManagementOverlay
         var headerText = $"Manage {_religionInfo.ReligionName}";
         var headerSize = ImGui.CalcTextSize(headerText);
         var headerPos = new Vector2(overlayX + padding, currentY);
-        var headerColor = ImGui.ColorConvertFloat4ToU32(ColorGold);
+        var headerColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold);
         drawList.AddText(ImGui.GetFont(), 20f, headerPos, headerColor, headerText);
 
         // Close button (X)
         const float closeButtonSize = 24f;
         var closeButtonX = overlayX + overlayWidth - padding - closeButtonSize;
         var closeButtonY = currentY;
-        if (DrawCloseButton(drawList, closeButtonX, closeButtonY, closeButtonSize))
+        if (ButtonRenderer.DrawCloseButton(drawList, closeButtonX, closeButtonY, closeButtonSize))
         {
             api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                 api.World.Player.Entity, null, false, 8f, 0.5f);
@@ -165,11 +161,11 @@ internal static class ReligionManagementOverlay
         currentY += 25f;
 
         var inviteInputWidth = overlayWidth - padding * 2 - 120f;
-        _invitePlayerName = DrawTextInput(drawList, "##invite_input", _invitePlayerName, overlayX + padding, currentY, inviteInputWidth, 32f, "Player name...");
+        _invitePlayerName = TextInput.Draw(drawList, "##invite_input", _invitePlayerName, overlayX + padding, currentY, inviteInputWidth, 32f, "Player name...");
 
         // Invite button
         var inviteButtonX = overlayX + padding + inviteInputWidth + 10f;
-        if (DrawButton(drawList, "Invite", inviteButtonX, currentY, 100f, 32f, false, !string.IsNullOrWhiteSpace(_invitePlayerName)))
+        if (ButtonRenderer.DrawButton(drawList, "Invite", inviteButtonX, currentY, 100f, 32f, false, !string.IsNullOrWhiteSpace(_invitePlayerName)))
         {
             if (!string.IsNullOrWhiteSpace(_invitePlayerName))
             {
@@ -187,13 +183,13 @@ internal static class ReligionManagementOverlay
         currentY += 25f;
 
         const float descHeight = 80f;
-        _description = DrawMultilineTextInput(drawList, "##description_input", _description, overlayX + padding, currentY, overlayWidth - padding * 2, descHeight);
+        _description = TextInput.DrawMultiline(drawList, "##description_input", _description, overlayX + padding, currentY, overlayWidth - padding * 2, descHeight, 500);
         currentY += descHeight + 5f;
 
         // Save Description button
         var saveButtonWidth = 150f;
         var saveButtonX = overlayX + overlayWidth - padding - saveButtonWidth;
-        if (DrawButton(drawList, "Save Description", saveButtonX, currentY, saveButtonWidth, 32f, false, true))
+        if (ButtonRenderer.DrawButton(drawList, "Save Description", saveButtonX, currentY, saveButtonWidth, 32f, false, true))
         {
             api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                 api.World.Player.Entity, null, false, 8f, 0.5f);
@@ -215,7 +211,7 @@ internal static class ReligionManagementOverlay
         var disbandButtonX = overlayX + padding;
         var disbandButtonY = overlayY + overlayHeight - padding - disbandButtonHeight;
 
-        if (DrawButton(drawList, "Disband Religion", disbandButtonX, disbandButtonY, disbandButtonWidth, disbandButtonHeight, false, true, ColorRed))
+        if (ButtonRenderer.DrawButton(drawList, "Disband Religion", disbandButtonX, disbandButtonY, disbandButtonWidth, disbandButtonHeight, false, true, ColorPalette.Red))
         {
             api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                 api.World.Player.Entity, null, false, 8f, 0.5f);
@@ -238,12 +234,12 @@ internal static class ReligionManagementOverlay
         // Header with close button
         var headerText = "Manage Religion";
         var headerPos = new Vector2(x + 20f, currentY);
-        var headerColor = ImGui.ColorConvertFloat4ToU32(ColorGold);
+        var headerColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold);
         drawList.AddText(ImGui.GetFont(), 20f, headerPos, headerColor, headerText);
 
         const float closeButtonSize = 24f;
         var closeButtonX = x + width - 20f - closeButtonSize;
-        if (DrawCloseButton(drawList, closeButtonX, currentY, closeButtonSize))
+        if (ButtonRenderer.DrawCloseButton(drawList, closeButtonX, currentY, closeButtonSize))
         {
             api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                 api.World.Player.Entity, null, false, 8f, 0.5f);
@@ -256,7 +252,7 @@ internal static class ReligionManagementOverlay
         var message = _religionInfo == null ? "Loading religion data..." : "You are not in a religion.";
         var messageSize = ImGui.CalcTextSize(message);
         var messagePos = new Vector2(x + (width - messageSize.X) / 2, y + (height - messageSize.Y) / 2);
-        var messageColor = ImGui.ColorConvertFloat4ToU32(ColorGrey);
+        var messageColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
         drawList.AddText(messagePos, messageColor, message);
 
         // Refresh button if not loading
@@ -267,7 +263,7 @@ internal static class ReligionManagementOverlay
             var buttonX = x + (width - buttonWidth) / 2;
             var buttonY = messagePos.Y + 40f;
 
-            if (DrawButton(drawList, "Refresh", buttonX, buttonY, buttonWidth, buttonHeight, false, true))
+            if (ButtonRenderer.DrawButton(drawList, "Refresh", buttonX, buttonY, buttonWidth, buttonHeight, false, true))
             {
                 api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                     api.World.Player.Entity, null, false, 8f, 0.5f);
@@ -289,11 +285,11 @@ internal static class ReligionManagementOverlay
         // Draw confirm background
         var confirmStart = new Vector2(confirmX, confirmY);
         var confirmEnd = new Vector2(confirmX + confirmWidth, confirmY + confirmHeight);
-        var confirmBg = ImGui.ColorConvertFloat4ToU32(ColorDarkBrown);
+        var confirmBg = ImGui.ColorConvertFloat4ToU32(ColorPalette.DarkBrown);
         drawList.AddRectFilled(confirmStart, confirmEnd, confirmBg, 8f);
 
         // Draw border
-        var confirmBorder = ImGui.ColorConvertFloat4ToU32(ColorRed);
+        var confirmBorder = ImGui.ColorConvertFloat4ToU32(ColorPalette.Red);
         drawList.AddRect(confirmStart, confirmEnd, confirmBorder, 8f, ImDrawFlags.None, 3f);
 
         var currentY = confirmY + 20f;
@@ -302,7 +298,7 @@ internal static class ReligionManagementOverlay
         var warningText = "Disband Religion?";
         var warningSize = ImGui.CalcTextSize(warningText);
         var warningPos = new Vector2(confirmX + (confirmWidth - warningSize.X) / 2, currentY);
-        var warningColor = ImGui.ColorConvertFloat4ToU32(ColorRed);
+        var warningColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Red);
         drawList.AddText(ImGui.GetFont(), 18f, warningPos, warningColor, warningText);
         currentY += warningSize.Y + 20f;
 
@@ -313,7 +309,7 @@ internal static class ReligionManagementOverlay
         {
             var lineSize = ImGui.CalcTextSize(line);
             var linePos = new Vector2(confirmX + (confirmWidth - lineSize.X) / 2, currentY);
-            var lineColor = ImGui.ColorConvertFloat4ToU32(ColorWhite);
+            var lineColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.White);
             drawList.AddText(linePos, lineColor, line);
             currentY += lineSize.Y + 5f;
         }
@@ -328,7 +324,7 @@ internal static class ReligionManagementOverlay
         var buttonY = confirmY + confirmHeight - 20f - buttonHeight;
 
         // Cancel button
-        if (DrawButton(drawList, "Cancel", buttonsStartX, buttonY, buttonWidth, buttonHeight, false, true))
+        if (ButtonRenderer.DrawButton(drawList, "Cancel", buttonsStartX, buttonY, buttonWidth, buttonHeight, false, true))
         {
             api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                 api.World.Player.Entity, null, false, 8f, 0.5f);
@@ -337,7 +333,7 @@ internal static class ReligionManagementOverlay
 
         // Confirm button
         var confirmButtonX = buttonsStartX + buttonWidth + buttonSpacing;
-        if (DrawButton(drawList, "Disband", confirmButtonX, buttonY, buttonWidth, buttonHeight, false, true, ColorRed))
+        if (ButtonRenderer.DrawButton(drawList, "Disband", confirmButtonX, buttonY, buttonWidth, buttonHeight, false, true, ColorPalette.Red))
         {
             api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                 api.World.Player.Entity, null, false, 8f, 0.5f);
@@ -361,7 +357,7 @@ internal static class ReligionManagementOverlay
         // Draw background
         var listStart = new Vector2(x, y);
         var listEnd = new Vector2(x + width, y + height);
-        var listBgColor = ImGui.ColorConvertFloat4ToU32(ColorDarkBrown * 0.5f);
+        var listBgColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.DarkBrown * 0.5f);
         drawList.AddRectFilled(listStart, listEnd, listBgColor, 4f);
 
         var members = _religionInfo?.Members ?? new List<PlayerReligionInfoResponsePacket.MemberInfo>();
@@ -370,7 +366,7 @@ internal static class ReligionManagementOverlay
             var noMembersText = "No members";
             var noMembersSize = ImGui.CalcTextSize(noMembersText);
             var noMembersPos = new Vector2(x + (width - noMembersSize.X) / 2, y + (height - noMembersSize.Y) / 2);
-            var noMembersColor = ImGui.ColorConvertFloat4ToU32(ColorGrey);
+            var noMembersColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
             drawList.AddText(noMembersPos, noMembersColor, noMembersText);
             return;
         }
@@ -418,7 +414,7 @@ internal static class ReligionManagementOverlay
         // Draw scrollbar if needed
         if (contentHeight > height)
         {
-            DrawScrollbar(drawList, x + width - scrollbarWidth, y, scrollbarWidth, height, _memberScrollY, maxScroll);
+            Scrollbar.Draw(drawList, x + width - scrollbarWidth, y, scrollbarWidth, height, _memberScrollY, maxScroll);
         }
     }
 
@@ -435,20 +431,20 @@ internal static class ReligionManagementOverlay
         // Draw background
         var itemStart = new Vector2(x, y);
         var itemEnd = new Vector2(x + width, y + height);
-        var bgColor = ImGui.ColorConvertFloat4ToU32(ColorDarkBrown * 0.8f);
+        var bgColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.DarkBrown * 0.8f);
         drawList.AddRectFilled(itemStart, itemEnd, bgColor, 3f);
 
         // Player name
         var nameText = member.PlayerName + (member.IsFounder ? " [Founder]" : "");
         var namePos = new Vector2(x + padding, y + (height - 14f) / 2);
-        var nameColor = ImGui.ColorConvertFloat4ToU32(member.IsFounder ? ColorGold : ColorWhite);
+        var nameColor = ImGui.ColorConvertFloat4ToU32(member.IsFounder ? ColorPalette.Gold : ColorPalette.White);
         drawList.AddText(namePos, nameColor, nameText);
 
         // Favor rank
         var rankText = $"{member.FavorRank} ({member.Favor})";
         var rankSize = ImGui.CalcTextSize(rankText);
         var rankPos = new Vector2(x + width - padding - kickButtonWidth - 10f - rankSize.X, y + (height - 14f) / 2);
-        var rankColor = ImGui.ColorConvertFloat4ToU32(ColorGrey);
+        var rankColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
         drawList.AddText(rankPos, rankColor, rankText);
 
         // Kick button (only if not founder and not self)
@@ -456,7 +452,7 @@ internal static class ReligionManagementOverlay
         {
             var kickButtonX = x + width - kickButtonWidth - padding;
             var kickButtonY = y + (height - 22f) / 2;
-            if (DrawSmallButton(drawList, "Kick", kickButtonX, kickButtonY, kickButtonWidth, 22f))
+            if (ButtonRenderer.DrawSmallButton(drawList, "Kick", kickButtonX, kickButtonY, kickButtonWidth, 22f))
             {
                 api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                     api.World.Player.Entity, null, false, 8f, 0.5f);
@@ -470,7 +466,7 @@ internal static class ReligionManagementOverlay
     /// </summary>
     private static void DrawSectionLabel(ImDrawListPtr drawList, string text, float x, float y)
     {
-        var textColor = ImGui.ColorConvertFloat4ToU32(ColorGold * 0.9f);
+        var textColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold * 0.9f);
         drawList.AddText(ImGui.GetFont(), 15f, new Vector2(x, y), textColor, text);
     }
 
@@ -481,291 +477,5 @@ internal static class ReligionManagementOverlay
     {
         var textColor = ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 0.3f, 0.3f, 1f));
         drawList.AddText(ImGui.GetFont(), 13f, new Vector2(x, y), textColor, text);
-    }
-
-    /// <summary>
-    ///     Draw text input (same as CreateReligionOverlay)
-    /// </summary>
-    private static string DrawTextInput(ImDrawListPtr drawList, string id, string currentValue, float x, float y, float width, float height, string placeholder)
-    {
-        var inputStart = new Vector2(x, y);
-        var inputEnd = new Vector2(x + width, y + height);
-
-        var bgColor = ImGui.ColorConvertFloat4ToU32(ColorDarkBrown * 0.7f);
-        drawList.AddRectFilled(inputStart, inputEnd, bgColor, 4f);
-
-        var borderColor = ImGui.ColorConvertFloat4ToU32(ColorGrey * 0.5f);
-        drawList.AddRect(inputStart, inputEnd, borderColor, 4f, ImDrawFlags.None, 1f);
-
-        ImGui.SetCursorScreenPos(inputStart);
-        ImGui.InvisibleButton(id, new Vector2(width, height));
-        var isActive = ImGui.IsItemActive() || ImGui.IsItemFocused();
-        var wasClicked = ImGui.IsItemClicked();
-
-        if (isActive || ImGui.IsItemHovered())
-        {
-            ImGui.SetMouseCursor(ImGuiMouseCursor.TextInput);
-        }
-
-        // Set keyboard focus when clicked
-        if (wasClicked)
-        {
-            ImGui.SetKeyboardFocusHere(-1);
-        }
-
-        if (isActive)
-        {
-            var io = ImGui.GetIO();
-            io.WantCaptureKeyboard = true; // Block game input while typing
-
-            if (ImGui.IsKeyPressed(ImGuiKey.Backspace) && currentValue.Length > 0)
-            {
-                currentValue = currentValue.Substring(0, currentValue.Length - 1);
-            }
-
-            for (int i = 0; i < io.InputQueueCharacters.Size; i++)
-            {
-                var c = (char)io.InputQueueCharacters[i];
-                if (c >= 32 && c < 127)
-                {
-                    currentValue += c;
-                }
-            }
-        }
-
-        var displayText = string.IsNullOrEmpty(currentValue) ? placeholder : currentValue;
-        var textColor = string.IsNullOrEmpty(currentValue)
-            ? ImGui.ColorConvertFloat4ToU32(ColorGrey * 0.7f)
-            : ImGui.ColorConvertFloat4ToU32(ColorWhite);
-
-        var textPos = new Vector2(x + 8f, y + (height - 16f) / 2);
-        drawList.AddText(textPos, textColor, displayText);
-
-        if (isActive && (int)(ImGui.GetTime() * 2) % 2 == 0)
-        {
-            var textWidth = string.IsNullOrEmpty(currentValue) ? 0f : ImGui.CalcTextSize(currentValue).X;
-            var cursorX = x + 8f + textWidth;
-            drawList.AddLine(new Vector2(cursorX, y + 6f), new Vector2(cursorX, y + height - 6f),
-                ImGui.ColorConvertFloat4ToU32(ColorWhite), 2f);
-        }
-
-        return currentValue ?? "";
-    }
-
-    /// <summary>
-    ///     Draw multiline text input
-    /// </summary>
-    private static string DrawMultilineTextInput(ImDrawListPtr drawList, string id, string currentValue, float x, float y, float width, float height)
-    {
-        var inputStart = new Vector2(x, y);
-        var inputEnd = new Vector2(x + width, y + height);
-
-        var bgColor = ImGui.ColorConvertFloat4ToU32(ColorDarkBrown * 0.7f);
-        drawList.AddRectFilled(inputStart, inputEnd, bgColor, 4f);
-
-        var borderColor = ImGui.ColorConvertFloat4ToU32(ColorGrey * 0.5f);
-        drawList.AddRect(inputStart, inputEnd, borderColor, 4f, ImDrawFlags.None, 1f);
-
-        ImGui.SetCursorScreenPos(inputStart);
-        ImGui.InvisibleButton(id, new Vector2(width, height));
-        var isActive = ImGui.IsItemActive() || ImGui.IsItemFocused();
-        var wasClicked = ImGui.IsItemClicked();
-
-        if (isActive || ImGui.IsItemHovered())
-        {
-            ImGui.SetMouseCursor(ImGuiMouseCursor.TextInput);
-        }
-
-        // Set keyboard focus when clicked
-        if (wasClicked)
-        {
-            ImGui.SetKeyboardFocusHere(-1);
-        }
-
-        if (isActive)
-        {
-            var io = ImGui.GetIO();
-            io.WantCaptureKeyboard = true; // Block game input while typing
-
-            if (ImGui.IsKeyPressed(ImGuiKey.Backspace) && currentValue.Length > 0)
-            {
-                currentValue = currentValue.Substring(0, currentValue.Length - 1);
-            }
-
-            if (ImGui.IsKeyPressed(ImGuiKey.Enter))
-            {
-                currentValue += "\n";
-            }
-
-            for (int i = 0; i < io.InputQueueCharacters.Size; i++)
-            {
-                var c = (char)io.InputQueueCharacters[i];
-                if (c >= 32 && c < 127 && currentValue.Length < 500)
-                {
-                    currentValue += c;
-                }
-            }
-        }
-
-        // Draw text (simple word wrap)
-        var textPos = new Vector2(x + 8f, y + 8f);
-        var textColor = ImGui.ColorConvertFloat4ToU32(ColorWhite);
-        if (!string.IsNullOrEmpty(currentValue))
-        {
-            drawList.AddText(textPos, textColor, currentValue);
-        }
-
-        // Draw blinking cursor when active
-        if (isActive && (int)(ImGui.GetTime() * 2) % 2 == 0)
-        {
-            // Calculate cursor position at end of text
-            var text = currentValue ?? "";
-            var lines = text.Split('\n');
-            var lastLine = lines.Length > 0 ? lines[lines.Length - 1] : "";
-
-            // Calculate cursor position - handle empty strings
-            var lastLineWidth = 0f;
-            if (!string.IsNullOrEmpty(lastLine))
-            {
-                lastLineWidth = ImGui.CalcTextSize(lastLine).X;
-            }
-
-            var cursorY = y + 8f + (lines.Length - 1) * 16f; // Approximate line height
-            var cursorX = x + 8f + lastLineWidth;
-
-            // Draw cursor line
-            drawList.AddLine(new Vector2(cursorX, cursorY), new Vector2(cursorX, cursorY + 16f),
-                ImGui.ColorConvertFloat4ToU32(ColorWhite), 2f);
-        }
-
-        return currentValue ?? "";
-    }
-
-    /// <summary>
-    ///     Draw scrollbar
-    /// </summary>
-    private static void DrawScrollbar(ImDrawListPtr drawList, float x, float y, float width, float height, float scrollY, float maxScroll)
-    {
-        var trackStart = new Vector2(x, y);
-        var trackEnd = new Vector2(x + width, y + height);
-        var trackColor = ImGui.ColorConvertFloat4ToU32(ColorDarkBrown * 0.7f);
-        drawList.AddRectFilled(trackStart, trackEnd, trackColor, 4f);
-
-        var thumbHeight = Math.Max(20f, height * (height / (height + maxScroll)));
-        var thumbY = y + (scrollY / maxScroll) * (height - thumbHeight);
-        var thumbStart = new Vector2(x + 2f, thumbY);
-        var thumbEnd = new Vector2(x + width - 2f, thumbY + thumbHeight);
-        var thumbColor = ImGui.ColorConvertFloat4ToU32(ColorGrey);
-        drawList.AddRectFilled(thumbStart, thumbEnd, thumbColor, 4f);
-    }
-
-    /// <summary>
-    ///     Draw close button
-    /// </summary>
-    private static bool DrawCloseButton(ImDrawListPtr drawList, float x, float y, float size)
-    {
-        var buttonStart = new Vector2(x, y);
-        var buttonEnd = new Vector2(x + size, y + size);
-
-        var mousePos = ImGui.GetMousePos();
-        var isHovering = mousePos.X >= x && mousePos.X <= x + size &&
-                        mousePos.Y >= y && mousePos.Y <= y + size;
-
-        var bgColor = isHovering ? ColorLightBrown : ColorDarkBrown;
-        var bgColorU32 = ImGui.ColorConvertFloat4ToU32(bgColor);
-        drawList.AddRectFilled(buttonStart, buttonEnd, bgColorU32, 4f);
-
-        var xColor = ImGui.ColorConvertFloat4ToU32(isHovering ? ColorWhite : ColorGrey);
-        var xPadding = size * 0.25f;
-        drawList.AddLine(new Vector2(x + xPadding, y + xPadding),
-            new Vector2(x + size - xPadding, y + size - xPadding), xColor, 2f);
-        drawList.AddLine(new Vector2(x + size - xPadding, y + xPadding),
-            new Vector2(x + xPadding, y + size - xPadding), xColor, 2f);
-
-        if (isHovering)
-        {
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-        }
-
-        return isHovering && ImGui.IsMouseClicked(ImGuiMouseButton.Left);
-    }
-
-    /// <summary>
-    ///     Draw button
-    /// </summary>
-    private static bool DrawButton(ImDrawListPtr drawList, string text, float x, float y, float width, float height, bool isPrimary, bool enabled, Vector4? customColor = null)
-    {
-        var buttonStart = new Vector2(x, y);
-        var buttonEnd = new Vector2(x + width, y + height);
-
-        var mousePos = ImGui.GetMousePos();
-        var isHovering = enabled && mousePos.X >= x && mousePos.X <= x + width &&
-                        mousePos.Y >= y && mousePos.Y <= y + height;
-
-        var baseColor = customColor ?? (isPrimary ? ColorGold : ColorDarkBrown);
-
-        Vector4 bgColor;
-        if (!enabled)
-        {
-            bgColor = ColorDarkBrown * 0.5f;
-        }
-        else if (isHovering && ImGui.IsMouseDown(ImGuiMouseButton.Left))
-        {
-            bgColor = baseColor * 0.7f;
-        }
-        else if (isHovering)
-        {
-            bgColor = baseColor * 1.2f;
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-        }
-        else
-        {
-            bgColor = baseColor * 0.8f;
-        }
-
-        var bgColorU32 = ImGui.ColorConvertFloat4ToU32(bgColor);
-        drawList.AddRectFilled(buttonStart, buttonEnd, bgColorU32, 4f);
-
-        var borderColor = ImGui.ColorConvertFloat4ToU32(enabled ? ColorGold * 0.7f : ColorGrey * 0.3f);
-        drawList.AddRect(buttonStart, buttonEnd, borderColor, 4f, ImDrawFlags.None, 1.5f);
-
-        var textSize = ImGui.CalcTextSize(text);
-        var textPos = new Vector2(x + (width - textSize.X) / 2, y + (height - textSize.Y) / 2);
-        var textColor = ImGui.ColorConvertFloat4ToU32(enabled ? ColorWhite : ColorGrey * 0.7f);
-        drawList.AddText(textPos, textColor, text);
-
-        return enabled && isHovering && ImGui.IsMouseReleased(ImGuiMouseButton.Left);
-    }
-
-    /// <summary>
-    ///     Draw small button (for list items)
-    /// </summary>
-    private static bool DrawSmallButton(ImDrawListPtr drawList, string text, float x, float y, float width, float height)
-    {
-        var buttonStart = new Vector2(x, y);
-        var buttonEnd = new Vector2(x + width, y + height);
-
-        var mousePos = ImGui.GetMousePos();
-        var isHovering = mousePos.X >= x && mousePos.X <= x + width &&
-                        mousePos.Y >= y && mousePos.Y <= y + height;
-
-        var bgColor = isHovering ? ColorRed * 0.8f : ColorDarkBrown;
-        var bgColorU32 = ImGui.ColorConvertFloat4ToU32(bgColor);
-        drawList.AddRectFilled(buttonStart, buttonEnd, bgColorU32, 3f);
-
-        var borderColor = ImGui.ColorConvertFloat4ToU32(ColorRed * 0.7f);
-        drawList.AddRect(buttonStart, buttonEnd, borderColor, 3f, ImDrawFlags.None, 1f);
-
-        var textSize = ImGui.CalcTextSize(text);
-        var textPos = new Vector2(x + (width - textSize.X) / 2, y + (height - textSize.Y) / 2);
-        var textColor = ImGui.ColorConvertFloat4ToU32(ColorWhite);
-        drawList.AddText(ImGui.GetFont(), 11f, textPos, textColor, text);
-
-        if (isHovering)
-        {
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-        }
-
-        return isHovering && ImGui.IsMouseClicked(ImGuiMouseButton.Left);
     }
 }

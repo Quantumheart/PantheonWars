@@ -1,5 +1,7 @@
 using System.Numerics;
 using ImGuiNET;
+using PantheonWars.GUI.UI.Components.Buttons;
+using PantheonWars.GUI.UI.Utilities;
 using PantheonWars.Models.Enum;
 using Vintagestory.API.Client;
 
@@ -11,12 +13,6 @@ namespace PantheonWars.GUI.UI.Renderers;
 /// </summary>
 internal static class ReligionHeaderRenderer
 {
-    // Color constants (matching XSkillsGilded design language)
-    private static readonly Vector4 ColorGold = new(0.996f, 0.682f, 0.204f, 1.0f); // #feae34
-    private static readonly Vector4 ColorWhite = new(0.9f, 0.9f, 0.9f, 1.0f);
-    private static readonly Vector4 ColorGrey = new(0.573f, 0.502f, 0.416f, 1.0f); // #92806a
-    private static readonly Vector4 ColorDarkBrown = new(0.24f, 0.18f, 0.13f, 1.0f); // #3d2e20
-
     /// <summary>
     ///     Draw the religion header banner
     /// </summary>
@@ -45,11 +41,11 @@ internal static class ReligionHeaderRenderer
         var endPos = new Vector2(x + width, y + headerHeight);
 
         // Draw header background
-        var bgColor = ImGui.ColorConvertFloat4ToU32(ColorDarkBrown);
+        var bgColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.DarkBrown);
         drawList.AddRectFilled(startPos, endPos, bgColor, 4f); // Rounded corners
 
         // Draw border
-        var borderColor = ImGui.ColorConvertFloat4ToU32(ColorGold * 0.5f);
+        var borderColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold * 0.5f);
         drawList.AddRect(startPos, endPos, borderColor, 4f, ImDrawFlags.None, 2f);
 
         // Check if player has a religion
@@ -63,7 +59,7 @@ internal static class ReligionHeaderRenderer
                 y + (headerHeight - textSize.Y) / 2 - 10f
             );
 
-            var textColor = ImGui.ColorConvertFloat4ToU32(ColorGrey);
+            var textColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
             drawList.AddText(ImGui.GetFont(), 16f, textPos, textColor, noReligionText);
 
             // Add "Browse Religions" button
@@ -93,7 +89,7 @@ internal static class ReligionHeaderRenderer
         // For now, use placeholder circle
         const float iconSize = 48f;
         var iconCenter = new Vector2(currentX + iconSize / 2, centerY);
-        var iconColor = ImGui.ColorConvertFloat4ToU32(GetDeityColor(manager.CurrentDeity));
+        var iconColor = ImGui.ColorConvertFloat4ToU32(DeityHelper.GetDeityColor(manager.CurrentDeity));
         drawList.AddCircleFilled(iconCenter, iconSize / 2, iconColor, 16);
 
         currentX += iconSize + padding;
@@ -104,7 +100,7 @@ internal static class ReligionHeaderRenderer
         var headerText = $"{religionName} - {deityName}";
 
         var headerTextPos = new Vector2(currentX, y + 12f);
-        var headerTextColor = ImGui.ColorConvertFloat4ToU32(ColorGold);
+        var headerTextColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold);
         drawList.AddText(ImGui.GetFont(), 18f, headerTextPos, headerTextColor, headerText);
 
         // Member count and role
@@ -116,7 +112,7 @@ internal static class ReligionHeaderRenderer
             : "";
         var infoText = $"{memberInfo}{roleInfo}";
         var infoTextPos = new Vector2(currentX, y + 35f);
-        var infoTextColor = ImGui.ColorConvertFloat4ToU32(ColorGrey);
+        var infoTextColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
         drawList.AddText(ImGui.GetFont(), 13f, infoTextPos, infoTextColor, infoText);
 
         // Rank progression
@@ -124,7 +120,7 @@ internal static class ReligionHeaderRenderer
         var prestigeRankName = GetPrestigeRankName(manager.CurrentPrestigeRank);
         var ranksText = $"Favor: {favorRankName} | Prestige: {prestigeRankName}";
         var ranksTextPos = new Vector2(currentX, y + 54f);
-        var ranksTextColor = ImGui.ColorConvertFloat4ToU32(ColorWhite);
+        var ranksTextColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.White);
         drawList.AddText(ImGui.GetFont(), 13f, ranksTextPos, ranksTextColor, ranksText);
 
         // Right-side buttons
@@ -194,25 +190,6 @@ internal static class ReligionHeaderRenderer
     }
 
     /// <summary>
-    ///     Get color associated with a deity (for icon placeholder)
-    /// </summary>
-    private static Vector4 GetDeityColor(DeityType deity)
-    {
-        return deity switch
-        {
-            DeityType.Khoras => new Vector4(0.8f, 0.2f, 0.2f, 1.0f), // Red - War
-            DeityType.Lysa => new Vector4(0.4f, 0.8f, 0.3f, 1.0f), // Green - Hunt
-            DeityType.Morthen => new Vector4(0.3f, 0.1f, 0.4f, 1.0f), // Purple - Death
-            DeityType.Aethra => new Vector4(0.9f, 0.9f, 0.6f, 1.0f), // Light yellow - Light
-            DeityType.Umbros => new Vector4(0.2f, 0.2f, 0.3f, 1.0f), // Dark grey - Shadows
-            DeityType.Tharos => new Vector4(0.3f, 0.6f, 0.9f, 1.0f), // Blue - Storms
-            DeityType.Gaia => new Vector4(0.5f, 0.4f, 0.2f, 1.0f), // Brown - Earth
-            DeityType.Vex => new Vector4(0.7f, 0.2f, 0.7f, 1.0f), // Magenta - Madness
-            _ => new Vector4(0.5f, 0.5f, 0.5f, 1.0f) // Grey - Unknown
-        };
-    }
-
-    /// <summary>
     ///     Get favor rank name from rank number
     /// </summary>
     private static string GetFavorRankName(int rank)
@@ -247,7 +224,7 @@ internal static class ReligionHeaderRenderer
     /// <summary>
     ///     Draw a simple button
     /// </summary>
-    /// <param name="baseColor">Optional base color override (defaults to ColorDarkBrown)</param>
+    /// <param name="baseColor">Optional base color override (defaults to ColorPalette.DarkBrown)</param>
     /// <returns>True if clicked</returns>
     private static bool DrawButton(string text, float x, float y, float width, float height, Vector4? baseColor = null)
     {
@@ -256,7 +233,7 @@ internal static class ReligionHeaderRenderer
         var buttonEnd = new Vector2(x + width, y + height);
 
         var isHovering = IsMouseInRect(x, y, width, height);
-        var actualBaseColor = baseColor ?? ColorDarkBrown;
+        var actualBaseColor = baseColor ?? ColorPalette.DarkBrown;
 
         // Determine button color based on state
         Vector4 currentColor;
@@ -282,7 +259,7 @@ internal static class ReligionHeaderRenderer
         drawList.AddRectFilled(buttonStart, buttonEnd, bgColor, 4f);
 
         // Draw border
-        var borderColor = ImGui.ColorConvertFloat4ToU32(ColorGold * 0.7f);
+        var borderColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold * 0.7f);
         drawList.AddRect(buttonStart, buttonEnd, borderColor, 4f, ImDrawFlags.None, 1.5f);
 
         // Draw button text (centered)
@@ -291,7 +268,7 @@ internal static class ReligionHeaderRenderer
             x + (width - textSize.X) / 2,
             y + (height - textSize.Y) / 2
         );
-        var textColor = ImGui.ColorConvertFloat4ToU32(ColorWhite);
+        var textColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.White);
         drawList.AddText(textPos, textColor, text);
 
         // Handle click
