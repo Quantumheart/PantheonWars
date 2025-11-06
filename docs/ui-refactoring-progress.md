@@ -235,41 +235,53 @@ Successfully extracted state management from overlay files into dedicated state 
 
 ### Phase 4: Decompose PerkDialog ✅ COMPLETE
 
-Successfully broke down the monolithic PerkDialog.cs (746 lines) into maintainable, focused components:
+Successfully broke down the monolithic PerkDialog.cs (746 lines) into maintainable, focused components through three tasks:
 
-#### Files Created:
+#### Task 4.1 & 4.2: Event Handlers & Overlay Coordination
 
-1. **PerkDialogEventHandlers.cs** - 382 lines
+**Files Created:**
+
+1. **PerkDialogEventHandlers.cs** - 431 lines
    - Extracted all 24 event handler methods
    - Partial class containing event handling logic
    - Methods include: OnPerkDataReceived, OnReligionStateChanged, OnUnlockButtonClicked, etc.
 
-2. **OverlayCoordinator.cs** - 202 lines
+2. **OverlayCoordinator.cs** - 167 lines
    - Manages visibility state of all overlay windows
-   - Properties for overlay visibility: ShowReligionBrowser, ShowReligionManagement, etc.
    - Show/Close methods for each overlay
    - Centralized RenderOverlays() method to render all active overlays
    - CloseAllOverlays() helper method
 
-#### Files Modified:
+**Initial Result:** PerkDialog.cs (746 → 292 lines, 61% reduction)
 
-**PerkDialog.cs** (746 → 292 lines)
-- **Reduction:** 454 lines (61% reduction)
-- **Changes:**
-  - Made class partial to work with PerkDialogEventHandlers.cs
-  - Removed 24 event handler methods (now in PerkDialogEventHandlers.cs)
-  - Removed inline overlay rendering logic (now in OverlayCoordinator)
-  - Added _overlayCoordinator field and initialization
-  - Updated DrawWindow() to use _overlayCoordinator.RenderOverlays()
-  - Kept core lifecycle methods: ShouldLoad, ExecuteOrder, StartClientSide, Dispose
-  - Kept window management: Open, Close, OnDraw, OnClose, DrawWindow, DrawBackground
+#### Task 4.3: Dialog State Extraction
+
+**File Created:**
+
+3. **PerkDialogState.cs** - 38 lines
+   - State management for PerkDialog
+   - Properties: IsOpen, IsReady, WindowPosX, WindowPosY
+   - Method: Reset()
+
+**Files Modified:**
+
+- **PerkDialog.cs** (292 → 290 lines, final)
+  - Replaced state variables with PerkDialogState instance
+  - All state access now through _state property
+  - Consistent with state management pattern used in overlays
+
+- **PerkDialogEventHandlers.cs**
+  - Updated to use _state references for IsOpen and IsReady
+
+**Final Result:** PerkDialog.cs (746 → 290 lines, 61% total reduction)
 
 #### Benefits:
-- **Separation of Concerns:** Event handling, overlay coordination, and window lifecycle are now separate
+- **Complete Separation of Concerns:** Event handling, overlay coordination, state, and lifecycle are now separate
+- **Consistent Architecture:** State management pattern consistent across all dialogs and overlays
 - **Easier Maintenance:** Each file has a single, clear responsibility
-- **Better Testing:** Can test event handlers and overlay coordination independently
+- **Better Testing:** Can test event handlers, overlay coordination, and state independently
 - **Improved Readability:** No more 700+ line files to navigate
-- **Reusability:** OverlayCoordinator can be reused for other dialog systems
+- **Reusability:** OverlayCoordinator and state pattern can be reused for other dialog systems
 
 ## Next Steps (Future Work)
 
@@ -314,8 +326,10 @@ PantheonWars/GUI/UI/
 ### Phase 4:
 ```
 PantheonWars/GUI/
-├── PerkDialogEventHandlers.cs (382 lines)
-└── OverlayCoordinator.cs (202 lines)
+├── PerkDialogEventHandlers.cs (431 lines)
+├── OverlayCoordinator.cs (167 lines)
+└── State/
+    └── PerkDialogState.cs (38 lines)
 ```
 
 ## Files Modified
@@ -343,7 +357,8 @@ PantheonWars/GUI/UI/Renderers/
 ### Phase 4:
 ```
 PantheonWars/GUI/
-└── PerkDialog.cs (746 → 292 lines)
+├── PerkDialog.cs (746 → 290 lines, 61% reduction)
+└── PerkDialogEventHandlers.cs (updated to use state)
 ```
 
 ---
@@ -356,18 +371,18 @@ PantheonWars/GUI/
 **Phase-by-Phase Breakdown:**
 - **Phase 1-2:** 836 lines eliminated (shared components)
 - **Phase 3a:** Included in Phase 1-2 numbers (component extraction)
-- **Phase 3b:** 297 lines eliminated (state extraction)
-- **Phase 4:** 454 lines eliminated (PerkDialog decomposition)
+- **Phase 3b:** 297 lines eliminated (state extraction from overlays)
+- **Phase 4:** 456 lines eliminated (PerkDialog decomposition + state extraction)
 
 **Grand Total:**
-- **Lines Eliminated:** 1,587 lines of code removed
+- **Lines Eliminated:** 1,589 lines of code removed
 - **Files Refactored:** 8 major files
   - 7 overlay/renderer files (some refactored twice - components then state)
-  - 1 dialog file (PerkDialog)
-- **Files Created:** 13 new reusable files
+  - 1 dialog file (PerkDialog - refactored in 3 tasks)
+- **Files Created:** 14 new reusable files
   - 6 shared component/utility files (Phase 1-2)
   - 5 state class + renderer component files (Phase 3b)
-  - 2 dialog component files (Phase 4)
+  - 3 dialog component + state files (Phase 4)
 - **Average Reduction:** 42% per file
 
 **Largest Files:**
@@ -376,28 +391,33 @@ PantheonWars/GUI/
 - **After Phase 3b:** 356 lines (ReligionManagementOverlay.cs)
 - **Final Reduction:** 54% reduction on largest file
 
-**Most Improved:** PerkDialog.cs (746 → 292 lines, 61% reduction in single phase)
+**Most Improved:** PerkDialog.cs (746 → 290 lines, 61% reduction across 3 tasks)
 
 **Final State of Major Files:**
 - ReligionManagementOverlay.cs: 771 → 356 lines (54% reduction)
 - CreateReligionOverlay.cs: 690 → 358 lines (48% reduction)
 - ReligionBrowserOverlay.cs: 580 → 286 lines (51% reduction)
-- PerkDialog.cs: 746 → 292 lines (61% reduction)
+- PerkDialog.cs: 746 → 290 lines (61% reduction)
 
 ### Summary:
 - ✅ Phase 1-2: Created shared UI components and utilities (6 files)
 - ✅ Phase 3a: Refactored 7 overlay/renderer files using shared components
 - ✅ Phase 3b: Extracted state management from 3 overlays (5 new files)
-- ✅ Phase 4: Decomposed PerkDialog.cs into maintainable components (2 new files)
+- ✅ Phase 4 (Complete): Decomposed PerkDialog.cs into maintainable components (3 new files)
+  - Task 4.1: Event handlers extracted
+  - Task 4.2: Overlay coordinator extracted
+  - Task 4.3: Dialog state extracted
 - ✅ All files now follow single-responsibility principle
 - ✅ Complete separation of state, rendering, and event handling
 - ✅ Code is highly maintainable, testable, and reusable
+- ✅ Consistent state management pattern across all dialogs and overlays
 
 ### Architecture Improvements:
-- **State Management:** State classes separate from rendering logic
+- **State Management:** State classes separate from rendering logic (consistent pattern)
 - **Reusable Components:** 8 renderer/component classes can be reused anywhere
 - **Single Responsibility:** Each file has one clear purpose
 - **Testability:** State, renderers, and event handlers can be tested independently
 - **Maintainability:** Changes to one concern don't affect others
+- **Consistency:** All dialogs/overlays follow the same architectural patterns
 
 **Next:** Test changes in-game, or proceed to Phase 5 (optional advanced features)
