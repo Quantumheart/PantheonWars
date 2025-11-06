@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Components.Buttons;
-using PantheonWars.GUI.UI.Components.Lists;
+using PantheonWars.GUI.UI.Renderers.Components;
+using PantheonWars.GUI.UI.State;
 using PantheonWars.GUI.UI.Utilities;
 using PantheonWars.Network;
 using Vintagestory.API.Client;
@@ -16,24 +17,15 @@ namespace PantheonWars.GUI.UI.Renderers;
 /// </summary>
 internal static class ReligionBrowserOverlay
 {
-
     // State
-    private static string _selectedDeityFilter = "All";
-    private static string? _selectedReligionUID;
-    private static float _scrollY;
-    private static List<ReligionListResponsePacket.ReligionInfo> _religions = new();
-    private static bool _isLoading = true;
+    private static readonly ReligionBrowserState _state = new();
 
     /// <summary>
     ///     Initialize/reset overlay state
     /// </summary>
     public static void Initialize()
     {
-        _selectedDeityFilter = "All";
-        _selectedReligionUID = null;
-        _scrollY = 0f;
-        _religions.Clear();
-        _isLoading = true;
+        _state.Reset();
     }
 
     /// <summary>
@@ -41,8 +33,7 @@ internal static class ReligionBrowserOverlay
     /// </summary>
     public static void UpdateReligionList(List<ReligionListResponsePacket.ReligionInfo> religions)
     {
-        _religions = religions;
-        _isLoading = false;
+        _state.UpdateReligionList(religions);
     }
 
     /// <summary>
@@ -126,14 +117,14 @@ internal static class ReligionBrowserOverlay
         for (int i = 0; i < deityFilters.Length; i++)
         {
             var filter = deityFilters[i];
-            var isSelected = _selectedDeityFilter == filter;
+            var isSelected = _state.SelectedDeityFilter == filter;
 
             if (DrawTab(drawList, filter, tabX, currentY, tabWidth, tabHeight, isSelected))
             {
-                _selectedDeityFilter = filter;
-                _selectedReligionUID = null;
-                _scrollY = 0f;
-                _isLoading = true;
+                _state.SelectedDeityFilter = filter;
+                _state.SelectedReligionUID = null;
+                _state.ScrollY = 0f;
+                _state.IsLoading = true;
 
                 // Request refresh with new filter
                 var filterString = filter == "All" ? "" : filter;
@@ -150,7 +141,9 @@ internal static class ReligionBrowserOverlay
 
         // === RELIGION LIST ===
         var listHeight = overlayHeight - (currentY - overlayY) - padding * 2 - 40f; // 40f for join button
-        DrawReligionList(drawList, api, overlayX + padding, currentY, overlayWidth - padding * 2, listHeight);
+        (_state.ScrollY, _state.SelectedReligionUID) = ReligionListRenderer.Draw(
+            drawList, api, overlayX + padding, currentY, overlayWidth - padding * 2, listHeight,
+            _state.Religions, _state.IsLoading, _state.ScrollY, _state.SelectedReligionUID);
 
         currentY += listHeight + padding;
 
@@ -159,7 +152,7 @@ internal static class ReligionBrowserOverlay
         const float buttonHeight = 36f;
         const float buttonSpacing = 12f;
         var buttonY = currentY;
-        var canJoin = !string.IsNullOrEmpty(_selectedReligionUID);
+        var canJoin = !string.IsNullOrEmpty(_state.SelectedReligionUID);
 
         // Only show Create button if user doesn't have a religion
         if (!userHasReligion)
@@ -185,7 +178,7 @@ internal static class ReligionBrowserOverlay
                 {
                     api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                         api.World.Player.Entity, null, false, 8f, 0.5f);
-                    onJoinReligion.Invoke(_selectedReligionUID!);
+                    onJoinReligion.Invoke(_state.SelectedReligionUID!);
                     return false; // Close overlay after join
                 }
                 else
@@ -205,7 +198,7 @@ internal static class ReligionBrowserOverlay
                 {
                     api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                         api.World.Player.Entity, null, false, 8f, 0.5f);
-                    onJoinReligion.Invoke(_selectedReligionUID!);
+                    onJoinReligion.Invoke(_state.SelectedReligionUID!);
                     return false; // Close overlay after join
                 }
                 else
@@ -222,164 +215,6 @@ internal static class ReligionBrowserOverlay
     /// <summary>
     ///     Draw the religion list
     /// </summary>
-    private static void DrawReligionList(ImDrawListPtr drawList, ICoreClientAPI api, float x, float y, float width, float height)
-    {
-        const float itemHeight = 80f;
-        const float itemSpacing = 8f;
-        const float scrollbarWidth = 16f;
-
-        // Draw list background
-        var listStart = new Vector2(x, y);
-        var listEnd = new Vector2(x + width, y + height);
-        var listBgColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.DarkBrown * 0.5f);
-        drawList.AddRectFilled(listStart, listEnd, listBgColor, 4f);
-
-        // Loading state
-        if (_isLoading)
-        {
-            var loadingText = "Loading religions...";
-            var loadingSize = ImGui.CalcTextSize(loadingText);
-            var loadingPos = new Vector2(
-                x + (width - loadingSize.X) / 2,
-                y + (height - loadingSize.Y) / 2
-            );
-            var loadingColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
-            drawList.AddText(loadingPos, loadingColor, loadingText);
-            return;
-        }
-
-        // No religions state
-        if (_religions.Count == 0)
-        {
-            var noReligionText = "No religions found";
-            var noReligionSize = ImGui.CalcTextSize(noReligionText);
-            var noReligionPos = new Vector2(
-                x + (width - noReligionSize.X) / 2,
-                y + (height - noReligionSize.Y) / 2
-            );
-            var noReligionColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
-            drawList.AddText(noReligionPos, noReligionColor, noReligionText);
-            return;
-        }
-
-        // Calculate scroll limits
-        var contentHeight = _religions.Count * (itemHeight + itemSpacing);
-        var maxScroll = Math.Max(0f, contentHeight - height);
-
-        // Handle mouse wheel scrolling
-        var mousePos = ImGui.GetMousePos();
-        var isMouseOver = mousePos.X >= x && mousePos.X <= x + width &&
-                          mousePos.Y >= y && mousePos.Y <= y + height;
-        if (isMouseOver)
-        {
-            var wheel = ImGui.GetIO().MouseWheel;
-            if (wheel != 0)
-            {
-                _scrollY = Math.Clamp(_scrollY - wheel * 40f, 0f, maxScroll);
-            }
-        }
-
-        // Clip to list bounds
-        drawList.PushClipRect(listStart, listEnd, true);
-
-        // Draw religion items
-        var itemY = y - _scrollY;
-        for (int i = 0; i < _religions.Count; i++)
-        {
-            var religion = _religions[i];
-
-            // Skip if not visible
-            if (itemY + itemHeight < y || itemY > y + height)
-            {
-                itemY += itemHeight + itemSpacing;
-                continue;
-            }
-
-            DrawReligionItem(drawList, api, religion, x, itemY, width - scrollbarWidth, itemHeight);
-            itemY += itemHeight + itemSpacing;
-        }
-
-        drawList.PopClipRect();
-
-        // Draw scrollbar if needed
-        if (contentHeight > height)
-        {
-            Scrollbar.Draw(drawList, x + width - scrollbarWidth, y, scrollbarWidth, height, _scrollY, maxScroll);
-        }
-    }
-
-    /// <summary>
-    ///     Draw a single religion item
-    /// </summary>
-    private static void DrawReligionItem(ImDrawListPtr drawList, ICoreClientAPI api,
-        ReligionListResponsePacket.ReligionInfo religion, float x, float y, float width, float height)
-    {
-        const float padding = 12f;
-
-        var itemStart = new Vector2(x, y);
-        var itemEnd = new Vector2(x + width, y + height);
-
-        var mousePos = ImGui.GetMousePos();
-        var isHovering = mousePos.X >= x && mousePos.X <= x + width &&
-                        mousePos.Y >= y && mousePos.Y <= y + height;
-        var isSelected = _selectedReligionUID == religion.ReligionUID;
-
-        // Determine background color
-        Vector4 bgColor;
-        if (isSelected)
-        {
-            bgColor = ColorPalette.Gold * 0.3f;
-        }
-        else if (isHovering)
-        {
-            bgColor = ColorPalette.LightBrown * 0.7f;
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-        }
-        else
-        {
-            bgColor = ColorPalette.DarkBrown;
-        }
-
-        // Draw background
-        var bgColorU32 = ImGui.ColorConvertFloat4ToU32(bgColor);
-        drawList.AddRectFilled(itemStart, itemEnd, bgColorU32, 4f);
-
-        // Draw border
-        var borderColor = ImGui.ColorConvertFloat4ToU32(isSelected ? ColorPalette.Gold : ColorPalette.Grey * 0.5f);
-        drawList.AddRect(itemStart, itemEnd, borderColor, 4f, ImDrawFlags.None, isSelected ? 2f : 1f);
-
-        // Handle click
-        if (isHovering && ImGui.IsMouseClicked(ImGuiMouseButton.Left))
-        {
-            _selectedReligionUID = religion.ReligionUID;
-            api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
-                api.World.Player.Entity, null, false, 8f, 0.5f);
-        }
-
-        // Draw deity icon (placeholder circle)
-        const float iconSize = 48f;
-        var iconCenter = new Vector2(x + padding + iconSize / 2, y + height / 2);
-        var deityColor = DeityHelper.GetDeityColor(religion.Deity);
-        var iconColorU32 = ImGui.ColorConvertFloat4ToU32(deityColor);
-        drawList.AddCircleFilled(iconCenter, iconSize / 2, iconColorU32, 16);
-
-        // Draw religion name
-        var namePos = new Vector2(x + padding * 2 + iconSize, y + padding);
-        var nameColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold);
-        drawList.AddText(ImGui.GetFont(), 16f, namePos, nameColor, religion.ReligionName);
-
-        // Draw deity name
-        var deityText = $"{religion.Deity} - {DeityHelper.GetDeityTitle(religion.Deity)}";
-        var deityPos = new Vector2(x + padding * 2 + iconSize, y + padding + 22f);
-        var deityColorU32 = ImGui.ColorConvertFloat4ToU32(ColorPalette.White);
-        drawList.AddText(ImGui.GetFont(), 13f, deityPos, deityColorU32, deityText);
-
-        // Draw member count and prestige
-        var infoText = $"{religion.MemberCount} members • {religion.PrestigeRank} Prestige • {(religion.IsPublic ? "Public" : "Private")}";
-        var infoPos = new Vector2(x + padding * 2 + iconSize, y + padding + 42f);
-        var infoColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
-        drawList.AddText(ImGui.GetFont(), 12f, infoPos, infoColor, infoText);
-    }
 
     /// <summary>
     ///     Draw scrollbar
