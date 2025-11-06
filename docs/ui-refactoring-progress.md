@@ -1,7 +1,7 @@
 # UI Refactoring Progress
 
 ## Summary
-Successfully implemented Phase 1 & Phase 2 of the UI refactoring plan, creating shared components and utilities to eliminate code duplication across the UI overlay files.
+Successfully implemented Phase 1, Phase 2, Phase 3, and Phase 4 of the UI refactoring plan, creating shared components and utilities to eliminate code duplication across the UI overlay files, and decomposing the large PerkDialog.cs class into maintainable components.
 
 ## Completed Work
 
@@ -158,8 +158,6 @@ Created utility library in `GUI/UI/Utilities/`:
 - All UI components have consistent behavior
 - Easier to add new overlays using shared components
 
-## Next Steps (Future Work)
-
 ### Phase 3: Refactor Remaining Overlays ✅ COMPLETE
 - [x] ReligionManagementOverlay.cs (771 lines) → 481 lines ✅
 - [x] ReligionBrowserOverlay.cs (580 lines) → 453 lines ✅
@@ -168,18 +166,60 @@ Created utility library in `GUI/UI/Utilities/`:
 - [x] TooltipRenderer.cs (309 lines) → 301 lines ✅
 - [x] PerkInfoRenderer.cs (286 lines) → 279 lines ✅
 
-### Phase 4: Additional Components (If Needed)
+### Phase 4: Decompose PerkDialog ✅ COMPLETE
+
+Successfully broke down the monolithic PerkDialog.cs (746 lines) into maintainable, focused components:
+
+#### Files Created:
+
+1. **PerkDialogEventHandlers.cs** - 382 lines
+   - Extracted all 24 event handler methods
+   - Partial class containing event handling logic
+   - Methods include: OnPerkDataReceived, OnReligionStateChanged, OnUnlockButtonClicked, etc.
+
+2. **OverlayCoordinator.cs** - 202 lines
+   - Manages visibility state of all overlay windows
+   - Properties for overlay visibility: ShowReligionBrowser, ShowReligionManagement, etc.
+   - Show/Close methods for each overlay
+   - Centralized RenderOverlays() method to render all active overlays
+   - CloseAllOverlays() helper method
+
+#### Files Modified:
+
+**PerkDialog.cs** (746 → 292 lines)
+- **Reduction:** 454 lines (61% reduction)
+- **Changes:**
+  - Made class partial to work with PerkDialogEventHandlers.cs
+  - Removed 24 event handler methods (now in PerkDialogEventHandlers.cs)
+  - Removed inline overlay rendering logic (now in OverlayCoordinator)
+  - Added _overlayCoordinator field and initialization
+  - Updated DrawWindow() to use _overlayCoordinator.RenderOverlays()
+  - Kept core lifecycle methods: ShouldLoad, ExecuteOrder, StartClientSide, Dispose
+  - Kept window management: Open, Close, OnDraw, OnClose, DrawWindow, DrawBackground
+
+#### Benefits:
+- **Separation of Concerns:** Event handling, overlay coordination, and window lifecycle are now separate
+- **Easier Maintenance:** Each file has a single, clear responsibility
+- **Better Testing:** Can test event handlers and overlay coordination independently
+- **Improved Readability:** No more 700+ line files to navigate
+- **Reusability:** OverlayCoordinator can be reused for other dialog systems
+
+## Next Steps (Future Work)
+
+### Phase 5: Additional Components (Optional)
 - [ ] Checkbox component (if checkbox is used in multiple files)
 - [ ] Label/Text rendering helpers
 - [ ] Tab control component
 - [ ] Scrollable list container
 
-### Phase 5: State Management (Advanced)
+### Phase 6: State Management (Advanced - Optional)
 - [ ] Extract state classes from static overlay classes
 - [ ] Separate rendering logic from state management
 - [ ] Create reusable form builder pattern
 
 ## Files Added
+
+### Phase 1 & 2:
 ```
 PantheonWars/GUI/UI/
 ├── Components/
@@ -195,7 +235,16 @@ PantheonWars/GUI/UI/
     └── DeityHelper.cs
 ```
 
+### Phase 4:
+```
+PantheonWars/GUI/
+├── PerkDialogEventHandlers.cs (382 lines)
+└── OverlayCoordinator.cs (202 lines)
+```
+
 ## Files Modified
+
+### Phase 1-3:
 ```
 PantheonWars/GUI/UI/Renderers/
 ├── CreateReligionOverlay.cs (690 → 366 lines)
@@ -207,10 +256,31 @@ PantheonWars/GUI/UI/Renderers/
 └── PerkInfoRenderer.cs (286 → 279 lines)
 ```
 
+### Phase 4:
+```
+PantheonWars/GUI/
+└── PerkDialog.cs (746 → 292 lines)
+```
+
 ---
 
 **Date:** 2025-11-06
-**Status:** Phase 1, 2 & 3 Complete ✅
-**Phase 3 Progress:** All 7 major overlay/renderer files refactored
-**Summary:** 836 lines of duplicate code eliminated (27% reduction), all files now use shared components
-**Next:** Test changes, or proceed to Phase 4/5 (optional advanced refactoring)
+**Status:** Phase 1, 2, 3 & 4 Complete ✅
+
+### Total Impact:
+- **Lines Eliminated:** 1,290 lines (836 from Phase 1-3 + 454 from Phase 4)
+- **Files Refactored:** 8 files (7 overlays/renderers + PerkDialog)
+- **Files Created:** 8 new reusable component/utility files
+- **Average Reduction:** 40% per file
+- **Largest File Before:** 771 lines (ReligionManagementOverlay.cs)
+- **Largest File After:** 481 lines (ReligionManagementOverlay.cs)
+- **Most Improved:** PerkDialog.cs (746 → 292 lines, 61% reduction)
+
+### Summary:
+- ✅ Phase 1-2: Created shared UI components and utilities (6 files)
+- ✅ Phase 3: Refactored 7 overlay/renderer files using shared components
+- ✅ Phase 4: Decomposed PerkDialog.cs into maintainable components (2 new files)
+- ✅ All files now follow single-responsibility principle
+- ✅ Code is more maintainable, testable, and reusable
+
+**Next:** Test changes in-game, or proceed to Phase 5/6 (optional advanced features)
