@@ -4,7 +4,8 @@ using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Components.Buttons;
 using PantheonWars.GUI.UI.Components.Inputs;
-using PantheonWars.GUI.UI.Components.Lists;
+using PantheonWars.GUI.UI.Renderers.Components;
+using PantheonWars.GUI.UI.State;
 using PantheonWars.GUI.UI.Utilities;
 using PantheonWars.Network;
 using Vintagestory.API.Client;
@@ -17,26 +18,15 @@ namespace PantheonWars.GUI.UI.Renderers;
 /// </summary>
 internal static class ReligionManagementOverlay
 {
-
     // State
-    private static PlayerReligionInfoResponsePacket? _religionInfo;
-    private static string _invitePlayerName = "";
-    private static string _description = "";
-    private static float _memberScrollY;
-    private static string? _errorMessage;
-    private static bool _showDisbandConfirm;
+    private static readonly ReligionManagementState _state = new();
 
     /// <summary>
     ///     Initialize/reset overlay state
     /// </summary>
     public static void Initialize()
     {
-        _religionInfo = null;
-        _invitePlayerName = "";
-        _description = "";
-        _memberScrollY = 0f;
-        _errorMessage = null;
-        _showDisbandConfirm = false;
+        _state.Reset();
     }
 
     /// <summary>
@@ -44,8 +34,7 @@ internal static class ReligionManagementOverlay
     /// </summary>
     public static void UpdateReligionInfo(PlayerReligionInfoResponsePacket info)
     {
-        _religionInfo = info;
-        _description = info.Description ?? "";
+        _state.UpdateReligionInfo(info);
     }
 
     /// <summary>
@@ -106,7 +95,7 @@ internal static class ReligionManagementOverlay
         ImGui.BeginChild("##religion_mgmt_overlay", new Vector2(overlayWidth, overlayHeight), false, ImGuiWindowFlags.NoScrollbar);
 
         // Check if data loaded
-        if (_religionInfo == null || !_religionInfo.HasReligion)
+        if (_state.ReligionInfo == null || !_state.ReligionInfo.HasReligion)
         {
             DrawLoadingOrError(drawList, overlayX, overlayY, overlayWidth, overlayHeight, onClose, onRequestRefresh, api);
             ImGui.EndChild();
@@ -116,7 +105,7 @@ internal static class ReligionManagementOverlay
         }
 
         // Disband confirmation dialog
-        if (_showDisbandConfirm)
+        if (_state.ShowDisbandConfirm)
         {
             var result = DrawDisbandConfirmation(drawList, api, overlayX, overlayY, overlayWidth, overlayHeight, onDisband);
             ImGui.EndChild();
@@ -128,7 +117,7 @@ internal static class ReligionManagementOverlay
         var currentY = overlayY + padding;
 
         // === HEADER ===
-        var headerText = $"Manage {_religionInfo.ReligionName}";
+        var headerText = $"Manage {_state.ReligionInfo.ReligionName}";
         var headerSize = ImGui.CalcTextSize(headerText);
         var headerPos = new Vector2(overlayX + padding, currentY);
         var headerColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold);
@@ -153,7 +142,9 @@ internal static class ReligionManagementOverlay
         currentY += 25f;
 
         const float memberListHeight = 200f;
-        DrawMemberList(drawList, api, overlayX + padding, currentY, overlayWidth - padding * 2, memberListHeight, onKickMember);
+        var members = _state.ReligionInfo?.Members ?? new List<PlayerReligionInfoResponsePacket.MemberInfo>();
+        _state.MemberScrollY = MemberListRenderer.Draw(drawList, api, overlayX + padding, currentY,
+            overlayWidth - padding * 2, memberListHeight, members, _state.MemberScrollY, onKickMember);
         currentY += memberListHeight + padding;
 
         // === INVITE PLAYER ===
@@ -161,18 +152,18 @@ internal static class ReligionManagementOverlay
         currentY += 25f;
 
         var inviteInputWidth = overlayWidth - padding * 2 - 120f;
-        _invitePlayerName = TextInput.Draw(drawList, "##invite_input", _invitePlayerName, overlayX + padding, currentY, inviteInputWidth, 32f, "Player name...");
+        _state.InvitePlayerName = TextInput.Draw(drawList, "##invite_input", _state.InvitePlayerName, overlayX + padding, currentY, inviteInputWidth, 32f, "Player name...");
 
         // Invite button
         var inviteButtonX = overlayX + padding + inviteInputWidth + 10f;
-        if (ButtonRenderer.DrawButton(drawList, "Invite", inviteButtonX, currentY, 100f, 32f, false, !string.IsNullOrWhiteSpace(_invitePlayerName)))
+        if (ButtonRenderer.DrawButton(drawList, "Invite", inviteButtonX, currentY, 100f, 32f, false, !string.IsNullOrWhiteSpace(_state.InvitePlayerName)))
         {
-            if (!string.IsNullOrWhiteSpace(_invitePlayerName))
+            if (!string.IsNullOrWhiteSpace(_state.InvitePlayerName))
             {
                 api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                     api.World.Player.Entity, null, false, 8f, 0.5f);
-                onInvitePlayer.Invoke(_invitePlayerName.Trim());
-                _invitePlayerName = "";
+                onInvitePlayer.Invoke(_state.InvitePlayerName.Trim());
+                _state.InvitePlayerName = "";
             }
         }
 
@@ -183,7 +174,7 @@ internal static class ReligionManagementOverlay
         currentY += 25f;
 
         const float descHeight = 80f;
-        _description = TextInput.DrawMultiline(drawList, "##description_input", _description, overlayX + padding, currentY, overlayWidth - padding * 2, descHeight, 500);
+        _state.Description = TextInput.DrawMultiline(drawList, "##description_input", _state.Description, overlayX + padding, currentY, overlayWidth - padding * 2, descHeight, 500);
         currentY += descHeight + 5f;
 
         // Save Description button
@@ -193,15 +184,15 @@ internal static class ReligionManagementOverlay
         {
             api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                 api.World.Player.Entity, null, false, 8f, 0.5f);
-            onEditDescription.Invoke(_description);
+            onEditDescription.Invoke(_state.Description);
         }
 
         currentY += 40f;
 
         // Error message
-        if (!string.IsNullOrEmpty(_errorMessage))
+        if (!string.IsNullOrEmpty(_state.ErrorMessage))
         {
-            DrawErrorText(drawList, _errorMessage, overlayX + padding, currentY, overlayWidth - padding * 2);
+            DrawErrorText(drawList, _state.ErrorMessage, overlayX + padding, currentY, overlayWidth - padding * 2);
             currentY += 30f;
         }
 
@@ -215,7 +206,7 @@ internal static class ReligionManagementOverlay
         {
             api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                 api.World.Player.Entity, null, false, 8f, 0.5f);
-            _showDisbandConfirm = true;
+            _state.ShowDisbandConfirm = true;
         }
 
         ImGui.EndChild();
@@ -249,14 +240,14 @@ internal static class ReligionManagementOverlay
         currentY += 60f;
 
         // Loading/Error message
-        var message = _religionInfo == null ? "Loading religion data..." : "You are not in a religion.";
+        var message = _state.ReligionInfo == null ? "Loading religion data..." : "You are not in a religion.";
         var messageSize = ImGui.CalcTextSize(message);
         var messagePos = new Vector2(x + (width - messageSize.X) / 2, y + (height - messageSize.Y) / 2);
         var messageColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
         drawList.AddText(messagePos, messageColor, message);
 
         // Refresh button if not loading
-        if (_religionInfo != null)
+        if (_state.ReligionInfo != null)
         {
             const float buttonWidth = 120f;
             const float buttonHeight = 36f;
@@ -328,7 +319,7 @@ internal static class ReligionManagementOverlay
         {
             api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                 api.World.Player.Entity, null, false, 8f, 0.5f);
-            _showDisbandConfirm = false;
+            _state.ShowDisbandConfirm = false;
         }
 
         // Confirm button
@@ -338,127 +329,11 @@ internal static class ReligionManagementOverlay
             api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                 api.World.Player.Entity, null, false, 8f, 0.5f);
             onDisband.Invoke();
-            _showDisbandConfirm = false;
+            _state.ShowDisbandConfirm = false;
             return false; // Close overlay
         }
 
         return true;
-    }
-
-    /// <summary>
-    ///     Draw member list with scrolling
-    /// </summary>
-    private static void DrawMemberList(ImDrawListPtr drawList, ICoreClientAPI api, float x, float y, float width, float height, Action<string> onKickMember)
-    {
-        const float itemHeight = 30f;
-        const float itemSpacing = 4f;
-        const float scrollbarWidth = 16f;
-
-        // Draw background
-        var listStart = new Vector2(x, y);
-        var listEnd = new Vector2(x + width, y + height);
-        var listBgColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.DarkBrown * 0.5f);
-        drawList.AddRectFilled(listStart, listEnd, listBgColor, 4f);
-
-        var members = _religionInfo?.Members ?? new List<PlayerReligionInfoResponsePacket.MemberInfo>();
-        if (members.Count == 0)
-        {
-            var noMembersText = "No members";
-            var noMembersSize = ImGui.CalcTextSize(noMembersText);
-            var noMembersPos = new Vector2(x + (width - noMembersSize.X) / 2, y + (height - noMembersSize.Y) / 2);
-            var noMembersColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
-            drawList.AddText(noMembersPos, noMembersColor, noMembersText);
-            return;
-        }
-
-        // Calculate scroll
-        var contentHeight = members.Count * (itemHeight + itemSpacing);
-        var maxScroll = Math.Max(0f, contentHeight - height);
-
-        // Handle mouse wheel
-        var mousePos = ImGui.GetMousePos();
-        var isMouseOver = mousePos.X >= x && mousePos.X <= x + width &&
-                          mousePos.Y >= y && mousePos.Y <= y + height;
-        if (isMouseOver)
-        {
-            var wheel = ImGui.GetIO().MouseWheel;
-            if (wheel != 0)
-            {
-                _memberScrollY = Math.Clamp(_memberScrollY - wheel * 30f, 0f, maxScroll);
-            }
-        }
-
-        // Clip to bounds
-        drawList.PushClipRect(listStart, listEnd, true);
-
-        // Draw members
-        var itemY = y - _memberScrollY;
-        var currentPlayerUID = api.World.Player.PlayerUID;
-
-        foreach (var member in members)
-        {
-            // Skip if not visible
-            if (itemY + itemHeight < y || itemY > y + height)
-            {
-                itemY += itemHeight + itemSpacing;
-                continue;
-            }
-
-            DrawMemberItem(drawList, api, member, x, itemY, width - scrollbarWidth - 4f, itemHeight,
-                currentPlayerUID, onKickMember);
-            itemY += itemHeight + itemSpacing;
-        }
-
-        drawList.PopClipRect();
-
-        // Draw scrollbar if needed
-        if (contentHeight > height)
-        {
-            Scrollbar.Draw(drawList, x + width - scrollbarWidth, y, scrollbarWidth, height, _memberScrollY, maxScroll);
-        }
-    }
-
-    /// <summary>
-    ///     Draw single member item
-    /// </summary>
-    private static void DrawMemberItem(ImDrawListPtr drawList, ICoreClientAPI api,
-        PlayerReligionInfoResponsePacket.MemberInfo member, float x, float y, float width, float height,
-        string currentPlayerUID, Action<string> onKickMember)
-    {
-        const float padding = 8f;
-        const float kickButtonWidth = 60f;
-
-        // Draw background
-        var itemStart = new Vector2(x, y);
-        var itemEnd = new Vector2(x + width, y + height);
-        var bgColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.DarkBrown * 0.8f);
-        drawList.AddRectFilled(itemStart, itemEnd, bgColor, 3f);
-
-        // Player name
-        var nameText = member.PlayerName + (member.IsFounder ? " [Founder]" : "");
-        var namePos = new Vector2(x + padding, y + (height - 14f) / 2);
-        var nameColor = ImGui.ColorConvertFloat4ToU32(member.IsFounder ? ColorPalette.Gold : ColorPalette.White);
-        drawList.AddText(namePos, nameColor, nameText);
-
-        // Favor rank
-        var rankText = $"{member.FavorRank} ({member.Favor})";
-        var rankSize = ImGui.CalcTextSize(rankText);
-        var rankPos = new Vector2(x + width - padding - kickButtonWidth - 10f - rankSize.X, y + (height - 14f) / 2);
-        var rankColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
-        drawList.AddText(rankPos, rankColor, rankText);
-
-        // Kick button (only if not founder and not self)
-        if (!member.IsFounder && member.PlayerUID != currentPlayerUID)
-        {
-            var kickButtonX = x + width - kickButtonWidth - padding;
-            var kickButtonY = y + (height - 22f) / 2;
-            if (ButtonRenderer.DrawSmallButton(drawList, "Kick", kickButtonX, kickButtonY, kickButtonWidth, 22f))
-            {
-                api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
-                    api.World.Player.Entity, null, false, 8f, 0.5f);
-                onKickMember.Invoke(member.PlayerUID);
-            }
-        }
     }
 
     /// <summary>

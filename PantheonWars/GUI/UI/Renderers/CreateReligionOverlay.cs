@@ -3,6 +3,7 @@ using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Components.Buttons;
 using PantheonWars.GUI.UI.Components.Inputs;
+using PantheonWars.GUI.UI.State;
 using PantheonWars.GUI.UI.Utilities;
 using Vintagestory.API.Client;
 
@@ -15,22 +16,14 @@ namespace PantheonWars.GUI.UI.Renderers;
 internal static class CreateReligionOverlay
 {
     // State
-    private static string _religionName = "";
-    private static int _selectedDeityIndex = 0; // Khoras
-    private static bool _isPublic = true;
-    private static string? _errorMessage;
-    private static bool _dropdownOpen;
+    private static readonly CreateReligionState _state = new();
 
     /// <summary>
     ///     Initialize/reset overlay state
     /// </summary>
     public static void Initialize()
     {
-        _religionName = "";
-        _selectedDeityIndex = 0;
-        _isPublic = true;
-        _errorMessage = null;
-        _dropdownOpen = false;
+        _state.Reset();
     }
 
     /// <summary>
@@ -105,7 +98,7 @@ internal static class CreateReligionOverlay
         DrawLabel(drawList, "Religion Name:", overlayX + padding, currentY);
         currentY += 25f;
 
-        _religionName = TextInput.Draw(drawList, "##religionname", _religionName, overlayX + padding, currentY, fieldWidth, 32f, "Enter religion name...", 32);
+        _state.ReligionName = TextInput.Draw(drawList, "##religionname", _state.ReligionName, overlayX + padding, currentY, fieldWidth, 32f, "Enter religion name...", 32);
         currentY += 40f;
 
         // Deity Selection
@@ -117,26 +110,26 @@ internal static class CreateReligionOverlay
         currentY += 45f;
 
         // Public/Private Toggle
-        _isPublic = DrawCheckbox(drawList, api, "Public (anyone can join)", overlayX + padding, currentY, _isPublic);
+        _state.IsPublic = DrawCheckbox(drawList, api, "Public (anyone can join)", overlayX + padding, currentY, _state.IsPublic);
         currentY += 35f;
 
         // Info text
-        var infoText = _isPublic
+        var infoText = _state.IsPublic
             ? "Public religions appear in the browser and anyone can join."
             : "Private religions require an invitation from the founder.";
         DrawInfoText(drawList, infoText, overlayX + padding, currentY, fieldWidth);
         currentY += 50f;
 
         // Error message
-        if (!string.IsNullOrEmpty(_errorMessage))
+        if (!string.IsNullOrEmpty(_state.ErrorMessage))
         {
-            DrawErrorText(drawList, _errorMessage, overlayX + padding, currentY, fieldWidth);
+            DrawErrorText(drawList, _state.ErrorMessage, overlayX + padding, currentY, fieldWidth);
             currentY += 30f;
         }
 
         // Process dropdown menu FIRST (before buttons) to consume clicks
         bool dropdownConsumedClick = false;
-        if (_dropdownOpen)
+        if (_state.DropdownOpen)
         {
             dropdownConsumedClick = DrawDeityDropdownMenu(drawList, api, overlayX + padding, dropdownY, fieldWidth, 36f);
         }
@@ -147,7 +140,7 @@ internal static class CreateReligionOverlay
         var buttonY = overlayY + overlayHeight - padding - buttonHeight;
         var createButtonX = overlayX + (overlayWidth - buttonWidth) / 2; // Center the button
 
-        var canCreate = !string.IsNullOrWhiteSpace(_religionName) && _religionName.Length >= 3;
+        var canCreate = !string.IsNullOrWhiteSpace(_state.ReligionName) && _state.ReligionName.Length >= 3;
 
         // Draw Create button
         if (ButtonRenderer.DrawButton(drawList, "Create", createButtonX, buttonY, buttonWidth, buttonHeight, isPrimary: true, enabled: canCreate))
@@ -155,9 +148,9 @@ internal static class CreateReligionOverlay
             if (canCreate)
             {
                 // Validate name length
-                if (_religionName.Length > 32)
+                if (_state.ReligionName.Length > 32)
                 {
-                    _errorMessage = "Name must be 32 characters or less";
+                    _state.ErrorMessage = "Name must be 32 characters or less";
                     api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/error"),
                         api.World.Player.Entity, null, false, 8f, 0.3f);
                     return true;
@@ -166,20 +159,20 @@ internal static class CreateReligionOverlay
                 api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                     api.World.Player.Entity, null, false, 8f, 0.5f);
 
-                var deityName = DeityHelper.DeityNames[_selectedDeityIndex];
-                onCreate.Invoke(_religionName, deityName, _isPublic);
+                var deityName = DeityHelper.DeityNames[_state.SelectedDeityIndex];
+                onCreate.Invoke(_state.ReligionName, deityName, _state.IsPublic);
                 return false; // Close overlay after create
             }
             else
             {
-                _errorMessage = "Religion name must be at least 3 characters";
+                _state.ErrorMessage = "Religion name must be at least 3 characters";
                 api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/error"),
                     api.World.Player.Entity, null, false, 8f, 0.3f);
             }
         }
 
         // Redraw dropdown menu AFTER buttons for proper z-order (visual only, interaction already handled)
-        if (_dropdownOpen)
+        if (_state.DropdownOpen)
         {
             DrawDeityDropdownMenuVisual(drawList, overlayX + padding, dropdownY, fieldWidth, 36f);
         }
@@ -247,13 +240,13 @@ internal static class CreateReligionOverlay
     private static void DrawDeityDropdown(ImDrawListPtr drawList, ICoreClientAPI api, float x, float y, float width, float height)
     {
         // Create display text for selected deity
-        var selectedDeity = DeityHelper.DeityNames[_selectedDeityIndex];
+        var selectedDeity = DeityHelper.DeityNames[_state.SelectedDeityIndex];
         var deityText = DeityHelper.GetDeityDisplayText(selectedDeity);
 
         // Draw dropdown button
-        if (Dropdown.DrawButton(drawList, x, y, width, height, deityText, _dropdownOpen))
+        if (Dropdown.DrawButton(drawList, x, y, width, height, deityText, _state.DropdownOpen))
         {
-            _dropdownOpen = !_dropdownOpen;
+            _state.DropdownOpen = !_state.DropdownOpen;
             api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
                 api.World.Player.Entity, null, false, 8f, 0.3f);
         }
@@ -273,12 +266,12 @@ internal static class CreateReligionOverlay
 
         // Handle interaction
         var (newIndex, shouldClose, clickConsumed) = Dropdown.DrawMenuAndHandleInteraction(
-            drawList, api, x, y, width, height, deityDisplayTexts, _selectedDeityIndex);
+            drawList, api, x, y, width, height, deityDisplayTexts, _state.SelectedDeityIndex);
 
-        _selectedDeityIndex = newIndex;
+        _state.SelectedDeityIndex = newIndex;
         if (shouldClose)
         {
-            _dropdownOpen = false;
+            _state.DropdownOpen = false;
         }
 
         return clickConsumed;
@@ -297,7 +290,7 @@ internal static class CreateReligionOverlay
         }
 
         // Draw menu visual
-        Dropdown.DrawMenuVisual(drawList, x, y, width, height, deityDisplayTexts, _selectedDeityIndex);
+        Dropdown.DrawMenuVisual(drawList, x, y, width, height, deityDisplayTexts, _state.SelectedDeityIndex);
     }
 
     /// <summary>
