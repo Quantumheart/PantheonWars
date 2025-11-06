@@ -18,13 +18,13 @@ public partial class PerkDialog
     /// </summary>
     private void OnCheckDataAvailability(float dt)
     {
-        if (_isReady) return;
+        if (_state.IsReady) return;
 
         // Request perk data from server
         if (_pantheonWarsSystem != null)
         {
             _pantheonWarsSystem.RequestPerkData();
-            // Don't set _isReady yet - wait for server response in OnPerkDataReceived
+            // Don't set _state.IsReady yet - wait for server response in OnPerkDataReceived
             _capi!.Event.UnregisterGameTickListener(_checkDataId);
         }
     }
@@ -40,12 +40,12 @@ public partial class PerkDialog
         {
             _capi.Logger.Debug("[PantheonWars] Player has no religion - showing 'No Religion' state");
             _manager!.Reset();
-            _isReady = true; // Set ready so dialog can open to show "No Religion" state
+            _state.IsReady = true; // Set ready so dialog can open to show "No Religion" state
 
             // If dialog should be open, open it now
-            if (!_isOpen && _imguiModSystem != null)
+            if (!_state.IsOpen && _imguiModSystem != null)
             {
-                _isOpen = true;
+                _state.IsOpen = true;
                 _imguiModSystem.Show();
                 _capi.Logger.Debug("[PantheonWars] Perk Dialog opened with 'No Religion' state");
             }
@@ -98,7 +98,7 @@ public partial class PerkDialog
         // Refresh states to update can-unlock status
         _manager.RefreshAllPerkStates();
 
-        _isReady = true;
+        _state.IsReady = true;
         _capi.Logger.Notification(
             $"[PantheonWars] Loaded {playerPerks.Count} player perks and {religionPerks.Count} religion perks for {packet.Deity}");
 
@@ -106,9 +106,9 @@ public partial class PerkDialog
         _pantheonWarsSystem?.RequestPlayerReligionInfo();
 
         // If dialog should be open, open it now that data is ready
-        if (!_isOpen && _imguiModSystem != null)
+        if (!_state.IsOpen && _imguiModSystem != null)
         {
-            _isOpen = true;
+            _state.IsOpen = true;
             _imguiModSystem.Show();
             _capi.Logger.Debug("[PantheonWars] Perk Dialog opened after data load");
         }
@@ -129,7 +129,7 @@ public partial class PerkDialog
 
         // Reset perk dialog state to "No Religion" mode
         _manager!.Reset();
-        _isReady = true; // Keep dialog ready so it doesn't close
+        _state.IsReady = true; // Keep dialog ready so it doesn't close
 
         // Request fresh data from server (will show "No Religion" state)
         _pantheonWarsSystem?.RequestPerkData();
@@ -140,7 +140,7 @@ public partial class PerkDialog
     /// </summary>
     private bool OnToggleDialog(KeyCombination keyCombination)
     {
-        if (_isOpen)
+        if (_state.IsOpen)
             Close();
         else
             Open();

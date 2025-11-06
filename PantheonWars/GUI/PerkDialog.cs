@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
+using PantheonWars.GUI.State;
 using PantheonWars.GUI.UI;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
@@ -30,15 +31,12 @@ public partial class PerkDialog : ModSystem
     private ImGuiModSystem? _imguiModSystem;
     private PantheonWarsSystem? _pantheonWarsSystem;
 
-    private bool _isOpen;
-    private bool _isReady;
     private PerkDialogManager? _manager;
     private Stopwatch? _stopwatch;
     private ImGuiViewportPtr _viewport;
 
-    // Window position tracking
-    private float _windowPosX;
-    private float _windowPosY;
+    // State
+    private readonly PerkDialogState _state = new();
 
     // Overlay coordinator
     private OverlayCoordinator? _overlayCoordinator;
@@ -110,9 +108,9 @@ public partial class PerkDialog : ModSystem
     /// </summary>
     private void Open()
     {
-        if (_isOpen) return;
+        if (_state.IsOpen) return;
 
-        if (!_isReady)
+        if (!_state.IsReady)
         {
             // Request data from server
             _pantheonWarsSystem?.RequestPerkData();
@@ -120,7 +118,7 @@ public partial class PerkDialog : ModSystem
             return;
         }
 
-        _isOpen = true;
+        _state.IsOpen = true;
         _imguiModSystem?.Show();
 
         // TODO: Add open sound in Phase 5
@@ -134,9 +132,9 @@ public partial class PerkDialog : ModSystem
     /// </summary>
     private void Close()
     {
-        if (!_isOpen) return;
+        if (!_state.IsOpen) return;
 
-        _isOpen = false;
+        _state.IsOpen = false;
 
         // TODO: Add close sound in Phase 5
         // _capi.Gui.PlaySound(new AssetLocation("pantheonwars", "sounds/click.ogg"), false, 0.3f);
@@ -149,7 +147,7 @@ public partial class PerkDialog : ModSystem
     /// </summary>
     private CallbackGUIStatus OnDraw(float deltaSeconds)
     {
-        if (!_isOpen) return CallbackGUIStatus.Closed;
+        if (!_state.IsOpen) return CallbackGUIStatus.Closed;
 
         // Allow ESC to close
         if (ImGui.IsKeyPressed(ImGuiKey.Escape))
@@ -168,7 +166,7 @@ public partial class PerkDialog : ModSystem
     /// </summary>
     private void OnClose()
     {
-        if (_isOpen) Close();
+        if (_state.IsOpen) Close();
     }
 
     /// <summary>
@@ -210,8 +208,8 @@ public partial class PerkDialog : ModSystem
 
         // Track window position for drawing
         var windowPos = ImGui.GetWindowPos();
-        _windowPosX = windowPos.X;
-        _windowPosY = windowPos.Y;
+        _state.WindowPosX = windowPos.X;
+        _state.WindowPosY = windowPos.Y;
 
         // Draw content
         DrawBackground(windowWidth, windowHeight);
@@ -260,7 +258,7 @@ public partial class PerkDialog : ModSystem
     private void DrawBackground(int width, int height)
     {
         var drawList = ImGui.GetWindowDrawList();
-        var pos = new Vector2(_windowPosX, _windowPosY);
+        var pos = new Vector2(_state.WindowPosX, _state.WindowPosY);
 
         // Draw dark brown background rectangle
         var bgColor = ImGui.ColorConvertFloat4ToU32(new Vector4(0.16f, 0.12f, 0.09f, 1.0f)); // #2a1f16
