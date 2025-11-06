@@ -14,42 +14,6 @@ public class OverlayCoordinator
     private bool _showLeaveConfirmation;
 
     /// <summary>
-    ///     Religion Browser overlay is currently visible
-    /// </summary>
-    public bool ShowReligionBrowser
-    {
-        get => _showReligionBrowser;
-        set => _showReligionBrowser = value;
-    }
-
-    /// <summary>
-    ///     Religion Management overlay is currently visible
-    /// </summary>
-    public bool ShowReligionManagement
-    {
-        get => _showReligionManagement;
-        set => _showReligionManagement = value;
-    }
-
-    /// <summary>
-    ///     Create Religion overlay is currently visible
-    /// </summary>
-    public bool ShowCreateReligion
-    {
-        get => _showCreateReligion;
-        set => _showCreateReligion = value;
-    }
-
-    /// <summary>
-    ///     Leave Religion confirmation overlay is currently visible
-    /// </summary>
-    public bool ShowLeaveConfirmation
-    {
-        get => _showLeaveConfirmation;
-        set => _showLeaveConfirmation = value;
-    }
-
-    /// <summary>
     ///     Show the Religion Browser overlay
     /// </summary>
     public void ShowReligionBrowser()
