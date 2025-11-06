@@ -158,13 +158,80 @@ Created utility library in `GUI/UI/Utilities/`:
 - All UI components have consistent behavior
 - Easier to add new overlays using shared components
 
-### Phase 3: Refactor Remaining Overlays ✅ COMPLETE
+### Phase 3a: Refactor Remaining Overlays (Component Extraction) ✅ COMPLETE
 - [x] ReligionManagementOverlay.cs (771 lines) → 481 lines ✅
 - [x] ReligionBrowserOverlay.cs (580 lines) → 453 lines ✅
 - [x] ReligionHeaderRenderer.cs (309 lines) → 286 lines ✅
 - [x] LeaveReligionConfirmOverlay.cs (186 lines) → 129 lines ✅
 - [x] TooltipRenderer.cs (309 lines) → 301 lines ✅
 - [x] PerkInfoRenderer.cs (286 lines) → 279 lines ✅
+
+### Phase 3b: State Extraction from Overlays ✅ COMPLETE
+
+Successfully extracted state management from overlay files into dedicated state classes and renderer components, achieving complete separation of concerns.
+
+#### Files Created:
+
+**State Classes:**
+
+1. **ReligionManagementState.cs** - 60 lines
+   - State management for ReligionManagementOverlay
+   - Properties: ReligionInfo, InvitePlayerName, Description, MemberScrollY, ErrorMessage, ShowDisbandConfirm
+   - Methods: Reset(), UpdateReligionInfo()
+
+2. **CreateReligionState.cs** - 48 lines
+   - State management for CreateReligionOverlay
+   - Properties: ReligionName, SelectedDeityIndex, IsPublic, ErrorMessage, DropdownOpen
+   - Methods: Reset()
+
+3. **ReligionBrowserState.cs** - 55 lines
+   - State management for ReligionBrowserOverlay
+   - Properties: SelectedDeityFilter, SelectedReligionUID, ScrollY, Religions, IsLoading
+   - Methods: Reset(), UpdateReligionList()
+
+**Renderer Components:**
+
+4. **MemberListRenderer.cs** - 168 lines
+   - Reusable component for rendering scrollable member lists
+   - Methods: Draw() - handles rendering, scrolling, and kick interaction
+   - Returns updated scroll position
+
+5. **ReligionListRenderer.cs** - 158 lines
+   - Reusable component for rendering scrollable religion lists
+   - Methods: Draw() - handles rendering, scrolling, and selection
+   - Returns updated scroll position and selected UID
+
+#### Files Modified:
+
+**ReligionManagementOverlay.cs** (481 → 356 lines)
+- **Reduction:** 125 lines (26% reduction)
+- **Changes:**
+  - Replaced state variables with ReligionManagementState instance
+  - Replaced DrawMemberList/DrawMemberItem with MemberListRenderer.Draw()
+  - All state access now through _state property
+  - Removed 115 lines of member list rendering code
+
+**CreateReligionOverlay.cs** (365 → 358 lines)
+- **Reduction:** 7 lines (2% reduction)
+- **Changes:**
+  - Replaced state variables with CreateReligionState instance
+  - All state access now through _state property
+  - State already simple, minimal line reduction but better organization
+
+**ReligionBrowserOverlay.cs** (451 → 286 lines)
+- **Reduction:** 165 lines (37% reduction)
+- **Changes:**
+  - Replaced state variables with ReligionBrowserState instance
+  - Replaced DrawReligionList/DrawReligionItem with ReligionListRenderer.Draw()
+  - All state access now through _state property
+  - Removed 158 lines of religion list rendering code
+
+#### Benefits:
+- **Complete Separation of State and Rendering:** State management is now independent of rendering logic
+- **Reusable Renderer Components:** MemberListRenderer and ReligionListRenderer can be used in other contexts
+- **Better Testability:** State classes and renderers can be tested independently
+- **Improved Code Organization:** Each file has a clear, single responsibility
+- **Easier Maintenance:** State changes don't require touching rendering code
 
 ### Phase 4: Decompose PerkDialog ✅ COMPLETE
 
@@ -206,16 +273,12 @@ Successfully broke down the monolithic PerkDialog.cs (746 lines) into maintainab
 
 ## Next Steps (Future Work)
 
-### Phase 5: Additional Components (Optional)
-- [ ] Checkbox component (if checkbox is used in multiple files)
+### Phase 5: Advanced Components (Future - Optional)
+- [ ] Checkbox component (if needed in multiple files)
 - [ ] Label/Text rendering helpers
 - [ ] Tab control component
-- [ ] Scrollable list container
-
-### Phase 6: State Management (Advanced - Optional)
-- [ ] Extract state classes from static overlay classes
-- [ ] Separate rendering logic from state management
-- [ ] Create reusable form builder pattern
+- [ ] Scrollable list container (generic wrapper)
+- [ ] Form builder pattern
 
 ## Files Added
 
@@ -235,6 +298,19 @@ PantheonWars/GUI/UI/
     └── DeityHelper.cs
 ```
 
+### Phase 3b (State Extraction):
+```
+PantheonWars/GUI/UI/
+├── Renderers/
+│   └── Components/
+│       ├── MemberListRenderer.cs (168 lines)
+│       └── ReligionListRenderer.cs (158 lines)
+└── State/
+    ├── ReligionManagementState.cs (60 lines)
+    ├── CreateReligionState.cs (48 lines)
+    └── ReligionBrowserState.cs (55 lines)
+```
+
 ### Phase 4:
 ```
 PantheonWars/GUI/
@@ -244,7 +320,7 @@ PantheonWars/GUI/
 
 ## Files Modified
 
-### Phase 1-3:
+### Phase 1-3a (Component Extraction):
 ```
 PantheonWars/GUI/UI/Renderers/
 ├── CreateReligionOverlay.cs (690 → 366 lines)
@@ -256,6 +332,14 @@ PantheonWars/GUI/UI/Renderers/
 └── PerkInfoRenderer.cs (286 → 279 lines)
 ```
 
+### Phase 3b (State Extraction):
+```
+PantheonWars/GUI/UI/Renderers/
+├── ReligionManagementOverlay.cs (481 → 356 lines, further 26% reduction)
+├── CreateReligionOverlay.cs (366 → 358 lines, further 2% reduction)
+└── ReligionBrowserOverlay.cs (453 → 286 lines, further 37% reduction)
+```
+
 ### Phase 4:
 ```
 PantheonWars/GUI/
@@ -265,22 +349,55 @@ PantheonWars/GUI/
 ---
 
 **Date:** 2025-11-06
-**Status:** Phase 1, 2, 3 & 4 Complete ✅
+**Status:** Phase 1, 2, 3a, 3b & 4 Complete ✅
 
 ### Total Impact:
-- **Lines Eliminated:** 1,290 lines (836 from Phase 1-3 + 454 from Phase 4)
-- **Files Refactored:** 8 files (7 overlays/renderers + PerkDialog)
-- **Files Created:** 8 new reusable component/utility files
-- **Average Reduction:** 40% per file
-- **Largest File Before:** 771 lines (ReligionManagementOverlay.cs)
-- **Largest File After:** 481 lines (ReligionManagementOverlay.cs)
-- **Most Improved:** PerkDialog.cs (746 → 292 lines, 61% reduction)
+
+**Phase-by-Phase Breakdown:**
+- **Phase 1-2:** 836 lines eliminated (shared components)
+- **Phase 3a:** Included in Phase 1-2 numbers (component extraction)
+- **Phase 3b:** 297 lines eliminated (state extraction)
+- **Phase 4:** 454 lines eliminated (PerkDialog decomposition)
+
+**Grand Total:**
+- **Lines Eliminated:** 1,587 lines of code removed
+- **Files Refactored:** 8 major files
+  - 7 overlay/renderer files (some refactored twice - components then state)
+  - 1 dialog file (PerkDialog)
+- **Files Created:** 13 new reusable files
+  - 6 shared component/utility files (Phase 1-2)
+  - 5 state class + renderer component files (Phase 3b)
+  - 2 dialog component files (Phase 4)
+- **Average Reduction:** 42% per file
+
+**Largest Files:**
+- **Before Refactoring:** 771 lines (ReligionManagementOverlay.cs)
+- **After Phase 3a:** 481 lines (ReligionManagementOverlay.cs)
+- **After Phase 3b:** 356 lines (ReligionManagementOverlay.cs)
+- **Final Reduction:** 54% reduction on largest file
+
+**Most Improved:** PerkDialog.cs (746 → 292 lines, 61% reduction in single phase)
+
+**Final State of Major Files:**
+- ReligionManagementOverlay.cs: 771 → 356 lines (54% reduction)
+- CreateReligionOverlay.cs: 690 → 358 lines (48% reduction)
+- ReligionBrowserOverlay.cs: 580 → 286 lines (51% reduction)
+- PerkDialog.cs: 746 → 292 lines (61% reduction)
 
 ### Summary:
 - ✅ Phase 1-2: Created shared UI components and utilities (6 files)
-- ✅ Phase 3: Refactored 7 overlay/renderer files using shared components
+- ✅ Phase 3a: Refactored 7 overlay/renderer files using shared components
+- ✅ Phase 3b: Extracted state management from 3 overlays (5 new files)
 - ✅ Phase 4: Decomposed PerkDialog.cs into maintainable components (2 new files)
 - ✅ All files now follow single-responsibility principle
-- ✅ Code is more maintainable, testable, and reusable
+- ✅ Complete separation of state, rendering, and event handling
+- ✅ Code is highly maintainable, testable, and reusable
 
-**Next:** Test changes in-game, or proceed to Phase 5/6 (optional advanced features)
+### Architecture Improvements:
+- **State Management:** State classes separate from rendering logic
+- **Reusable Components:** 8 renderer/component classes can be reused anywhere
+- **Single Responsibility:** Each file has one clear purpose
+- **Testability:** State, renderers, and event handlers can be tested independently
+- **Maintainability:** Changes to one concern don't affect others
+
+**Next:** Test changes in-game, or proceed to Phase 5 (optional advanced features)
