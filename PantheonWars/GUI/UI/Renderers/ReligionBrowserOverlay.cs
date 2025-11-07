@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
+using PantheonWars.GUI.UI.Components;
 using PantheonWars.GUI.UI.Components.Buttons;
 using PantheonWars.GUI.UI.Renderers.Components;
 using PantheonWars.GUI.UI.State;
@@ -111,30 +112,36 @@ internal static class ReligionBrowserOverlay
         var deityFilters = new[] { "All", "Khoras", "Lysa", "Morthen", "Aethra", "Umbros", "Tharos", "Gaia", "Vex" };
         const float tabHeight = 32f;
         const float tabSpacing = 4f;
-        var tabWidth = (overlayWidth - padding * 2 - tabSpacing * (deityFilters.Length - 1)) / deityFilters.Length;
 
-        var tabX = overlayX + padding;
-        for (int i = 0; i < deityFilters.Length; i++)
+        // Find current selected index
+        var currentSelectedIndex = Array.IndexOf(deityFilters, _state.SelectedDeityFilter);
+        if (currentSelectedIndex == -1) currentSelectedIndex = 0; // Default to "All"
+
+        // Draw tabs using TabControl component
+        var newSelectedIndex = TabControl.Draw(
+            drawList,
+            overlayX + padding,
+            currentY,
+            overlayWidth - padding * 2,
+            tabHeight,
+            deityFilters,
+            currentSelectedIndex,
+            tabSpacing);
+
+        // Handle selection change
+        if (newSelectedIndex != currentSelectedIndex)
         {
-            var filter = deityFilters[i];
-            var isSelected = _state.SelectedDeityFilter == filter;
+            _state.SelectedDeityFilter = deityFilters[newSelectedIndex];
+            _state.SelectedReligionUID = null;
+            _state.ScrollY = 0f;
+            _state.IsLoading = true;
 
-            if (DrawTab(drawList, filter, tabX, currentY, tabWidth, tabHeight, isSelected))
-            {
-                _state.SelectedDeityFilter = filter;
-                _state.SelectedReligionUID = null;
-                _state.ScrollY = 0f;
-                _state.IsLoading = true;
+            // Request refresh with new filter
+            var filterString = deityFilters[newSelectedIndex] == "All" ? "" : deityFilters[newSelectedIndex];
+            onRequestRefresh.Invoke(filterString);
 
-                // Request refresh with new filter
-                var filterString = filter == "All" ? "" : filter;
-                onRequestRefresh.Invoke(filterString);
-
-                api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
-                    api.World.Player.Entity, null, false, 8f, 0.5f);
-            }
-
-            tabX += tabWidth + tabSpacing;
+            api.World.PlaySoundAt(new Vintagestory.API.Common.AssetLocation("pantheonwars:sounds/click"),
+                api.World.Player.Entity, null, false, 8f, 0.5f);
         }
 
         currentY += tabHeight + padding;
@@ -212,75 +219,4 @@ internal static class ReligionBrowserOverlay
         return true; // Keep overlay open
     }
 
-    /// <summary>
-    ///     Draw the religion list
-    /// </summary>
-
-    /// <summary>
-    ///     Draw scrollbar
-    /// </summary>
-    private static void DrawScrollbar(ImDrawListPtr drawList, float x, float y, float width, float height, float scrollY, float maxScroll)
-    {
-        // Draw track
-        var trackStart = new Vector2(x, y);
-        var trackEnd = new Vector2(x + width, y + height);
-        var trackColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.DarkBrown * 0.7f);
-        drawList.AddRectFilled(trackStart, trackEnd, trackColor, 4f);
-
-        // Draw thumb
-        var thumbHeight = Math.Max(20f, height * (height / (height + maxScroll)));
-        var thumbY = y + (scrollY / maxScroll) * (height - thumbHeight);
-        var thumbStart = new Vector2(x + 2f, thumbY);
-        var thumbEnd = new Vector2(x + width - 2f, thumbY + thumbHeight);
-        var thumbColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
-        drawList.AddRectFilled(thumbStart, thumbEnd, thumbColor, 4f);
-    }
-
-    /// <summary>
-    ///     Draw tab button (unique to this overlay)
-    /// </summary>
-    private static bool DrawTab(ImDrawListPtr drawList, string text, float x, float y, float width, float height, bool isSelected)
-    {
-        var tabStart = new Vector2(x, y);
-        var tabEnd = new Vector2(x + width, y + height);
-
-        var mousePos = ImGui.GetMousePos();
-        var isHovering = mousePos.X >= x && mousePos.X <= x + width &&
-                        mousePos.Y >= y && mousePos.Y <= y + height;
-
-        // Determine background color
-        Vector4 bgColor;
-        if (isSelected)
-        {
-            bgColor = ColorPalette.Gold * 0.4f;
-        }
-        else if (isHovering)
-        {
-            bgColor = ColorPalette.LightBrown;
-            ImGui.SetMouseCursor(ImGuiMouseCursor.Hand);
-        }
-        else
-        {
-            bgColor = ColorPalette.DarkBrown;
-        }
-
-        // Draw background
-        var bgColorU32 = ImGui.ColorConvertFloat4ToU32(bgColor);
-        drawList.AddRectFilled(tabStart, tabEnd, bgColorU32, 4f);
-
-        // Draw border
-        var borderColor = ImGui.ColorConvertFloat4ToU32(isSelected ? ColorPalette.Gold : ColorPalette.Grey * 0.5f);
-        drawList.AddRect(tabStart, tabEnd, borderColor, 4f, ImDrawFlags.None, isSelected ? 2f : 1f);
-
-        // Draw text (centered)
-        var textSize = ImGui.CalcTextSize(text);
-        var textPos = new Vector2(
-            x + (width - textSize.X) / 2,
-            y + (height - textSize.Y) / 2
-        );
-        var textColor = ImGui.ColorConvertFloat4ToU32(isSelected ? ColorPalette.White : ColorPalette.Grey);
-        drawList.AddText(textPos, textColor, text);
-
-        return !isSelected && isHovering && ImGui.IsMouseClicked(ImGuiMouseButton.Left);
-    }
 }

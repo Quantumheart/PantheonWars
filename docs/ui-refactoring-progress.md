@@ -323,9 +323,57 @@ scrollY = ScrollableList.Draw(
 - Easy to use and type-safe
 - Existing MemberListRenderer and ReligionListRenderer remain unchanged (no breaking changes)
 
-#### Task 5.2: Tab Control Component 🔲 TODO
-- [ ] Create reusable tab control component
-- [ ] Replace tab logic in ReligionBrowserOverlay
+#### Task 5.2: Tab Control Component ✅ COMPLETE
+
+**File Created:**
+
+**TabControl.cs** - 107 lines
+- Generic tab control component for horizontal tab navigation
+- Stateless design - caller manages selected index
+- Features:
+  - Automatic tab width calculation based on total width and spacing
+  - Mouse hover detection with hand cursor
+  - Active/selected state visual feedback (gold highlight)
+  - Click detection and selection change handling
+  - Centered text rendering in each tab
+  - Consistent styling with ColorPalette
+- Eliminates tab rendering duplication for future tab-based UIs
+
+**File Modified:**
+
+**ReligionBrowserOverlay.cs** (287 → 222 lines)
+- **Reduction:** 65 lines (23% reduction)
+- **Changes:**
+  - Added using for `PantheonWars.GUI.UI.Components`
+  - Replaced manual tab rendering loop with `TabControl.Draw()`
+  - Removed private `DrawTab()` method (43 lines)
+  - Removed private `DrawScrollbar()` method (15 lines)
+  - Kept deity filter state management (string-based, converts to/from index)
+  - Tab selection logic now cleaner with index-based API
+
+**Usage Example:**
+```csharp
+var tabs = new[] { "Tab1", "Tab2", "Tab3" };
+var newIndex = TabControl.Draw(
+    drawList, x, y, width, height,
+    tabs: tabs,
+    selectedIndex: currentIndex,
+    tabSpacing: 4f
+);
+
+if (newIndex != currentIndex)
+{
+    // Handle tab change
+    currentIndex = newIndex;
+}
+```
+
+**Benefits:**
+- Consistent tab behavior across all future tab-based overlays
+- Reduces boilerplate code for new tabbed interfaces
+- Easy to use with string array of tab labels
+- Automatic layout calculation
+- Can be reused for any horizontal tab control needs
 
 #### Task 5.3: Form Builder 🔲 TODO
 - [ ] Create form builder pattern
@@ -380,8 +428,10 @@ PantheonWars/GUI/
 
 ### Phase 5:
 ```
-PantheonWars/GUI/UI/Components/Lists/
-└── ScrollableList.cs (142 lines)
+PantheonWars/GUI/UI/Components/
+├── Lists/
+│   └── ScrollableList.cs (142 lines)
+└── TabControl.cs (107 lines)
 ```
 
 ## Files Modified
@@ -413,10 +463,16 @@ PantheonWars/GUI/
 └── PerkDialogEventHandlers.cs (updated to use state)
 ```
 
+### Phase 5:
+```
+PantheonWars/GUI/UI/Renderers/
+└── ReligionBrowserOverlay.cs (287 → 222 lines, further 23% reduction)
+```
+
 ---
 
-**Date:** 2025-11-06
-**Status:** Phase 1, 2, 3a, 3b, 4 & 5.1 Complete ✅
+**Date:** 2025-11-07
+**Status:** Phase 1, 2, 3a, 3b, 4, 5.1 & 5.2 Complete ✅
 
 ### Total Impact:
 
@@ -426,18 +482,19 @@ PantheonWars/GUI/
 - **Phase 3b:** 297 lines eliminated (state extraction from overlays)
 - **Phase 4:** 456 lines eliminated (PerkDialog decomposition + state extraction)
 - **Phase 5.1:** 142 lines created (generic ScrollableList component for future use)
+- **Phase 5.2:** 65 lines eliminated from ReligionBrowserOverlay + 107 lines created (TabControl component)
 
 **Grand Total:**
-- **Lines Eliminated:** 1,589 lines of code removed
+- **Lines Eliminated:** 1,654 lines of code removed
 - **Files Refactored:** 8 major files
-  - 7 overlay/renderer files (some refactored twice - components then state)
+  - 7 overlay/renderer files (some refactored multiple times - components, then state, then advanced components)
   - 1 dialog file (PerkDialog - refactored in 3 tasks)
-- **Files Created:** 15 new reusable files
+- **Files Created:** 16 new reusable files
   - 6 shared component/utility files (Phase 1-2)
   - 5 state class + renderer component files (Phase 3b)
   - 3 dialog component + state files (Phase 4)
-  - 1 generic list component (Phase 5.1)
-- **Average Reduction:** 42% per file
+  - 2 generic components (Phase 5.1-5.2: ScrollableList, TabControl)
+- **Average Reduction:** 43% per file
 
 **Largest Files:**
 - **Before Refactoring:** 771 lines (ReligionManagementOverlay.cs)
@@ -450,7 +507,7 @@ PantheonWars/GUI/
 **Final State of Major Files:**
 - ReligionManagementOverlay.cs: 771 → 356 lines (54% reduction)
 - CreateReligionOverlay.cs: 690 → 358 lines (48% reduction)
-- ReligionBrowserOverlay.cs: 580 → 286 lines (51% reduction)
+- ReligionBrowserOverlay.cs: 580 → 222 lines (62% reduction)
 - PerkDialog.cs: 746 → 290 lines (61% reduction)
 
 ### Summary:
@@ -462,7 +519,8 @@ PantheonWars/GUI/
   - Task 4.2: Overlay coordinator extracted
   - Task 4.3: Dialog state extracted
 - ✅ Phase 5.1 (Complete): Created generic ScrollableList component (1 new file)
-- 🚧 Phase 5.2-5.3: Tab Control and Form Builder (optional, future)
+- ✅ Phase 5.2 (Complete): Created generic TabControl component (1 new file)
+- 🚧 Phase 5.3: Form Builder (optional, future)
 - ✅ All files now follow single-responsibility principle
 - ✅ Complete separation of state, rendering, and event handling
 - ✅ Code is highly maintainable, testable, and reusable
@@ -471,10 +529,10 @@ PantheonWars/GUI/
 
 ### Architecture Improvements:
 - **State Management:** State classes separate from rendering logic (consistent pattern)
-- **Reusable Components:** 8 renderer/component classes can be reused anywhere
+- **Reusable Components:** 10 renderer/component classes can be reused anywhere
 - **Single Responsibility:** Each file has one clear purpose
 - **Testability:** State, renderers, and event handlers can be tested independently
 - **Maintainability:** Changes to one concern don't affect others
 - **Consistency:** All dialogs/overlays follow the same architectural patterns
 
-**Next:** Complete Phase 5.2 (Tab Control) and 5.3 (Form Builder), or test changes in-game
+**Next:** Complete Phase 5.3 (Form Builder), or test changes in-game
