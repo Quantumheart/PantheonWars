@@ -283,14 +283,60 @@ Successfully broke down the monolithic PerkDialog.cs (746 lines) into maintainab
 - **Improved Readability:** No more 700+ line files to navigate
 - **Reusability:** OverlayCoordinator and state pattern can be reused for other dialog systems
 
+### Phase 5: Advanced Components (In Progress) 🚧
+
+Optional advanced components to further improve code reusability and reduce duplication in future development.
+
+#### Task 5.1: Scrollable List Component ✅ COMPLETE
+
+**File Created:**
+
+**ScrollableList.cs** - 142 lines
+- Generic scrollable list component with item renderer callback
+- Type-safe with generic `<T>` support for any list type
+- Features:
+  - Item renderer callback: `Action<T, float, float, float, float>` for custom rendering
+  - Built-in mouse wheel scrolling with configurable speed
+  - Automatic scrollbar rendering using existing Scrollbar component
+  - Empty state and loading state text support
+  - Visibility culling optimization (only renders visible items)
+  - Customizable: background color, scrollbar width, wheel speed
+- Eliminates scrolling logic duplication for future list views
+- Single source of truth for scrollable list patterns
+
+**Usage Example:**
+```csharp
+scrollY = ScrollableList.Draw(
+    drawList, x, y, width, height,
+    items: myList,
+    itemHeight: 50f,
+    itemSpacing: 4f,
+    scrollY: currentScrollY,
+    itemRenderer: (item, x, y, w, h) => DrawMyItem(item, x, y, w, h),
+    emptyText: "No items found"
+);
+```
+
+**Benefits:**
+- Consistent scrolling behavior across all future lists
+- Reduces boilerplate code for new list views
+- Easy to use and type-safe
+- Existing MemberListRenderer and ReligionListRenderer remain unchanged (no breaking changes)
+
+#### Task 5.2: Tab Control Component 🔲 TODO
+- [ ] Create reusable tab control component
+- [ ] Replace tab logic in ReligionBrowserOverlay
+
+#### Task 5.3: Form Builder 🔲 TODO
+- [ ] Create form builder pattern
+- [ ] Simplify form construction in CreateReligionOverlay
+
 ## Next Steps (Future Work)
 
-### Phase 5: Advanced Components (Future - Optional)
-- [ ] Checkbox component (if needed in multiple files)
-- [ ] Label/Text rendering helpers
+### Phase 5: Remaining Tasks (Optional)
 - [ ] Tab control component
-- [ ] Scrollable list container (generic wrapper)
 - [ ] Form builder pattern
+- [ ] Additional helpers as needed
 
 ## Files Added
 
@@ -332,6 +378,12 @@ PantheonWars/GUI/
     └── PerkDialogState.cs (38 lines)
 ```
 
+### Phase 5:
+```
+PantheonWars/GUI/UI/Components/Lists/
+└── ScrollableList.cs (142 lines)
+```
+
 ## Files Modified
 
 ### Phase 1-3a (Component Extraction):
@@ -364,7 +416,7 @@ PantheonWars/GUI/
 ---
 
 **Date:** 2025-11-06
-**Status:** Phase 1, 2, 3a, 3b & 4 Complete ✅
+**Status:** Phase 1, 2, 3a, 3b, 4 & 5.1 Complete ✅
 
 ### Total Impact:
 
@@ -373,16 +425,18 @@ PantheonWars/GUI/
 - **Phase 3a:** Included in Phase 1-2 numbers (component extraction)
 - **Phase 3b:** 297 lines eliminated (state extraction from overlays)
 - **Phase 4:** 456 lines eliminated (PerkDialog decomposition + state extraction)
+- **Phase 5.1:** 142 lines created (generic ScrollableList component for future use)
 
 **Grand Total:**
 - **Lines Eliminated:** 1,589 lines of code removed
 - **Files Refactored:** 8 major files
   - 7 overlay/renderer files (some refactored twice - components then state)
   - 1 dialog file (PerkDialog - refactored in 3 tasks)
-- **Files Created:** 14 new reusable files
+- **Files Created:** 15 new reusable files
   - 6 shared component/utility files (Phase 1-2)
   - 5 state class + renderer component files (Phase 3b)
   - 3 dialog component + state files (Phase 4)
+  - 1 generic list component (Phase 5.1)
 - **Average Reduction:** 42% per file
 
 **Largest Files:**
@@ -407,10 +461,13 @@ PantheonWars/GUI/
   - Task 4.1: Event handlers extracted
   - Task 4.2: Overlay coordinator extracted
   - Task 4.3: Dialog state extracted
+- ✅ Phase 5.1 (Complete): Created generic ScrollableList component (1 new file)
+- 🚧 Phase 5.2-5.3: Tab Control and Form Builder (optional, future)
 - ✅ All files now follow single-responsibility principle
 - ✅ Complete separation of state, rendering, and event handling
 - ✅ Code is highly maintainable, testable, and reusable
 - ✅ Consistent state management pattern across all dialogs and overlays
+- ✅ Generic components available for future development
 
 ### Architecture Improvements:
 - **State Management:** State classes separate from rendering logic (consistent pattern)
@@ -420,4 +477,4 @@ PantheonWars/GUI/
 - **Maintainability:** Changes to one concern don't affect others
 - **Consistency:** All dialogs/overlays follow the same architectural patterns
 
-**Next:** Test changes in-game, or proceed to Phase 5 (optional advanced features)
+**Next:** Complete Phase 5.2 (Tab Control) and 5.3 (Form Builder), or test changes in-game
