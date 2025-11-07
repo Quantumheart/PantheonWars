@@ -3,7 +3,7 @@ namespace PantheonWars.Constants;
 /// <summary>
 ///     Constants for Vintage Story's stat system.
 ///     These are the actual stat names used by VS's entity.Stats API.
-///     Use these constants in perk definitions to ensure consistency.
+///     Use these constants in blessing definitions to ensure consistency.
 /// </summary>
 public static class VintageStoryStats
 {

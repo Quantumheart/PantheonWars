@@ -73,7 +73,7 @@ internal static class LeaveReligionConfirmOverlay
             $"Are you sure you want to leave '{religionName}'?",
             "",
             "You will lose:",
-            "  - Access to all deity perks",
+            "  - Access to all deity blessings",
             "  - Your rank and position in the religion",
             "  - Connection with fellow members",
             "",

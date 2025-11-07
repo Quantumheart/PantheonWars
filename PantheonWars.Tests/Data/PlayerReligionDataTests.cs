@@ -57,13 +57,13 @@ public class PlayerReligionDataTests
     }
 
     [Fact]
-    public void UnlockPerk_ShouldSetPerkToUnlocked()
+    public void UnlockBlessing_ShouldSetBlessingToUnlocked()
     {
         var data = new PlayerReligionData();
-        var perkId = "Perk123";
-        data.UnlockPerk(perkId);
-        Assert.True(data.UnlockedPerks[perkId]);
-        Assert.Contains(perkId, data.UnlockedPerks.Keys);
+        var blessingId = "Blessing123";
+        data.UnlockBlessing(blessingId);
+        Assert.True(data.UnlockedBlessings[blessingId]);
+        Assert.Contains(blessingId, data.UnlockedBlessings.Keys);
     }
 
     // New tests for missing methods
@@ -115,29 +115,29 @@ public class PlayerReligionDataTests
         var playerData = new PlayerReligionData();
         playerData.Favor = 1000;
         playerData.FavorRank = FavorRank.Champion;
-        playerData.UnlockedPerks.Add("Perk123", true);
+        playerData.UnlockedBlessings.Add("Blessing123", true);
 
         playerData.ApplySwitchPenalty();
 
         Assert.Equal(0, playerData.Favor);
         Assert.Equal(FavorRank.Initiate, playerData.FavorRank);
-        Assert.Empty(playerData.UnlockedPerks);
+        Assert.Empty(playerData.UnlockedBlessings);
     }
 
     [Fact]
-    public void IsPerkUnlocked_ShouldReturnCorrectValue()
+    public void IsBlessingUnlocked_ShouldReturnCorrectValue()
     {
         var playerData = new PlayerReligionData();
-        var perkId = "Perk123";
+        var blessingId = "Blessing123";
 
-        // Test when perk is not unlocked
-        Assert.False(playerData.IsPerkUnlocked(perkId));
+        // Test when blessing is not unlocked
+        Assert.False(playerData.IsBlessingUnlocked(blessingId));
 
-        // Test when perk is unlocked
-        playerData.UnlockPerk(perkId);
-        Assert.True(playerData.IsPerkUnlocked(perkId));
+        // Test when blessing is unlocked
+        playerData.UnlockBlessing(blessingId);
+        Assert.True(playerData.IsBlessingUnlocked(blessingId));
 
-        // Test when perk is not present
-        Assert.False(playerData.IsPerkUnlocked("Perk456"));
+        // Test when blessing is not present
+        Assert.False(playerData.IsBlessingUnlocked("Blessing456"));
     }
 }

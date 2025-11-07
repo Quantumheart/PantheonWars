@@ -86,11 +86,11 @@ public class ReligionData
     public DateTime CreationDate { get; set; } = DateTime.UtcNow;
 
     /// <summary>
-    ///     Dictionary of unlocked religion perks
-    ///     Key: perk ID, Value: unlock status (true if unlocked)
+    ///     Dictionary of unlocked religion blessings
+    ///     Key: blessing ID, Value: unlock status (true if unlocked)
     /// </summary>
     [ProtoMember(10)]
-    public Dictionary<string, bool> UnlockedPerks { get; set; } = new();
+    public Dictionary<string, bool> UnlockedBlessings { get; set; } = new();
 
     /// <summary>
     ///     Whether this is a public religion (anyone can join) or private (invite-only)
@@ -173,18 +173,18 @@ public class ReligionData
     }
 
     /// <summary>
-    ///     Unlocks a perk for this religion
+    ///     Unlocks a blessing for this religion
     /// </summary>
-    public void UnlockPerk(string perkId)
+    public void UnlockBlessing(string blessingId)
     {
-        UnlockedPerks[perkId] = true;
+        UnlockedBlessings[blessingId] = true;
     }
 
     /// <summary>
-    ///     Checks if a perk is unlocked
+    ///     Checks if a blessing is unlocked
     /// </summary>
-    public bool IsPerkUnlocked(string perkId)
+    public bool IsBlessingUnlocked(string blessingId)
     {
-        return UnlockedPerks.TryGetValue(perkId, out var unlocked) && unlocked;
+        return UnlockedBlessings.TryGetValue(blessingId, out var unlocked) && unlocked;
     }
 }

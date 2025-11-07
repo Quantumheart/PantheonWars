@@ -8,7 +8,7 @@ using Vintagestory.API.Client;
 namespace PantheonWars.GUI.UI.Renderers;
 
 /// <summary>
-///     Renders the religion/deity header banner at the top of the perk dialog
+///     Renders the religion/deity header banner at the top of the blessing dialog
 ///     Shows: Religion name, deity icon/name, favor/prestige ranks
 /// </summary>
 internal static class ReligionHeaderRenderer
@@ -16,7 +16,7 @@ internal static class ReligionHeaderRenderer
     /// <summary>
     ///     Draw the religion header banner
     /// </summary>
-    /// <param name="manager">Perk dialog state manager</param>
+    /// <param name="manager">Blessing dialog state manager</param>
     /// <param name="api">Client API</param>
     /// <param name="x">X position</param>
     /// <param name="y">Y position</param>
@@ -26,7 +26,7 @@ internal static class ReligionHeaderRenderer
     /// <param name="onLeaveReligionClicked">Callback when Leave Religion button clicked</param>
     /// <returns>Height used by this renderer</returns>
     public static float Draw(
-        PerkDialogManager manager,
+        BlessingDialogManager manager,
         ICoreClientAPI api,
         float x, float y, float width,
         System.Action? onChangeReligionClicked = null,
@@ -52,7 +52,7 @@ internal static class ReligionHeaderRenderer
         if (!manager.HasReligion())
         {
             // Display "No Religion" message
-            var noReligionText = "No Religion - Join or create one to unlock perks!";
+            var noReligionText = "No Religion - Join or create one to unlock blessings!";
             var textSize = ImGui.CalcTextSize(noReligionText);
             var textPos = new Vector2(
                 x + (width - textSize.X) / 2,

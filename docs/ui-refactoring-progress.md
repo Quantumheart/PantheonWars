@@ -1,7 +1,7 @@
 # UI Refactoring Progress
 
 ## Summary
-Successfully implemented Phase 1, Phase 2, Phase 3, and Phase 4 of the UI refactoring plan, creating shared components and utilities to eliminate code duplication across the UI overlay files, and decomposing the large PerkDialog.cs class into maintainable components.
+Successfully implemented Phase 1, Phase 2, Phase 3, and Phase 4 of the UI refactoring plan, creating shared components and utilities to eliminate code duplication across the UI overlay files, and decomposing the large BlessingDialog.cs class into maintainable components.
 
 ## Completed Work
 
@@ -121,14 +121,14 @@ Created utility library in `GUI/UI/Utilities/`:
   - Removed 7 color constant declarations
   - No duplicate methods (tooltip rendering is unique)
 
-### PerkInfoRenderer.cs ✅
+### BlessingInfoRenderer.cs ✅
 - **Before:** 286 lines
 - **After:** 279 lines
 - **Reduction:** 7 lines (2%)
 - **Changes:**
   - Replaced color constants with `ColorPalette`
   - Removed 6 color constant declarations
-  - No duplicate methods (perk info rendering is unique)
+  - No duplicate methods (blessing info rendering is unique)
 
 ## Impact
 
@@ -148,7 +148,7 @@ Created utility library in `GUI/UI/Utilities/`:
 | ReligionHeaderRenderer.cs | 309 | 286 | 23 | 7% |
 | LeaveReligionConfirmOverlay.cs | 186 | 129 | 57 | 31% |
 | TooltipRenderer.cs | 309 | 301 | 8 | 3% |
-| PerkInfoRenderer.cs | 286 | 279 | 7 | 2% |
+| BlessingInfoRenderer.cs | 286 | 279 | 7 | 2% |
 | **Total** | **3131** | **2295** | **836** | **27%** |
 
 ### Improved Maintainability
@@ -164,7 +164,7 @@ Created utility library in `GUI/UI/Utilities/`:
 - [x] ReligionHeaderRenderer.cs (309 lines) → 286 lines ✅
 - [x] LeaveReligionConfirmOverlay.cs (186 lines) → 129 lines ✅
 - [x] TooltipRenderer.cs (309 lines) → 301 lines ✅
-- [x] PerkInfoRenderer.cs (286 lines) → 279 lines ✅
+- [x] BlessingInfoRenderer.cs (286 lines) → 279 lines ✅
 
 ### Phase 3b: State Extraction from Overlays ✅ COMPLETE
 
@@ -233,18 +233,18 @@ Successfully extracted state management from overlay files into dedicated state 
 - **Improved Code Organization:** Each file has a clear, single responsibility
 - **Easier Maintenance:** State changes don't require touching rendering code
 
-### Phase 4: Decompose PerkDialog ✅ COMPLETE
+### Phase 4: Decompose BlessingDialog ✅ COMPLETE
 
-Successfully broke down the monolithic PerkDialog.cs (746 lines) into maintainable, focused components through three tasks:
+Successfully broke down the monolithic BlessingDialog.cs (746 lines) into maintainable, focused components through three tasks:
 
 #### Task 4.1 & 4.2: Event Handlers & Overlay Coordination
 
 **Files Created:**
 
-1. **PerkDialogEventHandlers.cs** - 431 lines
+1. **BlessingDialogEventHandlers.cs** - 431 lines
    - Extracted all 24 event handler methods
    - Partial class containing event handling logic
-   - Methods include: OnPerkDataReceived, OnReligionStateChanged, OnUnlockButtonClicked, etc.
+   - Methods include: OnBlessingDataReceived, OnReligionStateChanged, OnUnlockButtonClicked, etc.
 
 2. **OverlayCoordinator.cs** - 167 lines
    - Manages visibility state of all overlay windows
@@ -252,28 +252,28 @@ Successfully broke down the monolithic PerkDialog.cs (746 lines) into maintainab
    - Centralized RenderOverlays() method to render all active overlays
    - CloseAllOverlays() helper method
 
-**Initial Result:** PerkDialog.cs (746 → 292 lines, 61% reduction)
+**Initial Result:** BlessingDialog.cs (746 → 292 lines, 61% reduction)
 
 #### Task 4.3: Dialog State Extraction
 
 **File Created:**
 
-3. **PerkDialogState.cs** - 38 lines
-   - State management for PerkDialog
+3. **BlessingDialogState.cs** - 38 lines
+   - State management for BlessingDialog
    - Properties: IsOpen, IsReady, WindowPosX, WindowPosY
    - Method: Reset()
 
 **Files Modified:**
 
-- **PerkDialog.cs** (292 → 290 lines, final)
-  - Replaced state variables with PerkDialogState instance
+- **BlessingDialog.cs** (292 → 290 lines, final)
+  - Replaced state variables with BlessingDialogState instance
   - All state access now through _state property
   - Consistent with state management pattern used in overlays
 
-- **PerkDialogEventHandlers.cs**
+- **BlessingDialogEventHandlers.cs**
   - Updated to use _state references for IsOpen and IsReady
 
-**Final Result:** PerkDialog.cs (746 → 290 lines, 61% total reduction)
+**Final Result:** BlessingDialog.cs (746 → 290 lines, 61% total reduction)
 
 #### Benefits:
 - **Complete Separation of Concerns:** Event handling, overlay coordination, state, and lifecycle are now separate
@@ -461,10 +461,10 @@ PantheonWars/GUI/UI/
 ### Phase 4:
 ```
 PantheonWars/GUI/
-├── PerkDialogEventHandlers.cs (431 lines)
+├── BlessingDialogEventHandlers.cs (431 lines)
 ├── OverlayCoordinator.cs (167 lines)
 └── State/
-    └── PerkDialogState.cs (38 lines)
+    └── BlessingDialogState.cs (38 lines)
 ```
 
 ### Phase 5:
@@ -491,7 +491,7 @@ PantheonWars/GUI/UI/Renderers/
 ├── ReligionHeaderRenderer.cs (309 → 286 lines)
 ├── LeaveReligionConfirmOverlay.cs (186 → 129 lines)
 ├── TooltipRenderer.cs (309 → 301 lines)
-└── PerkInfoRenderer.cs (286 → 279 lines)
+└── BlessingInfoRenderer.cs (286 → 279 lines)
 ```
 
 ### Phase 3b (State Extraction):
@@ -505,8 +505,8 @@ PantheonWars/GUI/UI/Renderers/
 ### Phase 4:
 ```
 PantheonWars/GUI/
-├── PerkDialog.cs (746 → 290 lines, 61% reduction)
-└── PerkDialogEventHandlers.cs (updated to use state)
+├── BlessingDialog.cs (746 → 290 lines, 61% reduction)
+└── BlessingDialogEventHandlers.cs (updated to use state)
 ```
 
 ### Phase 5:
@@ -527,7 +527,7 @@ PantheonWars/GUI/UI/Renderers/
 - **Phase 1-2:** 836 lines eliminated (shared components)
 - **Phase 3a:** Included in Phase 1-2 numbers (component extraction)
 - **Phase 3b:** 297 lines eliminated (state extraction from overlays)
-- **Phase 4:** 456 lines eliminated (PerkDialog decomposition + state extraction)
+- **Phase 4:** 456 lines eliminated (BlessingDialog decomposition + state extraction)
 - **Phase 5.1:** 142 lines created (generic ScrollableList component for future use)
 - **Phase 5.2:** 65 lines eliminated + 107 lines created (TabControl component)
 - **Phase 5.3:** 116 lines eliminated + 232 lines created (Checkbox + TextRenderer components)
@@ -536,7 +536,7 @@ PantheonWars/GUI/UI/Renderers/
 - **Lines Eliminated:** 1,770 lines of code removed
 - **Files Refactored:** 8 major files
   - 7 overlay/renderer files (some refactored multiple times - components, then state, then advanced components)
-  - 1 dialog file (PerkDialog - refactored in 3 tasks)
+  - 1 dialog file (BlessingDialog - refactored in 3 tasks)
 - **Files Created:** 18 new reusable files
   - 6 shared component/utility files (Phase 1-2)
   - 5 state class + renderer component files (Phase 3b)
@@ -550,19 +550,19 @@ PantheonWars/GUI/UI/Renderers/
 - **After Phase 3b:** 356 lines (ReligionManagementOverlay.cs)
 - **Final Reduction:** 54% reduction on largest file
 
-**Most Improved:** PerkDialog.cs (746 → 290 lines, 61% reduction across 3 tasks)
+**Most Improved:** BlessingDialog.cs (746 → 290 lines, 61% reduction across 3 tasks)
 
 **Final State of Major Files:**
 - ReligionManagementOverlay.cs: 771 → 356 lines (54% reduction)
 - CreateReligionOverlay.cs: 690 → 242 lines (65% reduction)
 - ReligionBrowserOverlay.cs: 580 → 222 lines (62% reduction)
-- PerkDialog.cs: 746 → 290 lines (61% reduction)
+- BlessingDialog.cs: 746 → 290 lines (61% reduction)
 
 ### Summary:
 - ✅ Phase 1-2: Created shared UI components and utilities (6 files)
 - ✅ Phase 3a: Refactored 7 overlay/renderer files using shared components
 - ✅ Phase 3b: Extracted state management from 3 overlays (5 new files)
-- ✅ Phase 4 (Complete): Decomposed PerkDialog.cs into maintainable components (3 new files)
+- ✅ Phase 4 (Complete): Decomposed BlessingDialog.cs into maintainable components (3 new files)
   - Task 4.1: Event handlers extracted
   - Task 4.2: Overlay coordinator extracted
   - Task 4.3: Dialog state extracted

@@ -14,7 +14,7 @@ namespace PantheonWars.GUI.UI.Renderers;
 
 /// <summary>
 ///     Overlay for browsing and joining religions
-///     Displays as modal panel on top of Perk Dialog
+///     Displays as modal panel on top of Blessing Dialog
 /// </summary>
 internal static class ReligionBrowserOverlay
 {
