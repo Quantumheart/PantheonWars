@@ -98,7 +98,7 @@ public class PerkTooltipData
             tooltip.RequiredPrestigeRank = GetPrestigeRankName(perk.RequiredPrestigeRank);
 
         // Add prerequisite names
-        if (perkRegistry != null && perk.PrerequisitePerks.Count > 0)
+        if (perkRegistry != null && perk.PrerequisitePerks is { Count: > 0 })
             foreach (var prereqId in perk.PrerequisitePerks)
                 if (perkRegistry.TryGetValue(prereqId, out var prereqPerk))
                     tooltip.PrerequisiteNames.Add(prereqPerk.Name);
@@ -110,9 +110,9 @@ public class PerkTooltipData
         tooltip.SpecialEffectDescriptions.AddRange(perk.SpecialEffects);
 
         // Determine unlock block reason
-        if (!state.IsUnlocked && !state.CanUnlock)
+        if (state is { IsUnlocked: false, CanUnlock: false })
         {
-            if (perk.PrerequisitePerks.Count > 0 && perkRegistry != null)
+            if (perk.PrerequisitePerks is { Count: > 0 } && perkRegistry != null)
             {
                 // Check which prerequisites are missing
                 foreach (var prereqId in perk.PrerequisitePerks)
