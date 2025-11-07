@@ -108,7 +108,7 @@ internal static class ReligionHeaderRenderer
             ? $"{manager.ReligionMemberCount} member{(manager.ReligionMemberCount == 1 ? "" : "s")}"
             : "No members";
         var roleInfo = !string.IsNullOrEmpty(manager.PlayerRoleInReligion)
-            ? $" • {manager.PlayerRoleInReligion}"
+            ? $" | {manager.PlayerRoleInReligion}"
             : "";
         var infoText = $"{memberInfo}{roleInfo}";
         var infoTextPos = new Vector2(currentX, y + 35f);

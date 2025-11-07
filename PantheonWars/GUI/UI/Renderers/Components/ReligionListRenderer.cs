@@ -207,7 +207,7 @@ public static class ReligionListRenderer
         drawList.AddText(ImGui.GetFont(), 13f, deityPos, deityColorU32, deityText);
 
         // Draw member count and prestige
-        var infoText = $"{religion.MemberCount} members • {religion.PrestigeRank} Prestige • {(religion.IsPublic ? "Public" : "Private")}";
+        var infoText = $"{religion.MemberCount} members | {religion.PrestigeRank} Prestige | {(religion.IsPublic ? "Public" : "Private")}";
         var infoPos = new Vector2(x + padding * 2 + iconSize, y + padding + 42f);
         var infoColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
         drawList.AddText(ImGui.GetFont(), 12f, infoPos, infoColor, infoText);

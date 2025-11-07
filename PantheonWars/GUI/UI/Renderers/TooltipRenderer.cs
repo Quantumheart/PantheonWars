@@ -116,7 +116,7 @@ internal static class TooltipRenderer
         });
 
         // Category and Tier
-        var categoryText = $"{data.Category} • Tier {data.Tier}";
+        var categoryText = $"{data.Category} | Tier {data.Tier}";
         if (data.Kind == PerkKind.Religion)
             categoryText += " (Religion)";
 
@@ -172,7 +172,7 @@ internal static class TooltipRenderer
         {
             foreach (var effect in data.SpecialEffectDescriptions)
             {
-                var wrappedEffects = WrapText("• " + effect, TOOLTIP_MAX_WIDTH - (TOOLTIP_PADDING * 2), 13f);
+                var wrappedEffects = WrapText("- " + effect, TOOLTIP_MAX_WIDTH - (TOOLTIP_PADDING * 2), 13f);
                 foreach (var wrappedLine in wrappedEffects)
                 {
                     lines.Add(new TooltipLine
