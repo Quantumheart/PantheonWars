@@ -148,7 +148,8 @@ internal static class ReligionBrowserOverlay
 
         // === RELIGION LIST ===
         var listHeight = overlayHeight - (currentY - overlayY) - padding * 2 - 40f; // 40f for join button
-        (_state.ScrollY, _state.SelectedReligionUID) = ReligionListRenderer.Draw(
+        ReligionListResponsePacket.ReligionInfo? hoveredReligion;
+        (_state.ScrollY, _state.SelectedReligionUID, hoveredReligion) = ReligionListRenderer.Draw(
             drawList, api, overlayX + padding, currentY, overlayWidth - padding * 2, listHeight,
             _state.Religions, _state.IsLoading, _state.ScrollY, _state.SelectedReligionUID);
 
@@ -214,6 +215,14 @@ internal static class ReligionBrowserOverlay
                         api.World.Player.Entity, null, false, 8f, 0.3f);
                 }
             }
+        }
+
+        // === TOOLTIP ===
+        // Draw tooltip last so it appears on top of everything
+        if (hoveredReligion != null)
+        {
+            var mousePos = ImGui.GetMousePos();
+            ReligionListRenderer.DrawTooltip(hoveredReligion, mousePos.X, mousePos.Y, overlayWidth, overlayHeight);
         }
 
         return true; // Keep overlay open

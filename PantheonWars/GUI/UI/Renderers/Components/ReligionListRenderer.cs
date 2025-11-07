@@ -28,8 +28,8 @@ public static class ReligionListRenderer
     /// <param name="isLoading">Whether the list is loading</param>
     /// <param name="scrollY">Current scroll position (will be modified)</param>
     /// <param name="selectedReligionUID">Currently selected religion UID (will be modified)</param>
-    /// <returns>Tuple of (updated scroll Y, updated selected UID)</returns>
-    public static (float scrollY, string? selectedUID) Draw(
+    /// <returns>Tuple of (updated scroll Y, updated selected UID, hovered religion)</returns>
+    public static (float scrollY, string? selectedUID, ReligionListResponsePacket.ReligionInfo? hoveredReligion) Draw(
         ImDrawListPtr drawList,
         ICoreClientAPI api,
         float x,
@@ -62,7 +62,7 @@ public static class ReligionListRenderer
             );
             var loadingColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
             drawList.AddText(loadingPos, loadingColor, loadingText);
-            return (scrollY, selectedReligionUID);
+            return (scrollY, selectedReligionUID, null);
         }
 
         // No religions state
@@ -76,7 +76,7 @@ public static class ReligionListRenderer
             );
             var noReligionColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
             drawList.AddText(noReligionPos, noReligionColor, noReligionText);
-            return (scrollY, selectedReligionUID);
+            return (scrollY, selectedReligionUID, null);
         }
 
         // Calculate scroll limits
@@ -99,7 +99,8 @@ public static class ReligionListRenderer
         // Clip to list bounds
         drawList.PushClipRect(listStart, listEnd, true);
 
-        // Draw religion items
+        // Draw religion items and track hovered item
+        ReligionListResponsePacket.ReligionInfo? hoveredReligion = null;
         var itemY = y - scrollY;
         for (int i = 0; i < religions.Count; i++)
         {
@@ -112,10 +113,14 @@ public static class ReligionListRenderer
                 continue;
             }
 
-            var clickedUID = DrawReligionItem(drawList, api, religion, x, itemY, width - scrollbarWidth, itemHeight, selectedReligionUID);
+            var (clickedUID, isHovered) = DrawReligionItem(drawList, api, religion, x, itemY, width - scrollbarWidth, itemHeight, selectedReligionUID);
             if (clickedUID != null)
             {
                 selectedReligionUID = clickedUID;
+            }
+            if (isHovered)
+            {
+                hoveredReligion = religion;
             }
             itemY += itemHeight + itemSpacing;
         }
@@ -128,14 +133,14 @@ public static class ReligionListRenderer
             Scrollbar.Draw(drawList, x + width - scrollbarWidth, y, scrollbarWidth, height, scrollY, maxScroll);
         }
 
-        return (scrollY, selectedReligionUID);
+        return (scrollY, selectedReligionUID, hoveredReligion);
     }
 
     /// <summary>
     ///     Draw a single religion item
     /// </summary>
-    /// <returns>Religion UID if clicked, null otherwise</returns>
-    private static string? DrawReligionItem(
+    /// <returns>Tuple of (Religion UID if clicked, whether item is hovered)</returns>
+    private static (string? clickedUID, bool isHovered) DrawReligionItem(
         ImDrawListPtr drawList,
         ICoreClientAPI api,
         ReligionListResponsePacket.ReligionInfo religion,
@@ -212,6 +217,178 @@ public static class ReligionListRenderer
         var infoColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
         drawList.AddText(ImGui.GetFont(), 12f, infoPos, infoColor, infoText);
 
-        return clickedUID;
+        return (clickedUID, isHovering);
+    }
+
+    /// <summary>
+    ///     Draw tooltip for a religion
+    /// </summary>
+    public static void DrawTooltip(
+        ReligionListResponsePacket.ReligionInfo religion,
+        float mouseX,
+        float mouseY,
+        float windowWidth,
+        float windowHeight)
+    {
+        const float tooltipMaxWidth = 300f;
+        const float tooltipPadding = 12f;
+        const float lineSpacing = 6f;
+
+        var drawList = ImGui.GetForegroundDrawList();
+
+        // Build tooltip content
+        var lines = new List<string>();
+
+        // Religion name (title)
+        lines.Add(religion.ReligionName);
+
+        // Deity
+        lines.Add($"{religion.Deity} - {DeityHelper.GetDeityTitle(religion.Deity)}");
+
+        // Separator
+        lines.Add(""); // Empty line for spacing
+
+        // Member count
+        lines.Add($"Members: {religion.MemberCount}");
+
+        // Prestige
+        lines.Add($"Prestige: {religion.PrestigeRank} ({religion.Prestige})");
+
+        // Public/Private status
+        lines.Add($"Status: {(religion.IsPublic ? "Public" : "Private")}");
+
+        // Description (if available)
+        if (!string.IsNullOrEmpty(religion.Description))
+        {
+            lines.Add(""); // Empty line for spacing
+            lines.Add("Description:");
+
+            // Wrap description text
+            var wrappedDesc = WrapText(religion.Description, tooltipMaxWidth - tooltipPadding * 2, 13f);
+            lines.AddRange(wrappedDesc);
+        }
+
+        // Calculate tooltip dimensions
+        var lineHeight = 16f;
+        var tooltipHeight = tooltipPadding * 2 + (lines.Count * lineHeight);
+        var tooltipWidth = tooltipMaxWidth;
+
+        // Get window position for screen-space positioning
+        var windowPos = ImGui.GetWindowPos();
+
+        // Position tooltip (offset from mouse, check screen edges)
+        var offsetX = 16f;
+        var offsetY = 16f;
+
+        var tooltipX = mouseX + offsetX;
+        var tooltipY = mouseY + offsetY;
+
+        // Check right edge
+        if (tooltipX - windowPos.X + tooltipWidth > windowWidth)
+            tooltipX = mouseX - tooltipWidth - offsetX;
+
+        // Check bottom edge
+        if (tooltipY - windowPos.Y + tooltipHeight > windowHeight)
+            tooltipY = mouseY - tooltipHeight - offsetY;
+
+        // Ensure doesn't go off left edge
+        if (tooltipX < windowPos.X)
+            tooltipX = windowPos.X + 4f;
+
+        // Ensure doesn't go off top edge
+        if (tooltipY < windowPos.Y)
+            tooltipY = windowPos.Y + 4f;
+
+        // Draw tooltip background
+        var bgStart = new Vector2(tooltipX, tooltipY);
+        var bgEnd = new Vector2(tooltipX + tooltipWidth, tooltipY + tooltipHeight);
+        var bgColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.DarkBrown);
+        drawList.AddRectFilled(bgStart, bgEnd, bgColor, 4f);
+
+        // Draw border
+        var borderColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold * 0.6f);
+        drawList.AddRect(bgStart, bgEnd, borderColor, 4f, ImDrawFlags.None, 2f);
+
+        // Draw content
+        var currentY = tooltipY + tooltipPadding;
+        for (int i = 0; i < lines.Count; i++)
+        {
+            var line = lines[i];
+
+            if (string.IsNullOrEmpty(line))
+            {
+                // Empty line - just add spacing
+                currentY += lineSpacing;
+                continue;
+            }
+
+            Vector4 textColor;
+            float fontSize;
+
+            if (i == 0)
+            {
+                // Title (religion name)
+                textColor = ColorPalette.Gold;
+                fontSize = 16f;
+            }
+            else if (i == 1)
+            {
+                // Deity subtitle
+                textColor = ColorPalette.White;
+                fontSize = 13f;
+            }
+            else if (line.StartsWith("Description:") || line.StartsWith("Members:") || line.StartsWith("Prestige:") || line.StartsWith("Status:"))
+            {
+                // Section headers
+                textColor = ColorPalette.Grey;
+                fontSize = 12f;
+            }
+            else
+            {
+                // Regular text
+                textColor = ColorPalette.White;
+                fontSize = 13f;
+            }
+
+            var textPos = new Vector2(tooltipX + tooltipPadding, currentY);
+            var textColorU32 = ImGui.ColorConvertFloat4ToU32(textColor);
+            drawList.AddText(ImGui.GetFont(), fontSize, textPos, textColorU32, line);
+
+            currentY += lineHeight;
+        }
+    }
+
+    /// <summary>
+    ///     Wrap text to fit within max width
+    /// </summary>
+    private static List<string> WrapText(string text, float maxWidth, float fontSize)
+    {
+        var result = new List<string>();
+        if (string.IsNullOrEmpty(text)) return result;
+
+        var words = text.Split(' ');
+        var currentLine = "";
+
+        foreach (var word in words)
+        {
+            var testLine = string.IsNullOrEmpty(currentLine) ? word : currentLine + " " + word;
+            var testSize = ImGui.CalcTextSize(testLine);
+            var scaledWidth = testSize.X * (fontSize / ImGui.GetFontSize());
+
+            if (scaledWidth > maxWidth && !string.IsNullOrEmpty(currentLine))
+            {
+                result.Add(currentLine);
+                currentLine = word;
+            }
+            else
+            {
+                currentLine = testLine;
+            }
+        }
+
+        if (!string.IsNullOrEmpty(currentLine))
+            result.Add(currentLine);
+
+        return result;
     }
 }
