@@ -1,9 +1,9 @@
-# Balance Testing Guide - PantheonWars Perk System
+# Balance Testing Guide - PantheonWars Blessing System
 
 **Version:** 1.0
 **Last Updated:** October 30, 2025
-**Phase:** 3.4 - Deity Perk Trees
-**Total Perks:** 80 (8 deities × 10 perks each)
+**Phase:** 3.4 - Deity Blessing Trees
+**Total Blessings:** 80 (8 deities × 10 blessings each)
 
 ---
 
@@ -24,7 +24,7 @@
 
 ### Purpose
 
-This guide provides a systematic approach to balance testing all 80 perks across 8 deities in PantheonWars. The goal is to ensure:
+This guide provides a systematic approach to balance testing all 80 blessings across 8 deities in PantheonWars. The goal is to ensure:
 
 1. **Parity** - All deities are roughly equal in power at full progression
 2. **Viability** - Each deity has at least one competitive playstyle
@@ -36,14 +36,14 @@ This guide provides a systematic approach to balance testing all 80 perks across
 
 **What's Being Tested:**
 - Stat modifier values (damage, armor, health, speed, healing)
-- Perk prerequisite chains and unlock progression
-- Player perk vs religion perk balance
+- Blessing prerequisite chains and unlock progression
+- Player blessing vs religion blessing balance
 - Cross-deity balance (relative power levels)
 - Path viability (offense vs defense vs utility)
 
 **What's NOT Being Tested (Yet):**
 - Special effect handlers (lifesteal, poison, critical strikes, etc.)
-- GUI elements (PerkTreeDialog, ReligionManagementDialog)
+- GUI elements (BlessingTreeDialog, ReligionManagementDialog)
 - Network synchronization edge cases
 - Performance with 50+ players
 
@@ -82,44 +82,44 @@ This guide provides a systematic approach to balance testing all 80 perks across
 /religion create "HuntTestReligion" Lysa public
 # ... etc for all 8 deities
 
-# 3. Set yourself to max favor/prestige for full perk access
+# 3. Set yourself to max favor/prestige for full blessing access
 /favor settotal 15000
 # (As founder, religion prestige will also be high)
 
-# 4. Unlock all perks for your deity
-/perks list
-/perks unlock <perk_id>  # Repeat for all perks
+# 4. Unlock all blessings for your deity
+/blessings list
+/blessings unlock <blessing_id>  # Repeat for all blessings
 ```
 
 ---
 
 ## Testing Methodology
 
-### Phase 1: Individual Perk Verification (2-3 hours)
+### Phase 1: Individual Blessing Verification (2-3 hours)
 
-**Goal:** Verify each perk applies stats correctly
+**Goal:** Verify each blessing applies stats correctly
 
 **Process:**
 1. Create a new test character
 2. Join a religion of one deity
-3. Set favor to unlock Tier 1 perk
-4. Unlock Tier 1 perk
-5. Verify stat changes using `/perks active`
+3. Set favor to unlock Tier 1 blessing
+4. Unlock Tier 1 blessing
+5. Verify stat changes using `/blessings active`
 6. Check actual in-game stats (health bar, damage output, movement speed)
 7. Repeat for all tiers
 
 **What to Check:**
-- ✅ Perk unlocks successfully
+- ✅ Blessing unlocks successfully
 - ✅ Stats apply immediately
-- ✅ Stat values match perk description
-- ✅ Perks stack additively (player + religion)
+- ✅ Stat values match blessing description
+- ✅ Blessings stack additively (player + religion)
 - ✅ Stats persist after logout/login
 
 **Red Flags:**
-- ❌ Perk unlocks but stats don't change
+- ❌ Blessing unlocks but stats don't change
 - ❌ Stat values don't match description
 - ❌ Stats disappear after logout
-- ❌ Multiple perks of same stat don't stack correctly
+- ❌ Multiple blessings of same stat don't stack correctly
 
 ---
 
@@ -166,10 +166,10 @@ This guide provides a systematic approach to balance testing all 80 perks across
 
 **Process:**
 
-1. **Create 8 Max-Perk Characters** (one per deity)
+1. **Create 8 Max-Blessing Characters** (one per deity)
    - Set favor to 15000
    - Set religion prestige to 15000
-   - Unlock all 10 perks (6 player + 4 religion)
+   - Unlock all 10 blessings (6 player + 4 religion)
 
 2. **PvE Benchmark Test**
    - Location: Same area with consistent mob spawns
@@ -199,38 +199,38 @@ This guide provides a systematic approach to balance testing all 80 perks across
 
 ---
 
-### Phase 4: Religion Perk Impact (2-3 hours)
+### Phase 4: Religion Blessing Impact (2-3 hours)
 
-**Goal:** Verify religion perks provide meaningful group benefits
+**Goal:** Verify religion blessings provide meaningful group benefits
 
 **Process:**
 
 1. **Solo vs Group Comparison**
-   - Test A: Character with only player perks (no religion)
-   - Test B: Character with player + religion perks
+   - Test A: Character with only player blessings (no religion)
+   - Test B: Character with player + religion blessings
    - Measure: Stat difference, combat effectiveness
 
 2. **Scaling Test**
    - Religion with 1 member (founder only)
    - Religion with 3 members
    - Religion with 5+ members
-   - Verify: Religion perks apply to all members equally
+   - Verify: Religion blessings apply to all members equally
 
 3. **Cross-Religion PvP**
    - 2v2 battles: Religion A vs Religion B
    - Different deity combinations
-   - Measure: Which religion perks provide best team fight advantage
+   - Measure: Which religion blessings provide best team fight advantage
 
 **What to Check:**
-- ✅ Religion perks provide ~30-40% of total power budget
-- ✅ Religion perks encourage group play
+- ✅ Religion blessings provide ~30-40% of total power budget
+- ✅ Religion blessings encourage group play
 - ✅ All members receive religion buffs equally
 
 **Red Flags:**
-- ❌ Religion perks feel negligible
+- ❌ Religion blessings feel negligible
 - ❌ Solo play is just as strong as group play
-- ❌ Religion perks don't apply to some members
-- ❌ One religion's perks vastly outperform others
+- ❌ Religion blessings don't apply to some members
+- ❌ One religion's blessings vastly outperform others
 
 ---
 
@@ -247,17 +247,17 @@ This guide provides a systematic approach to balance testing all 80 perks across
 **Test Scenarios:**
 
 1. **Tank Test**
-   - Take defensive path perks only
+   - Take defensive path blessings only
    - Face tank 5 hostile mobs simultaneously
    - Expected: Survive with >40% health
 
 2. **Berserker Test**
-   - Take offensive path perks only
+   - Take offensive path blessings only
    - Kill 3 hostile mobs in quick succession
    - Expected: Lifesteal keeps you alive through combat
 
 3. **PvP Duel vs Lysa (Hunt)**
-   - Full perks, identical gear
+   - Full blessings, identical gear
    - Expected: Close fight (45-55% win rate)
    - Khoras advantage: Higher survivability
    - Lysa advantage: Kiting, range
@@ -284,17 +284,17 @@ This guide provides a systematic approach to balance testing all 80 perks across
 **Test Scenarios:**
 
 1. **Kiting Test**
-   - Take mobility path perks only
+   - Take mobility path blessings only
    - Fight melee enemy while maintaining distance
    - Expected: Never get hit, high movement advantage
 
 2. **Sniper Test**
-   - Take precision path perks only
+   - Take precision path blessings only
    - Kill targets from maximum bow range
    - Expected: High burst damage with critical hits
 
 3. **PvP Duel vs Khoras (War)**
-   - Full perks, identical gear
+   - Full blessings, identical gear
    - Expected: Close fight (45-55% win rate)
    - Lysa advantage: Range, mobility, kiting
    - Khoras advantage: Survivability if closes distance
@@ -321,7 +321,7 @@ This guide provides a systematic approach to balance testing all 80 perks across
 **Test Scenarios:**
 
 1. **Sustain Test**
-   - Take offensive path (lifesteal perks)
+   - Take offensive path (lifesteal blessings)
    - Fight 10 mobs without healing items
    - Expected: Lifesteal sustains health throughout
 
@@ -331,7 +331,7 @@ This guide provides a systematic approach to balance testing all 80 perks across
    - Expected: Highest effective HP pool
 
 3. **PvP Duel vs Aethra (Light)**
-   - Full perks, identical gear
+   - Full blessings, identical gear
    - Expected: Close fight (45-55% win rate)
    - Morthen advantage: Lifesteal, poison DoT
    - Aethra advantage: Burst healing, armor
@@ -358,7 +358,7 @@ This guide provides a systematic approach to balance testing all 80 perks across
 **Test Scenarios:**
 
 1. **Healing Test**
-   - Take all healing effectiveness perks
+   - Take all healing effectiveness blessings
    - Use healing items in combat
    - Expected: Healing efficiency 50-80% higher than base
 
@@ -368,7 +368,7 @@ This guide provides a systematic approach to balance testing all 80 perks across
    - Expected: Support role is viable and effective
 
 3. **PvP Duel vs Morthen (Death)**
-   - Full perks, identical gear
+   - Full blessings, identical gear
    - Expected: Close fight (45-55% win rate)
    - Aethra advantage: Burst healing, damage reduction
    - Morthen advantage: Sustain, lifesteal
@@ -379,7 +379,7 @@ This guide provides a systematic approach to balance testing all 80 perks across
    - Expected: Significantly improved survival
 
 **Balance Targets:**
-- Healing effectiveness: +50-80% from perks
+- Healing effectiveness: +50-80% from blessings
 - Damage output: 70-85% of pure DPS deities
 - Survivability with healing: Equal to tank deities
 
@@ -406,7 +406,7 @@ This guide provides a systematic approach to balance testing all 80 perks across
    - Expected: Difficult to hit, high survival via evasion
 
 3. **PvP Duel vs Tharos (Storms)**
-   - Full perks, identical gear
+   - Full blessings, identical gear
    - Expected: Close fight (45-55% win rate)
    - Umbros advantage: Stealth, burst, single-target
    - Tharos advantage: AoE, can't be avoided
@@ -417,7 +417,7 @@ This guide provides a systematic approach to balance testing all 80 perks across
 
 **Balance Targets:**
 - Movement speed: 80-120% faster than base
-- Critical hit chance: 20-30% with perks
+- Critical hit chance: 20-30% with blessings
 - Burst damage: 2-3x normal attack in optimal conditions
 
 ---
@@ -443,7 +443,7 @@ This guide provides a systematic approach to balance testing all 80 perks across
    - Expected: High mobility, hard to catch
 
 3. **PvP Duel vs Umbros (Shadows)**
-   - Full perks, identical gear
+   - Full blessings, identical gear
    - Expected: Close fight (45-55% win rate)
    - Tharos advantage: AoE, can't be stealthed against
    - Umbros advantage: Single-target burst, mobility
@@ -480,7 +480,7 @@ This guide provides a systematic approach to balance testing all 80 perks across
    - Expected: Highest wave survival
 
 3. **PvP Duel vs Vex (Madness)**
-   - Full perks, identical gear
+   - Full blessings, identical gear
    - Expected: Close fight (45-55% win rate)
    - Gaia advantage: Durability, regeneration, sustain
    - Vex advantage: Burst damage, chaos effects
@@ -517,7 +517,7 @@ This guide provides a systematic approach to balance testing all 80 perks across
    - Expected: Jack-of-all-trades, good at everything
 
 3. **PvP Duel vs Gaia (Earth)**
-   - Full perks, identical gear
+   - Full blessings, identical gear
    - Expected: Close fight (45-55% win rate)
    - Vex advantage: Higher damage output, speed
    - Gaia advantage: Sustain, regeneration
@@ -537,7 +537,7 @@ This guide provides a systematic approach to balance testing all 80 perks across
 
 ### Quantitative Metrics
 
-Track these numbers for each deity at max perks:
+Track these numbers for each deity at max blessings:
 
 **Combat Stats:**
 - Average mob TTK (time to kill): 5-10 seconds (±30%)
@@ -554,7 +554,7 @@ Track these numbers for each deity at max perks:
 
 **Religion Metrics:**
 - Solo vs religion buff difference: +30-50%
-- Religion perk contribution: 30-40% of total power
+- Religion blessing contribution: 30-40% of total power
 
 ### Qualitative Metrics
 
@@ -567,8 +567,8 @@ Track these numbers for each deity at max perks:
 **Balance Feel:**
 - Any deity feels OP? (Name it)
 - Any deity feels UP? (Name it)
-- Any specific perk feels mandatory? (Name it)
-- Any specific perk feels useless? (Name it)
+- Any specific blessing feels mandatory? (Name it)
+- Any specific blessing feels useless? (Name it)
 
 ---
 
@@ -587,9 +587,9 @@ Track these numbers for each deity at max perks:
 
    **Impact:** Stat testing is accurate, but gameplay testing is incomplete. Special effects may significantly shift balance when implemented.
 
-2. **No GUI for Perk Trees**
+2. **No GUI for Blessing Trees**
    - All interaction via commands
-   - Difficult to visualize perk dependencies
+   - Difficult to visualize blessing dependencies
    - May miss UX issues
 
 3. **Limited Multiplayer Testing**
@@ -605,8 +605,8 @@ Track these numbers for each deity at max perks:
 - Re-test balance after special effect implementation
 
 **GUI:**
-- Use `/perks tree` command for visualization
-- Manual tracking of unlocked perks
+- Use `/blessings tree` command for visualization
+- Manual tracking of unlocked blessings
 - Plan for GUI testing in Phase 3.5
 
 **Multiplayer:**
@@ -624,7 +624,7 @@ Track these numbers for each deity at max perks:
 - One deity has >65% win rate across all matchups
 - One deity has <35% win rate across all matchups
 - PvE clear times differ by >40%
-- Players report specific perk is "mandatory" or "useless"
+- Players report specific blessing is "mandatory" or "useless"
 - One path within a deity is clearly superior (>75% pick rate)
 
 **Don't adjust if:**
@@ -644,7 +644,7 @@ Track these numbers for each deity at max perks:
 
 2. **Make Surgical Changes**
    - Don't buff/nerf entire deity at once
-   - Target specific problematic perks
+   - Target specific problematic blessings
    - Maintain relative power between tiers
 
 3. **Example Adjustment**
@@ -696,7 +696,7 @@ Use this template to record your testing:
 
 - **Favor Rank:** Champion (10,000 favor)
 - **Prestige Rank:** Legendary (8,000 prestige)
-- **Perks Unlocked:** [List]
+- **Blessings Unlocked:** [List]
 - **Path Tested:** Offense / Defense / Balanced
 
 ## PvE Testing
@@ -750,8 +750,8 @@ Use this template to record your testing:
 - [ ] 2+ test accounts ready
 - [ ] Recording tools ready (spreadsheet, timer)
 
-### Phase 1: Individual Perks (2-3 hours)
-- [ ] Test all 8 deities × 10 perks = 80 perk verifications
+### Phase 1: Individual Blessings (2-3 hours)
+- [ ] Test all 8 deities × 10 blessings = 80 blessing verifications
 - [ ] Verify stats apply correctly
 - [ ] Check persistence after logout
 
@@ -762,14 +762,14 @@ Use this template to record your testing:
 - [ ] Document path strengths/weaknesses
 
 ### Phase 3: Cross-Deity Balance (4-6 hours)
-- [ ] Create 8 max-perk characters (one per deity)
+- [ ] Create 8 max-blessing characters (one per deity)
 - [ ] Run PvE benchmarks for all 8
 - [ ] Conduct round-robin PvP tournament (28 matchups minimum)
 - [ ] Analyze win rates and TTK
 
-### Phase 4: Religion Perks (2-3 hours)
+### Phase 4: Religion Blessings (2-3 hours)
 - [ ] Test solo vs religion buff difference
-- [ ] Test religion perk scaling (1, 3, 5+ members)
+- [ ] Test religion blessing scaling (1, 3, 5+ members)
 - [ ] Cross-religion PvP tests
 
 ### Post-Test Analysis
@@ -784,7 +784,7 @@ Use this template to record your testing:
 
 ## Conclusion
 
-This balance testing guide provides a systematic approach to ensuring all 80 perks across 8 deities are properly balanced. Follow the methodology, record your results, and iterate on adjustments until all deities feel competitive and fun.
+This balance testing guide provides a systematic approach to ensuring all 80 blessings across 8 deities are properly balanced. Follow the methodology, record your results, and iterate on adjustments until all deities feel competitive and fun.
 
 **Remember:**
 - Balance is iterative - don't expect perfection on the first pass
@@ -798,6 +798,6 @@ Good luck with testing! 🎯
 
 **Next Steps After Balance Testing:**
 1. Document all balance changes in changelog
-2. Update perk descriptions if stat values changed
+2. Update blessing descriptions if stat values changed
 3. Move to Phase 3.5: Integration & Polish
 4. Implement special effect handlers (will require re-balancing)

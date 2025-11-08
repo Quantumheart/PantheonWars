@@ -33,9 +33,9 @@ public class PantheonWarsSystem : ModSystem
     private FavorCommands? _favorCommands;
     private FavorHudElement? _favorHud;
     private FavorSystem? _favorSystem;
-    private PerkCommands? _perkCommands;
-    private PerkEffectSystem? _perkEffectSystem;
-    private PerkRegistry? _perkRegistry;
+    private BlessingCommands? _blessingCommands;
+    private BlessingEffectSystem? _blessingEffectSystem;
+    private BlessingRegistry? _blessingRegistry;
     private PlayerDataManager? _playerDataManager;
     private PlayerReligionDataManager? _playerReligionDataManager;
     private PvPManager? _pvpManager;
@@ -68,10 +68,10 @@ public class PantheonWarsSystem : ModSystem
             .RegisterMessageType<CreateReligionResponsePacket>()
             .RegisterMessageType<EditDescriptionRequestPacket>()
             .RegisterMessageType<EditDescriptionResponsePacket>()
-            .RegisterMessageType<PerkUnlockRequestPacket>()
-            .RegisterMessageType<PerkUnlockResponsePacket>()
-            .RegisterMessageType<PerkDataRequestPacket>()
-            .RegisterMessageType<PerkDataResponsePacket>()
+            .RegisterMessageType<BlessingUnlockRequestPacket>()
+            .RegisterMessageType<BlessingUnlockResponsePacket>()
+            .RegisterMessageType<BlessingDataRequestPacket>()
+            .RegisterMessageType<BlessingDataResponsePacket>()
             .RegisterMessageType<ReligionStateChangedPacket>();
     }
 
@@ -125,15 +125,15 @@ public class PantheonWarsSystem : ModSystem
             _deityRegistry);
         _pvpManager.Initialize();
 
-        // Initialize perk systems (Phase 3.3)
-        _perkRegistry = new PerkRegistry(api);
-        _perkRegistry.Initialize();
+        // Initialize blessing systems (Phase 3.3)
+        _blessingRegistry = new BlessingRegistry(api);
+        _blessingRegistry.Initialize();
 
-        _perkEffectSystem = new PerkEffectSystem(api, _perkRegistry, _playerReligionDataManager, _religionManager);
-        _perkEffectSystem.Initialize();
+        _blessingEffectSystem = new BlessingEffectSystem(api, _blessingRegistry, _playerReligionDataManager, _religionManager);
+        _blessingEffectSystem.Initialize();
 
-        // Connect perk systems to religion prestige manager
-        _religionPrestigeManager.SetPerkSystems(_perkRegistry, _perkEffectSystem);
+        // Connect blessing systems to religion prestige manager
+        _religionPrestigeManager.SetBlessingSystems(_blessingRegistry, _blessingEffectSystem);
 
         // Register commands
         _deityCommands = new DeityCommands(api, _deityRegistry, _playerDataManager);
@@ -148,9 +148,9 @@ public class PantheonWarsSystem : ModSystem
         _religionCommands = new ReligionCommands(api, _religionManager, _playerReligionDataManager, _serverChannel);
         _religionCommands.RegisterCommands();
 
-        _perkCommands = new PerkCommands(api, _perkRegistry, _playerReligionDataManager, _religionManager,
-            _perkEffectSystem);
-        _perkCommands.RegisterCommands();
+        _blessingCommands = new BlessingCommands(api, _blessingRegistry, _playerReligionDataManager, _religionManager,
+            _blessingEffectSystem);
+        _blessingCommands.RegisterCommands();
 
         // Setup network channel and handlers
         _serverChannel = api.Network.GetChannel(NETWORK_CHANNEL);
@@ -197,9 +197,9 @@ public class PantheonWarsSystem : ModSystem
         _serverChannel.SetMessageHandler<CreateReligionRequestPacket>(OnCreateReligionRequest);
         _serverChannel.SetMessageHandler<EditDescriptionRequestPacket>(OnEditDescriptionRequest);
 
-        // Register handlers for perk system packets
-        _serverChannel.SetMessageHandler<PerkUnlockRequestPacket>(OnPerkUnlockRequest);
-        _serverChannel.SetMessageHandler<PerkDataRequestPacket>(OnPerkDataRequest);
+        // Register handlers for blessing system packets
+        _serverChannel.SetMessageHandler<BlessingUnlockRequestPacket>(OnBlessingUnlockRequest);
+        _serverChannel.SetMessageHandler<BlessingDataRequestPacket>(OnBlessingDataRequest);
     }
 
     private void OnServerMessageReceived(IServerPlayer fromPlayer, PlayerReligionDataPacket packet)
@@ -547,17 +547,17 @@ public class PantheonWarsSystem : ModSystem
         _serverChannel!.SendPacket(response, fromPlayer);
     }
 
-    private void OnPerkUnlockRequest(IServerPlayer fromPlayer, PerkUnlockRequestPacket packet)
+    private void OnBlessingUnlockRequest(IServerPlayer fromPlayer, BlessingUnlockRequestPacket packet)
     {
         string message;
         var success = false;
 
         try
         {
-            var perk = _perkRegistry!.GetPerk(packet.PerkId);
-            if (perk == null)
+            var blessing = _blessingRegistry!.GetBlessing(packet.BlessingId);
+            if (blessing == null)
             {
-                message = $"Perk '{packet.PerkId}' not found.";
+                message = $"Blessing '{packet.BlessingId}' not found.";
             }
             else
             {
@@ -566,52 +566,52 @@ public class PantheonWarsSystem : ModSystem
                     ? _religionManager!.GetReligion(playerData.ReligionUID)
                     : null;
 
-                var (canUnlock, reason) = _perkRegistry.CanUnlockPerk(playerData, religion, perk);
+                var (canUnlock, reason) = _blessingRegistry.CanUnlockBlessing(playerData, religion, blessing);
                 if (!canUnlock)
                 {
                     message = reason;
                 }
                 else
                 {
-                    // Unlock the perk
-                    if (perk.Kind == PerkKind.Player)
+                    // Unlock the blessing
+                    if (blessing.Kind == BlessingKind.Player)
                     {
                         if (religion == null)
                         {
-                            message = "You must be in a religion to unlock player perks.";
+                            message = "You must be in a religion to unlock player blessings.";
                         }
                         else
                         {
-                            success = _playerReligionDataManager.UnlockPlayerPerk(fromPlayer.PlayerUID, packet.PerkId);
+                            success = _playerReligionDataManager.UnlockPlayerBlessing(fromPlayer.PlayerUID, packet.BlessingId);
                             if (success)
                             {
-                                _perkEffectSystem!.RefreshPlayerPerks(fromPlayer.PlayerUID);
-                                message = $"Successfully unlocked {perk.Name}!";
+                                _blessingEffectSystem!.RefreshPlayerBlessings(fromPlayer.PlayerUID);
+                                message = $"Successfully unlocked {blessing.Name}!";
 
                                 // Send updated player data to client
                                 SendPlayerDataToClient(fromPlayer);
                             }
                             else
                             {
-                                message = "Failed to unlock perk. Please try again.";
+                                message = "Failed to unlock blessing. Please try again.";
                             }
                         }
                     }
-                    else // Religion perk
+                    else // Religion blessing
                     {
                         if (religion == null)
                         {
-                            message = "You must be in a religion to unlock religion perks.";
+                            message = "You must be in a religion to unlock religion blessings.";
                         }
                         else if (!religion.IsFounder(fromPlayer.PlayerUID))
                         {
-                            message = "Only the religion founder can unlock religion perks.";
+                            message = "Only the religion founder can unlock religion blessings.";
                         }
                         else
                         {
-                            religion.UnlockedPerks[packet.PerkId] = true;
-                            _perkEffectSystem!.RefreshReligionPerks(religion.ReligionUID);
-                            message = $"Successfully unlocked {perk.Name} for all religion members!";
+                            religion.UnlockedBlessings[packet.BlessingId] = true;
+                            _blessingEffectSystem!.RefreshReligionBlessings(religion.ReligionUID);
+                            message = $"Successfully unlocked {blessing.Name} for all religion members!";
                             success = true;
 
                             // Notify all members
@@ -625,7 +625,7 @@ public class PantheonWarsSystem : ModSystem
 
                                     member.SendMessage(
                                         GlobalConstants.GeneralChatGroup,
-                                        $"{perk.Name} has been unlocked!",
+                                        $"{blessing.Name} has been unlocked!",
                                         EnumChatType.Notification
                                     );
                                 }
@@ -637,22 +637,22 @@ public class PantheonWarsSystem : ModSystem
         }
         catch (Exception ex)
         {
-            message = $"Error unlocking perk: {ex.Message}";
-            _sapi!.Logger.Error($"[PantheonWars] Perk unlock error: {ex}");
+            message = $"Error unlocking blessing: {ex.Message}";
+            _sapi!.Logger.Error($"[PantheonWars] Blessing unlock error: {ex}");
         }
 
-        var response = new PerkUnlockResponsePacket(success, message, packet.PerkId);
+        var response = new BlessingUnlockResponsePacket(success, message, packet.BlessingId);
         _serverChannel!.SendPacket(response, fromPlayer);
     }
 
     /// <summary>
-    ///     Handle perk data request from client
+    ///     Handle blessing data request from client
     /// </summary>
-    private void OnPerkDataRequest(IServerPlayer fromPlayer, PerkDataRequestPacket packet)
+    private void OnBlessingDataRequest(IServerPlayer fromPlayer, BlessingDataRequestPacket packet)
     {
-        _sapi!.Logger.Debug($"[PantheonWars] Perk data requested by {fromPlayer.PlayerName}");
+        _sapi!.Logger.Debug($"[PantheonWars] Blessing data requested by {fromPlayer.PlayerName}");
 
-        var response = new PerkDataResponsePacket();
+        var response = new BlessingDataResponsePacket();
 
         try
         {
@@ -675,52 +675,52 @@ public class PantheonWarsSystem : ModSystem
             response.FavorRank = (int)playerData.FavorRank;
             response.PrestigeRank = (int)religion.PrestigeRank;
 
-            // Get player perks for this deity
-            var playerPerks = _perkRegistry!.GetPerksForDeity(playerData.ActiveDeity, PerkKind.Player);
-            response.PlayerPerks = playerPerks.Select(p => new PerkDataResponsePacket.PerkInfo
+            // Get player blessings for this deity
+            var playerBlessings = _blessingRegistry!.GetBlessingsForDeity(playerData.ActiveDeity, BlessingKind.Player);
+            response.PlayerBlessings = playerBlessings.Select(p => new BlessingDataResponsePacket.BlessingInfo
             {
-                PerkId = p.PerkId,
+                BlessingId = p.BlessingId,
                 Name = p.Name,
                 Description = p.Description,
                 RequiredFavorRank = p.RequiredFavorRank,
                 RequiredPrestigeRank = p.RequiredPrestigeRank,
-                PrerequisitePerks = p.PrerequisitePerks ?? new List<string>(),
+                PrerequisiteBlessings = p.PrerequisiteBlessings ?? new List<string>(),
                 Category = (int)p.Category,
                 StatModifiers = p.StatModifiers ?? new Dictionary<string, float>()
             }).ToList();
 
-            // Get religion perks for this deity
-            var religionPerks = _perkRegistry.GetPerksForDeity(playerData.ActiveDeity, PerkKind.Religion);
-            response.ReligionPerks = religionPerks.Select(p => new PerkDataResponsePacket.PerkInfo
+            // Get religion blessings for this deity
+            var religionBlessings = _blessingRegistry.GetBlessingsForDeity(playerData.ActiveDeity, BlessingKind.Religion);
+            response.ReligionBlessings = religionBlessings.Select(p => new BlessingDataResponsePacket.BlessingInfo
             {
-                PerkId = p.PerkId,
+                BlessingId = p.BlessingId,
                 Name = p.Name,
                 Description = p.Description,
                 RequiredFavorRank = p.RequiredPrestigeRank,
                 RequiredPrestigeRank = p.RequiredPrestigeRank,
-                PrerequisitePerks = p.PrerequisitePerks ?? new List<string>(),
+                PrerequisiteBlessings = p.PrerequisiteBlessings ?? new List<string>(),
                 Category = (int)p.Category,
                 StatModifiers = p.StatModifiers ?? new Dictionary<string, float>()
             }).ToList();
 
-            // Get unlocked player perks
-            response.UnlockedPlayerPerks = playerData.UnlockedPerks
+            // Get unlocked player blessings
+            response.UnlockedPlayerBlessings = playerData.UnlockedBlessings
                 .Where(kvp => kvp.Value)
                 .Select(kvp => kvp.Key)
                 .ToList();
 
-            // Get unlocked religion perks
-            response.UnlockedReligionPerks = religion.UnlockedPerks
+            // Get unlocked religion blessings
+            response.UnlockedReligionBlessings = religion.UnlockedBlessings
                 .Where(kvp => kvp.Value)
                 .Select(kvp => kvp.Key)
                 .ToList();
 
             _sapi.Logger.Debug(
-                $"[PantheonWars] Sending perk data: {response.PlayerPerks.Count} player, {response.ReligionPerks.Count} religion");
+                $"[PantheonWars] Sending blessing data: {response.PlayerBlessings.Count} player, {response.ReligionBlessings.Count} religion");
         }
         catch (Exception ex)
         {
-            _sapi!.Logger.Error($"[PantheonWars] Error loading perk data: {ex}");
+            _sapi!.Logger.Error($"[PantheonWars] Error loading blessing data: {ex}");
             response.HasReligion = false;
         }
 
@@ -766,8 +766,8 @@ public class PantheonWarsSystem : ModSystem
         _clientChannel.SetMessageHandler<ReligionActionResponsePacket>(OnReligionActionResponse);
         _clientChannel.SetMessageHandler<CreateReligionResponsePacket>(OnCreateReligionResponse);
         _clientChannel.SetMessageHandler<EditDescriptionResponsePacket>(OnEditDescriptionResponse);
-        _clientChannel.SetMessageHandler<PerkUnlockResponsePacket>(OnPerkUnlockResponse);
-        _clientChannel.SetMessageHandler<PerkDataResponsePacket>(OnPerkDataResponse);
+        _clientChannel.SetMessageHandler<BlessingUnlockResponsePacket>(OnBlessingUnlockResponse);
+        _clientChannel.SetMessageHandler<BlessingDataResponsePacket>(OnBlessingDataResponse);
         _clientChannel.SetMessageHandler<ReligionStateChangedPacket>(OnReligionStateChanged);
         _clientChannel.RegisterMessageType(typeof(PlayerReligionDataPacket));
     }
@@ -843,11 +843,11 @@ public class PantheonWarsSystem : ModSystem
                 _religionDialog.TryOpen(); // Reopen to refresh
             }
 
-            // Request fresh perk data (now in a religion)
+            // Request fresh blessing data (now in a religion)
             // Use a small delay to ensure server has processed the religion creation
             _capi?.Event.RegisterCallback((dt) =>
             {
-                var request = new PerkDataRequestPacket();
+                var request = new BlessingDataRequestPacket();
                 _clientChannel?.SendPacket(request);
             }, 100);
         }
@@ -879,32 +879,32 @@ public class PantheonWarsSystem : ModSystem
         }
     }
 
-    private void OnPerkUnlockResponse(PerkUnlockResponsePacket packet)
+    private void OnBlessingUnlockResponse(BlessingUnlockResponsePacket packet)
     {
         if (packet.Success)
         {
             _capi?.ShowChatMessage(packet.Message);
-            _capi?.Logger.Notification($"[PantheonWars] Perk unlocked: {packet.PerkId}");
+            _capi?.Logger.Notification($"[PantheonWars] Blessing unlocked: {packet.BlessingId}");
 
-            // Trigger perk unlock event for UI refresh
-            PerkUnlocked?.Invoke(packet.PerkId, packet.Success);
+            // Trigger blessing unlock event for UI refresh
+            BlessingUnlocked?.Invoke(packet.BlessingId, packet.Success);
         }
         else
         {
             _capi?.ShowChatMessage($"Error: {packet.Message}");
-            _capi?.Logger.Warning($"[PantheonWars] Failed to unlock perk: {packet.Message}");
+            _capi?.Logger.Warning($"[PantheonWars] Failed to unlock blessing: {packet.Message}");
 
             // Trigger event even on failure so UI can update
-            PerkUnlocked?.Invoke(packet.PerkId, packet.Success);
+            BlessingUnlocked?.Invoke(packet.BlessingId, packet.Success);
         }
     }
 
-    private void OnPerkDataResponse(PerkDataResponsePacket packet)
+    private void OnBlessingDataResponse(BlessingDataResponsePacket packet)
     {
-        _capi?.Logger.Debug($"[PantheonWars] Received perk data: HasReligion={packet.HasReligion}");
+        _capi?.Logger.Debug($"[PantheonWars] Received blessing data: HasReligion={packet.HasReligion}");
 
-        // Trigger event for PerkDialog to consume
-        PerkDataReceived?.Invoke(packet);
+        // Trigger event for BlessingDialog to consume
+        BlessingDataReceived?.Invoke(packet);
     }
 
     private void OnReligionStateChanged(ReligionStateChangedPacket packet)
@@ -914,40 +914,40 @@ public class PantheonWarsSystem : ModSystem
         // Show notification to user
         _capi?.ShowChatMessage(packet.Reason);
 
-        // Trigger event for PerkDialog to refresh its data
+        // Trigger event for BlessingDialog to refresh its data
         ReligionStateChanged?.Invoke(packet);
     }
 
     /// <summary>
-    /// Request perk data from the server
+    /// Request blessing data from the server
     /// </summary>
-    public void RequestPerkData()
+    public void RequestBlessingData()
     {
         if (_clientChannel == null)
         {
-            _capi?.Logger.Error("[PantheonWars] Cannot request perk data: client channel not initialized");
+            _capi?.Logger.Error("[PantheonWars] Cannot request blessing data: client channel not initialized");
             return;
         }
 
-        var request = new PerkDataRequestPacket();
+        var request = new BlessingDataRequestPacket();
         _clientChannel.SendPacket(request);
-        _capi?.Logger.Debug("[PantheonWars] Sent perk data request to server");
+        _capi?.Logger.Debug("[PantheonWars] Sent blessing data request to server");
     }
 
     /// <summary>
-    /// Send a perk unlock request to the server
+    /// Send a blessing unlock request to the server
     /// </summary>
-    public void RequestPerkUnlock(string perkId)
+    public void RequestBlessingUnlock(string blessingId)
     {
         if (_clientChannel == null)
         {
-            _capi?.Logger.Error("[PantheonWars] Cannot unlock perk: client channel not initialized");
+            _capi?.Logger.Error("[PantheonWars] Cannot unlock blessing: client channel not initialized");
             return;
         }
 
-        var request = new PerkUnlockRequestPacket(perkId);
+        var request = new BlessingUnlockRequestPacket(blessingId);
         _clientChannel.SendPacket(request);
-        _capi?.Logger.Debug($"[PantheonWars] Sent unlock request for perk: {perkId}");
+        _capi?.Logger.Debug($"[PantheonWars] Sent unlock request for blessing: {blessingId}");
     }
 
     /// <summary>
@@ -1031,15 +1031,15 @@ public class PantheonWarsSystem : ModSystem
     }
 
     /// <summary>
-    /// Event fired when perk data is received from the server
+    /// Event fired when blessing data is received from the server
     /// </summary>
-    public event Action<PerkDataResponsePacket>? PerkDataReceived;
+    public event Action<BlessingDataResponsePacket>? BlessingDataReceived;
 
     /// <summary>
-    /// Event fired when a perk unlock response is received from the server
-    /// Parameters: (perkId, success)
+    /// Event fired when a blessing unlock response is received from the server
+    /// Parameters: (blessingId, success)
     /// </summary>
-    public event Action<string, bool>? PerkUnlocked;
+    public event Action<string, bool>? BlessingUnlocked;
 
     /// <summary>
     /// Event fired when the player's religion state changes (disbanded, kicked, etc.)

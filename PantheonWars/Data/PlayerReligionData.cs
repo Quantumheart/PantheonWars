@@ -63,11 +63,11 @@ public class PlayerReligionData
     public int TotalFavorEarned { get; set; }
 
     /// <summary>
-    ///     Dictionary of unlocked player perks
-    ///     Key: perk ID, Value: unlock status (true if unlocked)
+    ///     Dictionary of unlocked player blessings
+    ///     Key: blessing ID, Value: unlock status (true if unlocked)
     /// </summary>
     [ProtoMember(7)]
-    public Dictionary<string, bool> UnlockedPerks { get; set; } = new();
+    public Dictionary<string, bool> UnlockedBlessings { get; set; } = new();
 
     /// <summary>
     ///     Last time the player switched religions (for cooldown tracking)
@@ -132,36 +132,36 @@ public class PlayerReligionData
     }
 
     /// <summary>
-    ///     Unlocks a player perk
+    ///     Unlocks a player blessing
     /// </summary>
-    public void UnlockPerk(string perkId)
+    public void UnlockBlessing(string blessingId)
     {
-        UnlockedPerks[perkId] = true;
+        UnlockedBlessings[blessingId] = true;
     }
 
     /// <summary>
-    ///     Checks if a perk is unlocked
+    ///     Checks if a blessing is unlocked
     /// </summary>
-    public bool IsPerkUnlocked(string perkId)
+    public bool IsBlessingUnlocked(string blessingId)
     {
-        return UnlockedPerks.TryGetValue(perkId, out var unlocked) && unlocked;
+        return UnlockedBlessings.TryGetValue(blessingId, out var unlocked) && unlocked;
     }
 
     /// <summary>
-    ///     Clears all unlocked perks (used when switching religions)
+    ///     Clears all unlocked blessings (used when switching religions)
     /// </summary>
-    public void ClearUnlockedPerks()
+    public void ClearUnlockedBlessings()
     {
-        UnlockedPerks.Clear();
+        UnlockedBlessings.Clear();
     }
 
     /// <summary>
-    ///     Resets favor and perks (penalty for switching religions)
+    ///     Resets favor and blessings (penalty for switching religions)
     /// </summary>
     public void ApplySwitchPenalty()
     {
         Favor = 0;
         FavorRank = FavorRank.Initiate;
-        ClearUnlockedPerks();
+        ClearUnlockedBlessings();
     }
 }

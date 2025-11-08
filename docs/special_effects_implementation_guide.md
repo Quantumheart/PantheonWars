@@ -2,15 +2,15 @@
 
 **Document Version:** 1.0
 **Last Updated:** October 30, 2025
-**Phase:** 3.4 - Deity Perks (Special Effect Handlers)
+**Phase:** 3.4 - Deity Blessings (Special Effect Handlers)
 
 ## Overview
 
-This guide outlines the implementation plan for special effect handlers that power the 80 perks across all 8 deities. Special effects provide gameplay mechanics beyond simple stat modifiers, including lifesteal, critical strikes, damage over time, auras, and group abilities.
+This guide outlines the implementation plan for special effect handlers that power the 80 blessings across all 8 deities. Special effects provide gameplay mechanics beyond simple stat modifiers, including lifesteal, critical strikes, damage over time, auras, and group abilities.
 
 **Current Status:** Architecture design phase
 **Estimated Total Time:** 8-14 hours
-**Dependencies:** PerkEffectSystem, PerkDefinitions (both complete)
+**Dependencies:** BlessingEffectSystem, BlessingDefinitions (both complete)
 
 ---
 
@@ -25,8 +25,8 @@ This guide outlines the implementation plan for special effect handlers that pow
 Create the foundation for all effect handlers:
 
 - **Abstract base class or interface** defining common lifecycle methods:
-  - `Apply(IServerPlayer player, Perk perk)` - Initialize effect when perk is unlocked
-  - `Remove(IServerPlayer player)` - Clean up effect when perk is removed
+  - `Apply(IServerPlayer player, Blessing blessing)` - Initialize effect when blessing is unlocked
+  - `Remove(IServerPlayer player)` - Clean up effect when blessing is removed
   - `Update(float deltaTime)` - Optional periodic updates for DoTs/auras
   - `OnCombatEvent(...)` - Handle combat-related triggers
 
@@ -53,9 +53,9 @@ Build the central coordinator for all effect handlers:
 
 - **Core methods:**
   - `RegisterHandler(string effectId, ISpecialEffectHandler handler)`
-  - `ApplyEffect(IServerPlayer player, string effectId, Perk perk)`
+  - `ApplyEffect(IServerPlayer player, string effectId, Blessing blessing)`
   - `RemoveEffect(IServerPlayer player, string effectId)`
-  - `RemoveAllEffects(IServerPlayer player)` - Cleanup on logout/perk removal
+  - `RemoveAllEffects(IServerPlayer player)` - Cleanup on logout/blessing removal
   - `UpdateEffects(float deltaTime)` - Tick all active effects
 
 - **Event coordination:**
@@ -74,7 +74,7 @@ Build the central coordinator for all effect handlers:
 **Estimated Time:** 30-45 minutes
 
 **Effect IDs:** `lifesteal_3`, `lifesteal_10`, `lifesteal_15`, `lifesteal_20`
-**Used by:** 12 perks across Khoras, Morthen, Aethra, and others
+**Used by:** 12 blessings across Khoras, Morthen, Aethra, and others
 
 **Implementation:**
 - Hook into `OnEntityReceiveDamage` event
@@ -97,7 +97,7 @@ lifesteal_20: 0.20f (20%)
 **Estimated Time:** 20-30 minutes
 
 **Effect ID:** `damage_reduction_10`
-**Used by:** 8 perks across Khoras, Morthen, Aethra, Gaia
+**Used by:** 8 blessings across Khoras, Morthen, Aethra, Gaia
 
 **Implementation:**
 - Hook into `OnEntityReceiveDamage` event (before damage applied)
@@ -117,14 +117,14 @@ damage_reduction_10: 0.10f (10% reduction)
 **Estimated Time:** 45-60 minutes
 
 **Effect IDs:** `critical_chance_10`, `critical_chance_20`
-**Used by:** 6 perks across Lysa, Umbros
+**Used by:** 6 blessings across Lysa, Umbros
 
 **Implementation:**
 - Hook into attack/damage events
 - RNG check (10% or 20% chance)
 - On critical: multiply damage by 1.5x-2.0x
 - Visual feedback (particle effect, sound)
-- Prevent double-crits if player has multiple crit perks (use highest)
+- Prevent double-crits if player has multiple crit blessings (use highest)
 
 **Configuration:**
 ```csharp
@@ -139,7 +139,7 @@ critical_chance_20: 0.20f (20% chance, 1.5x damage)
 **Estimated Time:** 30-45 minutes
 
 **Effect ID:** `headshot_bonus`
-**Used by:** 1 perk (Lysa - Master Huntress)
+**Used by:** 1 blessing (Lysa - Master Huntress)
 
 **Implementation:**
 - Detect if attack hit entity's head hitbox
@@ -156,7 +156,7 @@ critical_chance_20: 0.20f (20% chance, 1.5x damage)
 **Estimated Time:** 30-45 minutes
 
 **Effect ID:** `execute_threshold`
-**Used by:** 2 perks (Morthen - Lord of Death, Umbros - Deadly Ambush)
+**Used by:** 2 blessings (Morthen - Lord of Death, Umbros - Deadly Ambush)
 
 **Implementation:**
 - Hook into attack events
@@ -179,7 +179,7 @@ execute_threshold: 0.15f (15% health threshold)
 **Estimated Time:** 45-60 minutes
 
 **Effect IDs:** `poison_dot`, `poison_dot_strong`
-**Used by:** 3 perks (Morthen - Soul Reaper, Plague Bearer)
+**Used by:** 3 blessings (Morthen - Soul Reaper, Plague Bearer)
 
 **Implementation:**
 - Apply poison debuff to target on hit
@@ -203,7 +203,7 @@ poison_dot_strong: { tickDamage: 0.10f, duration: 10s, interval: 2s }
 **Estimated Time:** 45-60 minutes
 
 **Effect IDs:** `plague_aura`, `death_aura`
-**Used by:** 2 perks (Morthen - Plague Bearer, Lord of Death)
+**Used by:** 2 blessings (Morthen - Plague Bearer, Lord of Death)
 
 **Implementation:**
 - Create radius-based periodic damage zone around player
@@ -228,7 +228,7 @@ death_aura: { radius: 7, tickDamage: 4, interval: 1s }
 **Estimated Time:** 60-90 minutes
 
 **Effect ID:** `aoe_cleave`
-**Used by:** 1 perk (Khoras - Avatar of War)
+**Used by:** 1 blessing (Khoras - Avatar of War)
 
 **Implementation:**
 - Hook into melee attack events
@@ -249,7 +249,7 @@ death_aura: { radius: 7, tickDamage: 4, interval: 1s }
 **Estimated Time:** 60-90 minutes
 
 **Effect ID:** `multishot`
-**Used by:** 1 perk (Lysa - Avatar of the Hunt)
+**Used by:** 1 blessing (Lysa - Avatar of the Hunt)
 
 **Implementation:**
 - Hook into ranged attack/arrow spawn events
@@ -270,7 +270,7 @@ death_aura: { radius: 7, tickDamage: 4, interval: 1s }
 **Estimated Time:** 30-45 minutes
 
 **Effect ID:** `stealth_bonus`
-**Used by:** 4 perks across Lysa, Umbros
+**Used by:** 4 blessings across Lysa, Umbros
 
 **Implementation:**
 - Reduce entity detection range for hostile mobs
@@ -289,7 +289,7 @@ death_aura: { radius: 7, tickDamage: 4, interval: 1s }
 **Estimated Time:** 30-45 minutes
 
 **Effect ID:** `tracking_vision`
-**Used by:** 1 perk (Lysa - Apex Predator)
+**Used by:** 1 blessing (Lysa - Apex Predator)
 
 **Implementation:**
 - Highlight recent tracks/footprints of animals and players
@@ -308,10 +308,10 @@ death_aura: { radius: 7, tickDamage: 4, interval: 1s }
 **Estimated Time:** 60-90 minutes
 
 **Effect ID:** `animal_companion`
-**Used by:** 1 perk (Lysa - Avatar of the Hunt)
+**Used by:** 1 blessing (Lysa - Avatar of the Hunt)
 
 **Implementation:**
-- Spawn companion wolf/bear when perk is unlocked
+- Spawn companion wolf/bear when blessing is unlocked
 - Companion follows player and assists in combat
 - Companion has 50% of player's health
 - Respawn companion after 5 minutes if killed
@@ -332,7 +332,7 @@ death_aura: { radius: 7, tickDamage: 4, interval: 1s }
 **Estimated Time:** 30-45 minutes
 
 **Effect ID:** `religion_war_cry`
-**Used by:** 1 perk (Khoras - Pantheon of War)
+**Used by:** 1 blessing (Khoras - Pantheon of War)
 
 **Implementation:**
 - Activatable ability (command or hotkey)
@@ -353,7 +353,7 @@ war_cry: { damageBuff: 0.20f, duration: 30s, cooldown: 300s }
 **Estimated Time:** 30-45 minutes
 
 **Effect ID:** `religion_pack_tracking`
-**Used by:** 1 perk (Lysa - Hunter's Paradise)
+**Used by:** 1 blessing (Lysa - Hunter's Paradise)
 
 **Implementation:**
 - Show waypoints/markers for all religion members
@@ -373,7 +373,7 @@ war_cry: { damageBuff: 0.20f, duration: 30s, cooldown: 300s }
 **Estimated Time:** 30-45 minutes
 
 **Effect ID:** `religion_death_mark`
-**Used by:** 1 perk (Morthen - Empire of Death)
+**Used by:** 1 blessing (Morthen - Empire of Death)
 
 **Implementation:**
 - Activatable ability to mark enemy
@@ -391,16 +391,16 @@ death_mark: { damageIncrease: 0.15f, duration: 20s, cooldown: 60s }
 
 ### Phase 6: Integration & Testing (1-2 hours)
 
-#### Task 6.1: Integrate SpecialEffectManager with PerkEffectSystem
+#### Task 6.1: Integrate SpecialEffectManager with BlessingEffectSystem
 **Priority:** Critical
 **Estimated Time:** 30-45 minutes
 
 **Implementation:**
-- Modify `PerkEffectSystem.ApplyPerksToPlayer()`:
+- Modify `BlessingEffectSystem.ApplyBlessingsToPlayer()`:
   - After applying stat modifiers, apply special effects
-  - Pass perk's `SpecialEffects` list to `SpecialEffectManager`
+  - Pass blessing's `SpecialEffects` list to `SpecialEffectManager`
 
-- Modify `PerkEffectSystem.RemovePerksFromPlayer()`:
+- Modify `BlessingEffectSystem.RemoveBlessingsFromPlayer()`:
   - Before removing stat modifiers, remove special effects
   - Call `SpecialEffectManager.RemoveAllEffects(player)`
 
@@ -408,17 +408,17 @@ death_mark: { damageIncrease: 0.15f, duration: 20s, cooldown: 60s }
 
 **Key Changes:**
 ```csharp
-// In ApplyPerksToPlayer, after stat application:
-foreach (var perk in activePerks) {
-    foreach (var effectId in perk.SpecialEffects) {
-        _specialEffectManager.ApplyEffect(player, effectId, perk);
+// In ApplyBlessingsToPlayer, after stat application:
+foreach (var blessing in activeBlessings) {
+    foreach (var effectId in blessing.SpecialEffects) {
+        _specialEffectManager.ApplyEffect(player, effectId, blessing);
     }
 }
 ```
 
 ---
 
-#### Task 6.2: Add Effect Cleanup on Perk Removal/Player Logout
+#### Task 6.2: Add Effect Cleanup on Blessing Removal/Player Logout
 **Priority:** Critical
 **Estimated Time:** 30-45 minutes
 
@@ -433,7 +433,7 @@ foreach (var perk in activePerks) {
 **Edge cases:**
 - Sudden disconnect (crash/timeout)
 - Server restart
-- Perk being locked after being unlocked
+- Blessing being locked after being unlocked
 
 ---
 
@@ -455,7 +455,7 @@ foreach (var perk in activePerks) {
 - [ ] Tracking vision highlights tracks
 - [ ] Animal companion spawns and fights
 - [ ] Religion abilities activate and buff members
-- [ ] Effects clean up on perk removal
+- [ ] Effects clean up on blessing removal
 - [ ] Effects restore properly on player login
 - [ ] No memory leaks or performance issues
 
@@ -530,7 +530,7 @@ dotnet build PantheonWars/PantheonWars.csproj
 4. Critical Strikes
 5. Execute Threshold
 6. Poison DoTs
-7. Integration with PerkEffectSystem
+7. Integration with BlessingEffectSystem
 
 ### Nice-to-Have (Can defer to Phase 3.5):
 8. Auras (Plague, Death)
@@ -554,7 +554,7 @@ Phase 3.4 Special Effects implementation is complete when:
 - [ ] All 20 tasks are implemented and tested
 - [ ] Build succeeds with 0 errors
 - [ ] All special effects function in-game without crashes
-- [ ] Effects apply/remove correctly with perk unlocks
+- [ ] Effects apply/remove correctly with blessing unlocks
 - [ ] Player logout/login properly persists effect state
 - [ ] No memory leaks or performance degradation
 - [ ] Documentation updated with effect behaviors
@@ -566,9 +566,9 @@ Phase 3.4 Special Effects implementation is complete when:
 
 ## References
 
-- **PerkDefinitions.cs** - All perk definitions with special effect lists
+- **BlessingDefinitions.cs** - All blessing definitions with special effect lists
 - **SpecialEffects.cs** - Effect ID constants
-- **PerkEffectSystem.cs** - Current stat modifier application system
+- **BlessingEffectSystem.cs** - Current stat modifier application system
 - **balance_testing_guide.md** - Testing methodology for effects
 - **phase3_task_breakdown.md** - Overall Phase 3 roadmap
 

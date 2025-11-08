@@ -101,35 +101,35 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
     }
 
     /// <summary>
-    ///     Unlocks a player perk
+    ///     Unlocks a player blessing
     /// </summary>
-    public bool UnlockPlayerPerk(string playerUID, string perkId)
+    public bool UnlockPlayerBlessing(string playerUID, string blessingId)
     {
         var data = GetOrCreatePlayerData(playerUID);
 
         // Check if already unlocked
-        if (data.IsPerkUnlocked(perkId)) return false;
+        if (data.IsBlessingUnlocked(blessingId)) return false;
 
-        // Unlock the perk
-        data.UnlockPerk(perkId);
-        _sapi.Logger.Notification($"[PantheonWars] Player {playerUID} unlocked perk: {perkId}");
+        // Unlock the blessing
+        data.UnlockBlessing(blessingId);
+        _sapi.Logger.Notification($"[PantheonWars] Player {playerUID} unlocked blessing: {blessingId}");
 
         return true;
     }
 
     /// <summary>
-    ///     Gets active player perks (to be expanded in Phase 3.3)
+    ///     Gets active player blessings (to be expanded in Phase 3.3)
     /// </summary>
-    public List<string> GetActivePlayerPerks(string playerUID)
+    public List<string> GetActivePlayerBlessings(string playerUID)
     {
         var data = GetOrCreatePlayerData(playerUID);
-        var unlockedPerks = new List<string>();
+        var unlockedBlessings = new List<string>();
 
-        foreach (var kvp in data.UnlockedPerks)
+        foreach (var kvp in data.UnlockedBlessings)
             if (kvp.Value) // If unlocked
-                unlockedPerks.Add(kvp.Key);
+                unlockedBlessings.Add(kvp.Key);
 
-        return unlockedPerks;
+        return unlockedBlessings;
     }
 
     /// <summary>
@@ -225,7 +225,7 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
 
         _sapi.Logger.Notification($"[PantheonWars] Applying religion switch penalty to player {playerUID}");
 
-        // Apply penalty (reset favor and perks)
+        // Apply penalty (reset favor and blessings)
         data.ApplySwitchPenalty();
     }
 

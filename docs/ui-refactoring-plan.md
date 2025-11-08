@@ -4,7 +4,7 @@
 
 ### Largest Classes (by line count)
 1. **ReligionManagementOverlay.cs** - 771 lines
-2. **PerkDialog.cs** - 745 lines
+2. **BlessingDialog.cs** - 745 lines
 3. **CreateReligionOverlay.cs** - 690 lines
 4. **ReligionBrowserOverlay.cs** - 580 lines
 5. **ReligionManagementDialog.cs** - 470 lines
@@ -22,7 +22,7 @@ The same UI components are reimplemented across multiple files:
 
 ### 2. Mixed Responsibilities
 Classes are doing too much:
-- **PerkDialog.cs**: Window management + event handling + overlay coordination + network communication + state management
+- **BlessingDialog.cs**: Window management + event handling + overlay coordination + network communication + state management
 - **ReligionManagementOverlay.cs**: Rendering + input handling + scrolling logic + validation + state
 - **CreateReligionOverlay.cs**: Form rendering + dropdown logic + validation + deity selection
 
@@ -88,14 +88,14 @@ ReligionManagementOverlay.cs (771 lines) →
 
 **Impact**: Each file becomes 100-400 lines (manageable size)
 
-### Phase 4: Extract Event Handlers from PerkDialog
-Break down PerkDialog.cs (745 lines):
+### Phase 4: Extract Event Handlers from BlessingDialog
+Break down BlessingDialog.cs (745 lines):
 
 ```
-PerkDialog.cs (745 lines) →
-    ├── PerkDialog.cs (~250 lines - window lifecycle only)
-    ├── PerkDialogEventHandlers.cs (~200 lines)
-    ├── PerkDialogState.cs (~100 lines)
+BlessingDialog.cs (745 lines) →
+    ├── BlessingDialog.cs (~250 lines - window lifecycle only)
+    ├── BlessingDialogEventHandlers.cs (~200 lines)
+    ├── BlessingDialogState.cs (~100 lines)
     └── OverlayCoordinator.cs (~150 lines)
 ```
 
@@ -209,14 +209,14 @@ CreateReligionOverlay.cs (690 lines) →
 - **Files affected**: ReligionBrowserOverlay.cs (580 → ~300 lines)
 - **Effort**: 4-5 hours
 
-### **Phase 4: Decompose PerkDialog** (Priority: MEDIUM)
+### **Phase 4: Decompose BlessingDialog** (Priority: MEDIUM)
 *Improves main coordinator class*
 
 #### Task 4.1: Extract Event Handlers
-- Create `GUI/PerkDialogEventHandlers.cs`
+- Create `GUI/BlessingDialogEventHandlers.cs`
   - Move all On* event handler methods (~300 lines)
-  - Keep dialog lifecycle methods in PerkDialog
-- **Files affected**: PerkDialog.cs (745 → ~450 lines)
+  - Keep dialog lifecycle methods in BlessingDialog
+- **Files affected**: BlessingDialog.cs (745 → ~450 lines)
 - **Effort**: 3-4 hours
 
 #### Task 4.2: Extract Overlay Coordinator
@@ -224,14 +224,14 @@ CreateReligionOverlay.cs (690 lines) →
   - Manage overlay open/close state
   - Handle overlay transitions
   - Coordinate between overlays
-- **Files affected**: PerkDialog.cs (450 → ~300 lines)
+- **Files affected**: BlessingDialog.cs (450 → ~300 lines)
 - **Effort**: 3-4 hours
 
 #### Task 4.3: Extract Dialog State
-- Create `GUI/State/PerkDialogState.cs`
+- Create `GUI/State/BlessingDialogState.cs`
   - Move window state tracking
   - Move data loading flags
-- **Files affected**: PerkDialog.cs (300 → ~250 lines)
+- **Files affected**: BlessingDialog.cs (300 → ~250 lines)
 - **Effort**: 2-3 hours
 
 ### **Phase 5: Advanced Components** (Priority: LOW)
@@ -273,7 +273,7 @@ Refactor one large class completely before moving to the next:
 1. CreateReligionOverlay (Tasks 1.1, 1.3, 1.5, 2.1, 3.2)
 2. ReligionManagementOverlay (Tasks 1.1, 1.2, 1.3, 1.4, 3.1)
 3. ReligionBrowserOverlay (Tasks 1.1, 1.2, 1.4, 2.1, 3.3)
-4. PerkDialog (Tasks 4.1-4.3)
+4. BlessingDialog (Tasks 4.1-4.3)
 
 **Benefits**:
 - See complete transformation of each file
@@ -304,4 +304,4 @@ Approximately 1-2 weeks of focused work.
 ---
 
 *Document created: 2025-11-06*
-*Analysis based on: phase3-group-deity-perks-user-interface branch*
+*Analysis based on: phase3-group-deity-blessings-user-interface branch*
