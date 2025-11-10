@@ -1,6 +1,6 @@
+using System;
 using System.Numerics;
 using ImGuiNET;
-using PantheonWars.GUI.UI.Components.Buttons;
 using PantheonWars.GUI.UI.Utilities;
 using PantheonWars.Models.Enum;
 using Vintagestory.API.Client;
@@ -29,9 +29,9 @@ internal static class ReligionHeaderRenderer
         BlessingDialogManager manager,
         ICoreClientAPI api,
         float x, float y, float width,
-        System.Action? onChangeReligionClicked = null,
-        System.Action? onManageReligionClicked = null,
-        System.Action? onLeaveReligionClicked = null)
+        Action? onChangeReligionClicked = null,
+        Action? onManageReligionClicked = null,
+        Action? onLeaveReligionClicked = null)
     {
         const float headerHeight = 80f;
         const float padding = 16f;
@@ -85,12 +85,34 @@ internal static class ReligionHeaderRenderer
         var currentX = x + padding;
         var centerY = y + headerHeight / 2;
 
-        // TODO: Phase 5 - Add deity icon (if textures available)
-        // For now, use placeholder circle
+        // Draw deity icon (with fallback to colored circle)
         const float iconSize = 48f;
-        var iconCenter = new Vector2(currentX + iconSize / 2, centerY);
-        var iconColor = ImGui.ColorConvertFloat4ToU32(DeityHelper.GetDeityColor(manager.CurrentDeity));
-        drawList.AddCircleFilled(iconCenter, iconSize / 2, iconColor, 16);
+        var deityTextureId = DeityIconLoader.GetDeityTextureId(manager.CurrentDeity);
+
+        if (deityTextureId != IntPtr.Zero)
+        {
+            // Render deity icon texture
+            var iconPos = new Vector2(currentX, centerY - iconSize / 2);
+            var iconMin = iconPos;
+            var iconMax = new Vector2(iconPos.X + iconSize, iconPos.Y + iconSize);
+
+            // Draw icon with deity color tint for visual cohesion
+            var tintColor = DeityHelper.GetDeityColor(manager.CurrentDeity);
+            var tintColorU32 = ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 1f, 1f, 1f)); // Full white = no tint
+
+            drawList.AddImage(deityTextureId, iconMin, iconMax, Vector2.Zero, Vector2.One, tintColorU32);
+
+            // Optional: Add subtle border around icon
+            var iconBorderColor = ImGui.ColorConvertFloat4ToU32(tintColor * 0.8f);
+            drawList.AddRect(iconMin, iconMax, iconBorderColor, 4f, ImDrawFlags.None, 2f);
+        }
+        else
+        {
+            // Fallback: Use placeholder colored circle if texture not available
+            var iconCenter = new Vector2(currentX + iconSize / 2, centerY);
+            var iconColor = ImGui.ColorConvertFloat4ToU32(DeityHelper.GetDeityColor(manager.CurrentDeity));
+            drawList.AddCircleFilled(iconCenter, iconSize / 2, iconColor, 16);
+        }
 
         currentX += iconSize + padding;
 
