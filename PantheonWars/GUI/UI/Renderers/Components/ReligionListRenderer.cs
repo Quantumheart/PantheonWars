@@ -193,12 +193,35 @@ public static class ReligionListRenderer
                 api.World.Player.Entity, null, false, 8f, 0.5f);
         }
 
-        // Draw deity icon (placeholder circle)
+        // Draw deity icon (with fallback to colored circle)
         const float iconSize = 48f;
-        var iconCenter = new Vector2(x + padding + iconSize / 2, y + height / 2);
-        var deityColor = DeityHelper.GetDeityColor(religion.Deity);
-        var iconColorU32 = ImGui.ColorConvertFloat4ToU32(deityColor);
-        drawList.AddCircleFilled(iconCenter, iconSize / 2, iconColorU32, 16);
+        var deityType = DeityHelper.ParseDeityType(religion.Deity);
+        var deityTextureId = DeityIconLoader.GetDeityTextureId(deityType);
+
+        if (deityTextureId != IntPtr.Zero)
+        {
+            // Render deity icon texture
+            var iconPos = new Vector2(x + padding, y + (height - iconSize) / 2);
+            var iconMin = iconPos;
+            var iconMax = new Vector2(iconPos.X + iconSize, iconPos.Y + iconSize);
+
+            // Draw icon with full color (no tint)
+            var tintColorU32 = ImGui.ColorConvertFloat4ToU32(new Vector4(1f, 1f, 1f, 1f));
+            drawList.AddImage(deityTextureId, iconMin, iconMax, Vector2.Zero, Vector2.One, tintColorU32);
+
+            // Add subtle border around icon for visual cohesion
+            var deityColor = DeityHelper.GetDeityColor(religion.Deity);
+            var iconBorderColor = ImGui.ColorConvertFloat4ToU32(deityColor * 0.8f);
+            drawList.AddRect(iconMin, iconMax, iconBorderColor, 4f, ImDrawFlags.None, 2f);
+        }
+        else
+        {
+            // Fallback: Use placeholder colored circle if texture not available
+            var iconCenter = new Vector2(x + padding + iconSize / 2, y + height / 2);
+            var deityColor = DeityHelper.GetDeityColor(religion.Deity);
+            var iconColorU32 = ImGui.ColorConvertFloat4ToU32(deityColor);
+            drawList.AddCircleFilled(iconCenter, iconSize / 2, iconColorU32, 16);
+        }
 
         // Draw religion name
         var namePos = new Vector2(x + padding * 2 + iconSize, y + padding);
