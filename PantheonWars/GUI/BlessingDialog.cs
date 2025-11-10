@@ -68,6 +68,9 @@ public partial class BlessingDialog : ModSystem
         _manager = new BlessingDialogManager(_capi);
         _overlayCoordinator = new OverlayCoordinator();
 
+        // Initialize deity icon loader
+        UI.Utilities.DeityIconLoader.Initialize(_capi);
+
         // Get PantheonWarsSystem for network communication
         _pantheonWarsSystem = _capi.ModLoader.GetModSystem<PantheonWarsSystem>();
         if (_pantheonWarsSystem != null)
@@ -285,6 +288,9 @@ public partial class BlessingDialog : ModSystem
             _pantheonWarsSystem.ReligionActionCompleted -= OnReligionActionCompleted;
             _pantheonWarsSystem.PlayerReligionInfoReceived -= OnPlayerReligionInfoReceived;
         }
+        
+        // Dispose deity icon loader
+        UI.Utilities.DeityIconLoader.Dispose();
 
         _capi?.Logger.Notification("[PantheonWars] Blessing Dialog disposed");
     }
