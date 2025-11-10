@@ -5,7 +5,7 @@ namespace PantheonWars.Network;
 /// <summary>
 ///     Server notification to client that their religion state has changed
 ///     (e.g., religion disbanded, kicked from religion, etc.)
-///     Client should request fresh perk data after receiving this
+///     Client should request fresh blessing data after receiving this
 /// </summary>
 [ProtoContract]
 public class ReligionStateChangedPacket

@@ -1,7 +1,7 @@
 namespace PantheonWars.Constants;
 
 /// <summary>
-///     Constants for special effect identifiers used in perks.
+///     Constants for special effect identifiers used in blessings.
 ///     These effects are not yet implemented but are reserved for future functionality.
 ///     Use these constants instead of hardcoded strings to prevent typos and enable refactoring.
 /// </summary>

@@ -9,7 +9,7 @@ using Vintagestory.API.Server;
 namespace PantheonWars.Systems;
 
 /// <summary>
-///     Manages religion prestige progression and religion-wide perks
+///     Manages religion prestige progression and religion-wide blessings
 /// </summary>
 public class ReligionPrestigeManager
 {
@@ -21,8 +21,8 @@ public class ReligionPrestigeManager
     private const int MYTHIC_THRESHOLD = 10000;
     private readonly ReligionManager _religionManager;
     private readonly ICoreServerAPI _sapi;
-    private PerkEffectSystem? _perkEffectSystem;
-    private PerkRegistry? _perkRegistry;
+    private BlessingEffectSystem? _blessingEffectSystem;
+    private BlessingRegistry? _blessingRegistry;
 
     public ReligionPrestigeManager(ICoreServerAPI sapi, ReligionManager religionManager)
     {
@@ -31,12 +31,12 @@ public class ReligionPrestigeManager
     }
 
     /// <summary>
-    ///     Sets the perk registry and effect system (called after they're initialized)
+    ///     Sets the blessing registry and effect system (called after they're initialized)
     /// </summary>
-    public void SetPerkSystems(PerkRegistry perkRegistry, PerkEffectSystem perkEffectSystem)
+    public void SetBlessingSystems(BlessingRegistry blessingRegistry, BlessingEffectSystem blessingEffectSystem)
     {
-        _perkRegistry = perkRegistry;
-        _perkEffectSystem = perkEffectSystem;
+        _blessingRegistry = blessingRegistry;
+        _blessingEffectSystem = blessingEffectSystem;
     }
 
     /// <summary>
@@ -97,8 +97,8 @@ public class ReligionPrestigeManager
             _sapi.Logger.Notification(
                 $"[PantheonWars] Religion {religion.ReligionName} rank changed: {oldRank} -> {newRank}");
 
-            // Check for new perk unlocks
-            CheckForNewPerkUnlocks(religionUID, newRank);
+            // Check for new blessing unlocks
+            CheckForNewBlessingUnlocks(religionUID, newRank);
         }
     }
 
@@ -115,65 +115,65 @@ public class ReligionPrestigeManager
     }
 
     /// <summary>
-    ///     Checks for new perk unlocks when religion ranks up
+    ///     Checks for new blessing unlocks when religion ranks up
     /// </summary>
-    private void CheckForNewPerkUnlocks(string religionUID, PrestigeRank newRank)
+    private void CheckForNewBlessingUnlocks(string religionUID, PrestigeRank newRank)
     {
-        if (_perkRegistry == null)
+        if (_blessingRegistry == null)
         {
-            _sapi.Logger.Debug("[PantheonWars] Perk registry not yet initialized, skipping perk unlock check");
+            _sapi.Logger.Debug("[PantheonWars] Blessing registry not yet initialized, skipping blessing unlock check");
             return;
         }
 
         var religion = _religionManager.GetReligion(religionUID);
         if (religion == null) return;
 
-        // Get all religion perks for this deity
-        var allReligionPerks = _perkRegistry.GetPerksForDeity(religion.Deity, PerkKind.Religion);
+        // Get all religion blessings for this deity
+        var allReligionBlessings = _blessingRegistry.GetBlessingsForDeity(religion.Deity, BlessingKind.Religion);
 
-        // Find perks that are now unlockable at the new rank
-        var newlyUnlockablePerks = new List<Perk>();
+        // Find blessings that are now unlockable at the new rank
+        var newlyUnlockableBlessings = new List<Blessing>();
 
-        foreach (var perk in allReligionPerks)
+        foreach (var blessing in allReligionBlessings)
         {
-            // Check if this perk requires the new rank (or lower)
-            if (perk.RequiredPrestigeRank > (int)newRank) continue; // Not yet available
+            // Check if this blessing requires the new rank (or lower)
+            if (blessing.RequiredPrestigeRank > (int)newRank) continue; // Not yet available
 
             // Check if already unlocked
-            if (religion.UnlockedPerks.TryGetValue(perk.PerkId, out var unlocked) &&
+            if (religion.UnlockedBlessings.TryGetValue(blessing.BlessingId, out var unlocked) &&
                 unlocked) continue; // Already unlocked
 
             // Check if all prerequisites are met
             var allPrereqsMet = true;
-            foreach (var prereqId in perk.PrerequisitePerks)
-                if (!religion.UnlockedPerks.TryGetValue(prereqId, out var prereqUnlocked) || !prereqUnlocked)
+            foreach (var prereqId in blessing.PrerequisiteBlessings)
+                if (!religion.UnlockedBlessings.TryGetValue(prereqId, out var prereqUnlocked) || !prereqUnlocked)
                 {
                     allPrereqsMet = false;
                     break;
                 }
 
-            if (allPrereqsMet) newlyUnlockablePerks.Add(perk);
+            if (allPrereqsMet) newlyUnlockableBlessings.Add(blessing);
         }
 
-        // Notify religion members about newly unlockable perks
-        if (newlyUnlockablePerks.Count > 0)
-            NotifyNewPerksAvailable(religionUID, newlyUnlockablePerks);
+        // Notify religion members about newly unlockable blessings
+        if (newlyUnlockableBlessings.Count > 0)
+            NotifyNewBlessingsAvailable(religionUID, newlyUnlockableBlessings);
         else
             _sapi.Logger.Debug(
-                $"[PantheonWars] No new perks available for religion {religion.ReligionName} at rank {newRank}");
+                $"[PantheonWars] No new blessings available for religion {religion.ReligionName} at rank {newRank}");
     }
 
     /// <summary>
-    ///     Notifies all religion members about newly available perks
+    ///     Notifies all religion members about newly available blessings
     /// </summary>
-    private void NotifyNewPerksAvailable(string religionUID, List<Perk> newPerks)
+    private void NotifyNewBlessingsAvailable(string religionUID, List<Blessing> newBlessings)
     {
         var religion = _religionManager.GetReligion(religionUID);
         if (religion == null) return;
 
-        var perkNames = string.Join(", ", newPerks.Select(p => p.Name));
+        var blessingNames = string.Join(", ", newBlessings.Select(p => p.Name));
         var message =
-            $"New perks available for '{religion.ReligionName}': {perkNames}. Use /perks religion to view and /perks unlock to unlock them.";
+            $"New blessings available for '{religion.ReligionName}': {blessingNames}. Use /blessings religion to view and /blessings unlock to unlock them.";
 
         // Notify all members
         foreach (var memberUID in religion.MemberUIDs)
@@ -188,7 +188,7 @@ public class ReligionPrestigeManager
         }
 
         _sapi.Logger.Notification(
-            $"[PantheonWars] Religion {religion.ReligionName} has {newPerks.Count} new perks available: {perkNames}");
+            $"[PantheonWars] Religion {religion.ReligionName} has {newBlessings.Count} new blessings available: {blessingNames}");
     }
 
     /// <summary>
@@ -217,64 +217,64 @@ public class ReligionPrestigeManager
     }
 
     /// <summary>
-    ///     Unlocks a religion perk if requirements are met
+    ///     Unlocks a religion blessing if requirements are met
     /// </summary>
-    public bool UnlockReligionPerk(string religionUID, string perkId)
+    public bool UnlockReligionBlessing(string religionUID, string blessingId)
     {
         var religion = _religionManager.GetReligion(religionUID);
         if (religion == null)
         {
-            _sapi.Logger.Error($"[PantheonWars] Cannot unlock perk for non-existent religion: {religionUID}");
+            _sapi.Logger.Error($"[PantheonWars] Cannot unlock blessing for non-existent religion: {religionUID}");
             return false;
         }
 
         // Check if already unlocked
-        if (religion.UnlockedPerks.TryGetValue(perkId, out var unlocked) && unlocked) return false;
+        if (religion.UnlockedBlessings.TryGetValue(blessingId, out var unlocked) && unlocked) return false;
 
-        // Unlock the perk
-        religion.UnlockedPerks[perkId] = true;
-        _sapi.Logger.Notification($"[PantheonWars] Religion {religion.ReligionName} unlocked perk: {perkId}");
+        // Unlock the blessing
+        religion.UnlockedBlessings[blessingId] = true;
+        _sapi.Logger.Notification($"[PantheonWars] Religion {religion.ReligionName} unlocked blessing: {blessingId}");
 
-        // Trigger perk effect refresh for all members
-        TriggerPerkEffectRefresh(religionUID);
+        // Trigger blessing effect refresh for all members
+        TriggerBlessingEffectRefresh(religionUID);
 
         return true;
     }
 
     /// <summary>
-    ///     Triggers perk effect refresh for all members
+    ///     Triggers blessing effect refresh for all members
     /// </summary>
-    private void TriggerPerkEffectRefresh(string religionUID)
+    private void TriggerBlessingEffectRefresh(string religionUID)
     {
-        if (_perkEffectSystem == null)
+        if (_blessingEffectSystem == null)
         {
-            _sapi.Logger.Debug("[PantheonWars] Perk effect system not yet initialized, skipping perk refresh");
+            _sapi.Logger.Debug("[PantheonWars] Blessing effect system not yet initialized, skipping blessing refresh");
             return;
         }
 
         var religion = _religionManager.GetReligion(religionUID);
         if (religion == null) return;
 
-        _sapi.Logger.Debug($"[PantheonWars] Triggering perk effect refresh for religion {religion.ReligionName}");
+        _sapi.Logger.Debug($"[PantheonWars] Triggering blessing effect refresh for religion {religion.ReligionName}");
 
-        // Refresh perk effects for all members
-        _perkEffectSystem.RefreshReligionPerks(religionUID);
+        // Refresh blessing effects for all members
+        _blessingEffectSystem.RefreshReligionBlessings(religionUID);
     }
 
     /// <summary>
-    ///     Gets all active (unlocked) religion perks
+    ///     Gets all active (unlocked) religion blessings
     /// </summary>
-    public List<string> GetActiveReligionPerks(string religionUID)
+    public List<string> GetActiveReligionBlessings(string religionUID)
     {
         var religion = _religionManager.GetReligion(religionUID);
         if (religion == null) return new List<string>();
 
-        var activePerks = new List<string>();
-        foreach (var kvp in religion.UnlockedPerks)
+        var activeBlessings = new List<string>();
+        foreach (var kvp in religion.UnlockedBlessings)
             if (kvp.Value) // If unlocked
-                activePerks.Add(kvp.Key);
+                activeBlessings.Add(kvp.Key);
 
-        return activePerks;
+        return activeBlessings;
     }
 
     /// <summary>

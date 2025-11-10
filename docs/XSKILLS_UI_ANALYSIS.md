@@ -1,7 +1,7 @@
 # XSkillsGilded UI System Analysis
 
 **Date:** November 3, 2025
-**Purpose:** Research XSkillsGilded's polished UI implementation to inform PantheonWars Perk Dialog design
+**Purpose:** Research XSkillsGilded's polished UI implementation to inform PantheonWars Blessing Dialog design
 
 ---
 
@@ -344,7 +344,7 @@ xSkillGilded/xSkillGilded/
 internal static class MyRenderer
 {
     public static float Draw(
-        PerkPageManager pageManager,
+        BlessingPageManager pageManager,
         ICoreClientAPI api,
         float x, float y, float width,
         ref string hoveringID)
@@ -437,7 +437,7 @@ if (clicked) {
 - **Window elements**: background, frame (9-patch)
 - **Tab elements**: normal, hover, selected
 - **Button elements**: idle, hover, pressing (all 9-patch)
-- **Icons**: deity icons, perk icons
+- **Icons**: deity icons, blessing icons
 - **Effects**: glow, shadow overlays
 - **Utility**: pixel (1x1 white for drawing rectangles)
 
@@ -451,7 +451,7 @@ if (clicked) {
 
 - Click/select: `click.ogg`
 - Hover transition: `tick.ogg`
-- Unlock perk: `unlock.ogg`
+- Unlock blessing: `unlock.ogg`
 - Max tier: `maxed.ogg`
 - Error/invalid: `error.ogg`
 
@@ -476,4 +476,4 @@ XSkillsGilded demonstrates a **production-quality UI system** with:
 - Smooth animations and transitions
 - Excellent code organization
 
-**This is an ideal reference for building PantheonWars' Perk Dialog UI.**
+**This is an ideal reference for building PantheonWars' Blessing Dialog UI.**

@@ -8,8 +8,8 @@ using PantheonWars.Models.Enum;
 namespace PantheonWars.GUI.UI.Renderers;
 
 /// <summary>
-///     Renders rich tooltips when hovering over perk nodes
-///     Displays perk details, requirements, stats, and unlock status
+///     Renders rich tooltips when hovering over blessing nodes
+///     Displays blessing details, requirements, stats, and unlock status
 /// </summary>
 internal static class TooltipRenderer
 {
@@ -19,7 +19,7 @@ internal static class TooltipRenderer
     private const float SECTION_SPACING = 8f;
 
     /// <summary>
-    ///     Draw a tooltip for a perk node when hovering
+    ///     Draw a tooltip for a blessing node when hovering
     /// </summary>
     /// <param name="tooltipData">Tooltip data to display</param>
     /// <param name="mouseX">Mouse X position (screen space)</param>
@@ -27,7 +27,7 @@ internal static class TooltipRenderer
     /// <param name="windowWidth">Window width for edge detection</param>
     /// <param name="windowHeight">Window height for edge detection</param>
     public static void Draw(
-        PerkTooltipData? tooltipData,
+        BlessingTooltipData? tooltipData,
         float mouseX,
         float mouseY,
         float windowWidth,
@@ -101,11 +101,11 @@ internal static class TooltipRenderer
     /// <summary>
     ///     Build formatted lines for tooltip content
     /// </summary>
-    private static List<TooltipLine> BuildTooltipLines(PerkTooltipData data)
+    private static List<TooltipLine> BuildTooltipLines(BlessingTooltipData data)
     {
         var lines = new List<TooltipLine>();
 
-        // Title (perk name) - Gold, larger font
+        // Title (blessing name) - Gold, larger font
         lines.Add(new TooltipLine
         {
             Text = data.Name,
@@ -117,7 +117,7 @@ internal static class TooltipRenderer
 
         // Category and Tier
         var categoryText = $"{data.Category} | Tier {data.Tier}";
-        if (data.Kind == PerkKind.Religion)
+        if (data.Kind == BlessingKind.Religion)
             categoryText += " (Religion)";
 
         lines.Add(new TooltipLine

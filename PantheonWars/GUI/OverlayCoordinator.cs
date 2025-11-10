@@ -95,7 +95,7 @@ public class OverlayCoordinator
         ICoreClientAPI capi,
         int windowWidth,
         int windowHeight,
-        PerkDialogManager manager,
+        BlessingDialogManager manager,
         Action<string> onJoinReligionClicked,
         Action<string> onRefreshReligionList,
         Action onCreateReligionClicked,

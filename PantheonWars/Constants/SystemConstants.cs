@@ -9,9 +9,9 @@ public static class SystemConstants
     #region Modifier IDs
 
     /// <summary>
-    ///     Format string for perk modifier IDs. Use with string.Format(ModifierIdFormat, playerUID)
+    ///     Format string for blessing modifier IDs. Use with string.Format(ModifierIdFormat, playerUID)
     /// </summary>
-    public const string ModifierIdFormat = "perk-{0}";
+    public const string ModifierIdFormat = "blessing-{0}";
 
     #endregion
 
@@ -100,12 +100,12 @@ public static class SystemConstants
     /// <summary>
     ///     Error message when player entity is null
     /// </summary>
-    public const string ErrorPlayerEntityNull = "Cannot apply perks - player entity is null";
+    public const string ErrorPlayerEntityNull = "Cannot apply blessings - player entity is null";
 
     /// <summary>
     ///     Error message when player has no Stats
     /// </summary>
-    public const string ErrorPlayerStatsNull = "Cannot apply perks - player has no Stats";
+    public const string ErrorPlayerStatsNull = "Cannot apply blessings - player has no Stats";
 
     /// <summary>
     ///     Error message format for stat not found. Use with string.Format(ErrorStatNotFound, statName, playerName)
@@ -129,23 +129,23 @@ public static class SystemConstants
     /// <summary>
     ///     Success message format for applying modifiers. Use with string.Format(SuccessAppliedModifiers, count, playerName)
     /// </summary>
-    public const string SuccessAppliedModifiersFormat = "Applied {0} perk modifiers to player {1}";
+    public const string SuccessAppliedModifiersFormat = "Applied {0} blessing modifiers to player {1}";
 
     /// <summary>
     ///     Success message format for removing modifiers. Use with string.Format(SuccessRemovedModifiers, count, playerName)
     /// </summary>
-    public const string SuccessRemovedModifiersFormat = "Removed {0} old perk modifiers from player {1}";
+    public const string SuccessRemovedModifiersFormat = "Removed {0} old blessing modifiers from player {1}";
 
     /// <summary>
-    ///     Success message format for refreshing perks. Use with string.Format(SuccessRefreshedPerks, playerUID)
+    ///     Success message format for refreshing blessings. Use with string.Format(SuccessRefreshedBlessings, playerUID)
     /// </summary>
-    public const string SuccessRefreshedPerksFormat = "Refreshed perks for player {0}";
+    public const string SuccessRefreshedBlessingsFormat = "Refreshed blessings for player {0}";
 
     /// <summary>
-    ///     Success message format for refreshing religion perks. Use with string.Format(SuccessRefreshedReligionPerks,
+    ///     Success message format for refreshing religion blessings. Use with string.Format(SuccessRefreshedReligionBlessings,
     ///     religionName, memberCount)
     /// </summary>
-    public const string SuccessRefreshedReligionPerksFormat = "Refreshed perks for religion {0} ({1} members)";
+    public const string SuccessRefreshedReligionBlessingsFormat = "Refreshed blessings for religion {0} ({1} members)";
 
     /// <summary>
     ///     Success message format for health update. Use with string.Format(SuccessHealthUpdate, playerName, beforeHealth,
@@ -158,19 +158,19 @@ public static class SystemConstants
     #region Info Messages
 
     /// <summary>
-    ///     Info message for initializing perk effect system
+    ///     Info message for initializing blessing effect system
     /// </summary>
-    public const string InfoInitializingPerkSystem = "Initializing Perk Effect System...";
+    public const string InfoInitializingBlessingSystem = "Initializing Blessing Effect System...";
 
     /// <summary>
-    ///     Info message for perk effect system initialized
+    ///     Info message for blessing effect system initialized
     /// </summary>
-    public const string InfoPerkSystemInitialized = "Perk Effect System initialized";
+    public const string InfoBlessingSystemInitialized = "Blessing Effect System initialized";
 
     /// <summary>
     ///     Info message for clearing caches
     /// </summary>
-    public const string InfoClearedCaches = "Cleared all perk modifier caches";
+    public const string InfoClearedCaches = "Cleared all blessing modifier caches";
 
     #endregion
 }

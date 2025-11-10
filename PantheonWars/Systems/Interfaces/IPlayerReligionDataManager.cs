@@ -29,14 +29,14 @@ public interface IPlayerReligionDataManager
     void UpdateFavorRank(string playerUID);
 
     /// <summary>
-    ///     Unlocks a player perk
+    ///     Unlocks a player blessing
     /// </summary>
-    bool UnlockPlayerPerk(string playerUID, string perkId);
+    bool UnlockPlayerBlessing(string playerUID, string blessingId);
 
     /// <summary>
-    ///     Gets active player perks (to be expanded in Phase 3.3)
+    ///     Gets active player blessings (to be expanded in Phase 3.3)
     /// </summary>
-    List<string> GetActivePlayerPerks(string playerUID);
+    List<string> GetActivePlayerBlessings(string playerUID);
 
     /// <summary>
     ///     Joins a player to a religion

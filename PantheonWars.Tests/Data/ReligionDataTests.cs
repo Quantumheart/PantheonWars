@@ -24,7 +24,7 @@ public class ReligionDataTests
         Assert.Equal(PrestigeRank.Fledgling, religion.PrestigeRank);
         Assert.Equal(0, religion.Prestige);
         Assert.Equal(0, religion.TotalPrestige);
-        Assert.Empty(religion.UnlockedPerks);
+        Assert.Empty(religion.UnlockedBlessings);
         Assert.True(religion.IsPublic);
         Assert.Empty(religion.Description);
     }
@@ -345,95 +345,95 @@ public class ReligionDataTests
 
     #endregion
 
-    #region Perk Tests
+    #region Blessing Tests
 
     [Fact]
-    public void UnlockPerk_NewPerk_ShouldAddToUnlockedPerks()
+    public void UnlockBlessing_NewBlessing_ShouldAddToUnlockedBlessings()
     {
         // Arrange
         var religion = new ReligionData("uid", "name", DeityType.Khoras, "founder");
-        var perkId = "test-perk-1";
+        var blessingId = "test-blessing-1";
 
         // Act
-        religion.UnlockPerk(perkId);
+        religion.UnlockBlessing(blessingId);
 
         // Assert
-        Assert.Single(religion.UnlockedPerks);
-        Assert.True(religion.UnlockedPerks[perkId]);
+        Assert.Single(religion.UnlockedBlessings);
+        Assert.True(religion.UnlockedBlessings[blessingId]);
     }
 
     [Fact]
-    public void UnlockPerk_MultipleDifferentPerks_ShouldAddAll()
+    public void UnlockBlessing_MultipleDifferentBlessings_ShouldAddAll()
     {
         // Arrange
         var religion = new ReligionData("uid", "name", DeityType.Khoras, "founder");
 
         // Act
-        religion.UnlockPerk("perk-1");
-        religion.UnlockPerk("perk-2");
-        religion.UnlockPerk("perk-3");
+        religion.UnlockBlessing("blessing-1");
+        religion.UnlockBlessing("blessing-2");
+        religion.UnlockBlessing("blessing-3");
 
         // Assert
-        Assert.Equal(3, religion.UnlockedPerks.Count);
-        Assert.True(religion.UnlockedPerks["perk-1"]);
-        Assert.True(religion.UnlockedPerks["perk-2"]);
-        Assert.True(religion.UnlockedPerks["perk-3"]);
+        Assert.Equal(3, religion.UnlockedBlessings.Count);
+        Assert.True(religion.UnlockedBlessings["blessing-1"]);
+        Assert.True(religion.UnlockedBlessings["blessing-2"]);
+        Assert.True(religion.UnlockedBlessings["blessing-3"]);
     }
 
     [Fact]
-    public void UnlockPerk_SamePerkTwice_ShouldRemainUnlocked()
+    public void UnlockBlessing_SameBlessingTwice_ShouldRemainUnlocked()
     {
         // Arrange
         var religion = new ReligionData("uid", "name", DeityType.Khoras, "founder");
-        var perkId = "test-perk";
+        var blessingId = "test-blessing";
 
         // Act
-        religion.UnlockPerk(perkId);
-        religion.UnlockPerk(perkId); // Unlock again
+        religion.UnlockBlessing(blessingId);
+        religion.UnlockBlessing(blessingId); // Unlock again
 
         // Assert
-        Assert.Single(religion.UnlockedPerks);
-        Assert.True(religion.UnlockedPerks[perkId]);
+        Assert.Single(religion.UnlockedBlessings);
+        Assert.True(religion.UnlockedBlessings[blessingId]);
     }
 
     [Fact]
-    public void IsPerkUnlocked_UnlockedPerk_ShouldReturnTrue()
+    public void IsBlessingUnlocked_UnlockedBlessing_ShouldReturnTrue()
     {
         // Arrange
         var religion = new ReligionData("uid", "name", DeityType.Khoras, "founder");
-        var perkId = "test-perk";
-        religion.UnlockPerk(perkId);
+        var blessingId = "test-blessing";
+        religion.UnlockBlessing(blessingId);
 
         // Act
-        var result = religion.IsPerkUnlocked(perkId);
+        var result = religion.IsBlessingUnlocked(blessingId);
 
         // Assert
         Assert.True(result);
     }
 
     [Fact]
-    public void IsPerkUnlocked_LockedPerk_ShouldReturnFalse()
+    public void IsBlessingUnlocked_LockedBlessing_ShouldReturnFalse()
     {
         // Arrange
         var religion = new ReligionData("uid", "name", DeityType.Khoras, "founder");
 
         // Act
-        var result = religion.IsPerkUnlocked("non-existent-perk");
+        var result = religion.IsBlessingUnlocked("non-existent-blessing");
 
         // Assert
         Assert.False(result);
     }
 
     [Fact]
-    public void IsPerkUnlocked_PerkSetToFalse_ShouldReturnFalse()
+    public void IsBlessingUnlocked_BlessingSetToFalse_ShouldReturnFalse()
     {
         // Arrange
         var religion = new ReligionData("uid", "name", DeityType.Khoras, "founder");
-        var perkId = "test-perk";
-        religion.UnlockedPerks[perkId] = false;
+        var blessingId = "test-blessing";
+        religion.UnlockedBlessings[blessingId] = false;
 
         // Act
-        var result = religion.IsPerkUnlocked(perkId);
+        var result = religion.IsBlessingUnlocked(blessingId);
 
         // Assert
         Assert.False(result);
@@ -444,7 +444,7 @@ public class ReligionDataTests
     #region Integration Tests
 
     [Fact]
-    public void CompleteWorkflow_CreateReligionAddMembersAndPerks_ShouldWork()
+    public void CompleteWorkflow_CreateReligionAddMembersAndBlessings_ShouldWork()
     {
         // Arrange
         var founderUID = "founder-123";
@@ -458,17 +458,17 @@ public class ReligionDataTests
         // Act - Gain prestige
         religion.AddPrestige(600); // Should reach Established rank
 
-        // Act - Unlock perks
-        religion.UnlockPerk("perk-1");
-        religion.UnlockPerk("perk-2");
+        // Act - Unlock blessings
+        religion.UnlockBlessing("blessing-1");
+        religion.UnlockBlessing("blessing-2");
 
         // Assert - Verify everything
         Assert.Equal(4, religion.GetMemberCount());
         Assert.Equal(PrestigeRank.Established, religion.PrestigeRank);
-        Assert.Equal(2, religion.UnlockedPerks.Count);
+        Assert.Equal(2, religion.UnlockedBlessings.Count);
         Assert.True(religion.IsFounder(founderUID));
         Assert.True(religion.IsMember("member-1"));
-        Assert.True(religion.IsPerkUnlocked("perk-1"));
+        Assert.True(religion.IsBlessingUnlocked("blessing-1"));
     }
 
     [Fact]
