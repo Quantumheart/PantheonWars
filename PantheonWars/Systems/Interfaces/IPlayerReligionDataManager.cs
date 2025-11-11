@@ -62,4 +62,21 @@ public interface IPlayerReligionDataManager
     ///     Applies switching penalty when changing religions
     /// </summary>
     void HandleReligionSwitch(string playerUID);
+
+    /// <summary>
+    /// Removes favor from the player
+    /// </summary>
+    /// <param name="playerUID"></param>
+    /// <param name="amount"></param>
+    /// <param name="reason"></param>
+    /// <returns></returns>
+    bool RemoveFavor(string playerUID, int amount, string reason = "");
+
+    /// <summary>
+    /// Adds fractional favor to a player (for passive favor generation)
+    /// </summary>
+    /// <param name="playerUID">Player unique identifier</param>
+    /// <param name="amount">Amount of favor to add</param>
+    /// <param name="reason">Reason for adding favor (optional)</param>
+    void AddFractionalFavor(string playerUID, float amount, string reason = "");
 }
