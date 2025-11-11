@@ -13,6 +13,8 @@ namespace PantheonWars.GUI;
 /// </summary>
 public partial class BlessingDialog
 {
+    private const string PANTHEONWARS_SOUNDS_DEITIES = "pantheonwars:sounds/deities/";
+
     /// <summary>
     ///     Periodically check if player religion data is available
     /// </summary>
@@ -455,13 +457,58 @@ public partial class BlessingDialog
         _capi!.Logger.Debug($"[PantheonWars] Blessing unlocked from server: {blessingId}");
 
         // Play unlock success sound
-        _capi.World.PlaySoundAt(new AssetLocation("pantheonwars:sounds/unlock"),
-            _capi.World.Player.Entity, null, false, 16f, 1.0f);
+        if (_manager != null)
+        {
+            switch (_manager.CurrentDeity)
+            {
+                case DeityType.None:
+                    break;
+                case DeityType.Khoras:
+                    _capi.World.PlaySoundAt(
+                        new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Khoras)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Lysa:
+                    _capi.World.PlaySoundAt(new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Lysa)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Morthen:
+                    _capi.World.PlaySoundAt(
+                        new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Morthen)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Aethra:
+                    _capi.World.PlaySoundAt(
+                        new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Aethra)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Umbros:
+                    _capi.World.PlaySoundAt(
+                        new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Umbros)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Tharos:
+                    _capi.World.PlaySoundAt(
+                        new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Tharos)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Gaia:
+                    _capi.World.PlaySoundAt(new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Gaia)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Vex:
+                    _capi.World.PlaySoundAt(new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Vex)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
 
-        // Update manager state
-        _manager?.SetBlessingUnlocked(blessingId, true);
+            // Update manager state
+            _manager?.SetBlessingUnlocked(blessingId, true);
 
-        // Refresh all blessing states to update prerequisites and glow effects
-        _manager?.RefreshAllBlessingStates();
+            // Refresh all blessing states to update prerequisites and glow effects
+            _manager?.RefreshAllBlessingStates();
+        }
     }
 }
