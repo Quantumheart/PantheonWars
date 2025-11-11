@@ -110,26 +110,20 @@ public class BlessingTooltipData
         tooltip.SpecialEffectDescriptions.AddRange(blessing.SpecialEffects);
 
         // Determine unlock block reason
+        // Note: Don't set UnlockBlockReason for prerequisites since they're already displayed in PrerequisiteNames
         if (state is { IsUnlocked: false, CanUnlock: false })
         {
-            if (blessing.PrerequisiteBlessings is { Count: > 0 } && blessingRegistry != null)
+            // Only set unlock block reason if there are no prerequisites (they're shown separately)
+            if (blessing.PrerequisiteBlessings is not { Count: > 0 })
             {
-                // Check which prerequisites are missing
-                foreach (var prereqId in blessing.PrerequisiteBlessings)
-                    if (blessingRegistry.TryGetValue(prereqId, out var prereqBlessing))
-                    {
-                        // This is simplified - in Phase 6 we'll check actual unlock status
-                        tooltip.UnlockBlockReason = $"Requires '{prereqBlessing.Name}'";
-                        break;
-                    }
-            }
-            else if (blessing.Kind == BlessingKind.Player)
-            {
-                tooltip.UnlockBlockReason = $"Requires {tooltip.RequiredFavorRank} rank";
-            }
-            else
-            {
-                tooltip.UnlockBlockReason = $"Requires religion {tooltip.RequiredPrestigeRank} rank";
+                if (blessing.Kind == BlessingKind.Player)
+                {
+                    tooltip.UnlockBlockReason = $"Requires {tooltip.RequiredFavorRank} rank";
+                }
+                else
+                {
+                    tooltip.UnlockBlockReason = $"Requires religion {tooltip.RequiredPrestigeRank} rank";
+                }
             }
         }
 

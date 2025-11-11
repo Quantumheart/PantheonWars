@@ -110,8 +110,8 @@ internal static class BlessingInfoRenderer
             x + padding, currentY, contentWidth, descriptionColorU32, 14f);
         currentY += 40f; // Approximate space for description
 
-        // Requirements section
-        if (!selectedState.IsUnlocked)
+        // Requirements section (check if space available)
+        if (!selectedState.IsUnlocked && currentY < y + height - 60f)
         {
             currentY += 8f;
             var reqTitleColorU32 = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold);
@@ -119,30 +119,60 @@ internal static class BlessingInfoRenderer
                 "Requirements:");
             currentY += 18f;
 
-            // Rank requirement
-            var rankReq = selectedState.Blessing.Kind == BlessingKind.Player
-                ? $"  Favor Rank: {GetRankName(selectedState.Blessing.RequiredFavorRank, true)}"
-                : $"  Prestige Rank: {GetRankName(selectedState.Blessing.RequiredPrestigeRank, false)}";
+            // Check if we have space for requirements
+            if (currentY < y + height - 40f)
+            {
+                // Rank requirement
+                var rankReq = selectedState.Blessing.Kind == BlessingKind.Player
+                    ? $"  Favor Rank: {GetRankName(selectedState.Blessing.RequiredFavorRank, true)}"
+                    : $"  Prestige Rank: {GetRankName(selectedState.Blessing.RequiredPrestigeRank, false)}";
 
-            drawList.AddText(ImGui.GetFont(), 14f, new Vector2(x + padding + 8, currentY), descriptionColorU32,
-                rankReq);
-            currentY += 18f;
+                drawList.AddText(ImGui.GetFont(), 14f, new Vector2(x + padding + 8, currentY), descriptionColorU32,
+                    rankReq);
+                currentY += 18f;
 
-            // Prerequisites
-            if (selectedState.Blessing.PrerequisiteBlessings is { Count: > 0 })
-                foreach (var prereqId in selectedState.Blessing.PrerequisiteBlessings)
+                // Prerequisites
+                if (selectedState.Blessing.PrerequisiteBlessings is { Count: > 0 })
                 {
-                    var prereqState = manager.GetBlessingState(prereqId);
-                    var prereqName = prereqState?.Blessing.Name ?? prereqId;
-                    var prereqText = $"  Unlock: {prereqName}";
+                    foreach (var prereqId in selectedState.Blessing.PrerequisiteBlessings)
+                    {
+                        // Check if we still have space
+                        if (currentY > y + height - 20f) break;
 
-                    var prereqColor = prereqState?.IsUnlocked ?? false ? ColorPalette.Green : ColorPalette.Red;
-                    var prereqColorU32 = ImGui.ColorConvertFloat4ToU32(prereqColor);
+                        var prereqState = manager.GetBlessingState(prereqId);
+                        var prereqName = prereqState?.Blessing.Name ?? prereqId;
+                        var prereqText = $"  Unlock: {prereqName}";
 
-                    drawList.AddText(ImGui.GetFont(), 14f, new Vector2(x + padding + 8, currentY),
-                        prereqColorU32, prereqText);
-                    currentY += 18f;
+                        // Truncate text if it's too long to fit within the panel
+                        var maxTextWidth = contentWidth - 8f; // Account for the indentation
+                        var textSize = ImGui.CalcTextSize(prereqText);
+                        if (textSize.X > maxTextWidth)
+                        {
+                            // Truncate and add ellipsis
+                            var targetLength = prereqName.Length;
+                            while (targetLength > 0)
+                            {
+                                var truncatedName = prereqName.Substring(0, targetLength) + "...";
+                                var truncatedText = $"  Unlock: {truncatedName}";
+                                var truncatedSize = ImGui.CalcTextSize(truncatedText);
+                                if (truncatedSize.X <= maxTextWidth)
+                                {
+                                    prereqText = truncatedText;
+                                    break;
+                                }
+                                targetLength--;
+                            }
+                        }
+
+                        var prereqColor = prereqState?.IsUnlocked ?? false ? ColorPalette.Green : ColorPalette.Red;
+                        var prereqColorU32 = ImGui.ColorConvertFloat4ToU32(prereqColor);
+
+                        drawList.AddText(ImGui.GetFont(), 14f, new Vector2(x + padding + 8, currentY),
+                            prereqColorU32, prereqText);
+                        currentY += 18f;
+                    }
                 }
+            }
         }
 
         // Stats section (if space available)
