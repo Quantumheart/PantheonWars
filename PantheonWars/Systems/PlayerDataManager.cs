@@ -112,6 +112,19 @@ public class PlayerDataManager : IPlayerDataManager
     }
 
     /// <summary>
+    ///     Adds fractional favor to a player (for passive favor generation)
+    /// </summary>
+    public void AddFractionalFavor(string playerUID, float amount, string reason = "")
+    {
+        var data = GetOrCreatePlayerData(playerUID);
+        data.AddFractionalFavor(amount);
+
+        // Only log when favor is actually awarded (when accumulated >= 1)
+        if (data.AccumulatedFractionalFavor < amount && !string.IsNullOrEmpty(reason))
+            _sapi.Logger.Debug($"[PantheonWars] Player {playerUID} gained favor: {reason}");
+    }
+
+    /// <summary>
     ///     Removes favor from a player
     /// </summary>
     public bool RemoveFavor(string playerUID, int amount, string reason = "")

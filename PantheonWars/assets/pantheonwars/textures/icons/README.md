@@ -37,9 +37,9 @@ icons/
 
 For detailed information about icon generation, see:
 
-- **`/docs/icon_specifications.md`** - Detailed visual descriptions for each icon
-- **`/docs/icon_manifest.json`** - JSON manifest for tracking generation progress
-- **`/docs/icon_generation_guide.md`** - Practical guide for generating icons
+- **`/docs/topics/art-assets/icon_specifications.md`** - Detailed visual descriptions for each icon
+- **`/docs/topics/art-assets/icon_manifest.json`** - JSON manifest for tracking generation progress
+- **`/docs/topics/art-assets/icon_generation_guide.md`** - Practical guide for generating icons
 
 ## Usage in Code
 
@@ -59,4 +59,4 @@ Total icons needed: **88**
 - Deity symbols: 8
 - Perk icons: 80 (10 per deity × 8 deities)
 
-Check `/docs/icon_manifest.json` for current generation progress.
+Check `/docs/topics/art-assets/icon_manifest.json` for current generation progress.
