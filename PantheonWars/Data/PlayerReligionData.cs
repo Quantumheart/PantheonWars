@@ -82,6 +82,18 @@ public class PlayerReligionData
     public int DataVersion { get; set; } = 2; // Phase 3 format
 
     /// <summary>
+    ///     Accumulated fractional favor (not yet awarded) for passive generation
+    /// </summary>
+    [ProtoMember(10)]
+    public float AccumulatedFractionalFavor { get; set; } = 0f;
+
+    /// <summary>
+    ///     Number of players killed in PvP
+    /// </summary>
+    [ProtoMember(11)]
+    public int KillCount { get; set; } = 0;
+
+    /// <summary>
     ///     Checks if player has a religion
     /// </summary>
     public bool HasReligion()
@@ -114,6 +126,28 @@ public class PlayerReligionData
             Favor += amount;
             TotalFavorEarned += amount;
             UpdateFavorRank();
+        }
+    }
+
+    /// <summary>
+    ///     Adds fractional favor and updates statistics when accumulated amount >= 1
+    /// </summary>
+    public void AddFractionalFavor(float amount)
+    {
+        if (amount > 0)
+        {
+            AccumulatedFractionalFavor += amount;
+
+            // Award integer favor when we have accumulated >= 1.0
+            if (AccumulatedFractionalFavor >= 1.0f)
+            {
+                int favorToAward = (int)AccumulatedFractionalFavor;
+                AccumulatedFractionalFavor -= favorToAward; // Keep the fractional remainder
+
+                Favor += favorToAward;
+                TotalFavorEarned += favorToAward;
+                UpdateFavorRank();
+            }
         }
     }
 

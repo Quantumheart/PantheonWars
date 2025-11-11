@@ -147,12 +147,11 @@ public class FavorCommands
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
         if (errorResult.HasValue) return errorResult.Value;
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
         var deity = _deityRegistry.GetDeity(religionData!.ActiveDeity);
         var deityName = deity?.Name ?? religionData.ActiveDeity.ToString();
 
         return TextCommandResult.Success(
-            $"You have {playerData.DivineFavor} favor with {deityName} (Rank: {playerData.DevotionRank})"
+            $"You have {religionData.Favor} favor with {deityName} (Rank: {religionData.FavorRank})"
         );
     }
 
@@ -167,19 +166,18 @@ public class FavorCommands
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
         if (errorResult.HasValue) return errorResult.Value;
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
         var deity = _deityRegistry.GetDeity(religionData!.ActiveDeity);
         var deityName = deity?.Name ?? religionData.ActiveDeity.ToString();
 
         // Get current rank based on total favor
-        var currentRank = GetCurrentFavorRank(playerData.TotalFavorEarned);
+        var currentRank = GetCurrentFavorRank(religionData.TotalFavorEarned);
         var currentRankName = RankRequirements.GetFavorRankName(currentRank);
 
         var sb = new StringBuilder();
         sb.AppendLine("=== Divine Favor ===");
         sb.AppendLine($"Deity: {deityName}");
-        sb.AppendLine($"Current Favor: {playerData.DivineFavor:N0}");
-        sb.AppendLine($"Total Favor Earned: {playerData.TotalFavorEarned:N0}");
+        sb.AppendLine($"Current Favor: {religionData.Favor:N0}");
+        sb.AppendLine($"Total Favor Earned: {religionData.TotalFavorEarned:N0}");
         sb.AppendLine($"Current Rank: {currentRankName}");
 
         // Calculate next rank
@@ -191,8 +189,8 @@ public class FavorCommands
 
             sb.AppendLine($"Next Rank: {nextRankName} ({nextThreshold:N0} total favor required)");
 
-            var remaining = nextThreshold - playerData.TotalFavorEarned;
-            var progress = (float)playerData.TotalFavorEarned / nextThreshold * 100f;
+            var remaining = nextThreshold - religionData.TotalFavorEarned;
+            var progress = (float)religionData.TotalFavorEarned / nextThreshold * 100f;
             sb.AppendLine($"Progress: {progress:F1}% ({remaining:N0} favor needed)");
         }
         else
@@ -214,27 +212,26 @@ public class FavorCommands
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
         if (errorResult.HasValue) return errorResult.Value;
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
         var deity = _deityRegistry.GetDeity(religionData!.ActiveDeity);
         var deityName = deity?.Name ?? religionData.ActiveDeity.ToString();
 
         // Get current rank based on total favor
-        var currentRank = GetCurrentFavorRank(playerData.TotalFavorEarned);
+        var currentRank = GetCurrentFavorRank(religionData.TotalFavorEarned);
         var currentRankName = RankRequirements.GetFavorRankName(currentRank);
 
         var sb = new StringBuilder();
         sb.AppendLine("=== Divine Statistics ===");
         sb.AppendLine($"Deity: {deityName}");
-        sb.AppendLine($"Current Favor: {playerData.DivineFavor:N0}");
-        sb.AppendLine($"Total Favor Earned: {playerData.TotalFavorEarned:N0}");
+        sb.AppendLine($"Current Favor: {religionData.Favor:N0}");
+        sb.AppendLine($"Total Favor Earned: {religionData.TotalFavorEarned:N0}");
         sb.AppendLine($"Devotion Rank: {currentRankName}");
-        sb.AppendLine($"Kill Count: {playerData.KillCount}");
+        sb.AppendLine($"Kill Count: {religionData.KillCount}");
 
-        if (playerData.PledgeDate != DateTime.MinValue)
+        if (religionData.LastReligionSwitch.HasValue)
         {
-            var daysServed = (DateTime.UtcNow - playerData.PledgeDate).Days;
+            var daysServed = (DateTime.UtcNow - religionData.LastReligionSwitch.Value).Days;
             sb.AppendLine($"Days Served: {daysServed}");
-            sb.AppendLine($"Pledge Date: {playerData.PledgeDate:yyyy-MM-dd}");
+            sb.AppendLine($"Join Date: {religionData.LastReligionSwitch.Value:yyyy-MM-dd}");
         }
 
         // Calculate next rank
@@ -243,7 +240,7 @@ public class FavorCommands
             var nextRank = currentRank + 1;
             var nextRankName = RankRequirements.GetFavorRankName(nextRank);
             var nextThreshold = RankRequirements.GetRequiredFavorForNextRank(currentRank);
-            var remaining = nextThreshold - playerData.TotalFavorEarned;
+            var remaining = nextThreshold - religionData.TotalFavorEarned;
 
             sb.AppendLine();
             sb.AppendLine($"Next Rank: {nextRankName}");
@@ -291,8 +288,6 @@ public class FavorCommands
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
         if (errorResult.HasValue) return errorResult.Value;
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
-
         var amount = (int)args[0];
 
         // Validate amount
@@ -300,7 +295,7 @@ public class FavorCommands
 
         if (amount > 999999) return TextCommandResult.Error("Favor amount cannot exceed 999,999.");
 
-        playerData.DivineFavor = amount;
+        religionData.Favor = amount;
 
         return TextCommandResult.Success($"Favor set to {amount:N0}");
     }
@@ -316,8 +311,6 @@ public class FavorCommands
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
         if (errorResult.HasValue) return errorResult.Value;
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
-
         var amount = (int)args[0];
 
         // Validate amount
@@ -325,10 +318,10 @@ public class FavorCommands
 
         if (amount > 999999) return TextCommandResult.Error("Amount cannot exceed 999,999.");
 
-        var oldFavor = playerData.DivineFavor;
-        playerData.DivineFavor += amount;
+        var oldFavor = religionData.Favor;
+        religionData.Favor += amount;
 
-        return TextCommandResult.Success($"Added {amount:N0} favor ({oldFavor:N0} → {playerData.DivineFavor:N0})");
+        return TextCommandResult.Success($"Added {amount:N0} favor ({oldFavor:N0} → {religionData.Favor:N0})");
     }
 
     /// <summary>
@@ -342,8 +335,6 @@ public class FavorCommands
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
         if (errorResult.HasValue) return errorResult.Value;
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
-
         var amount = (int)args[0];
 
         // Validate amount
@@ -351,12 +342,12 @@ public class FavorCommands
 
         if (amount > 999999) return TextCommandResult.Error("Amount cannot exceed 999,999.");
 
-        var oldFavor = playerData.DivineFavor;
-        playerData.DivineFavor = Math.Max(0, playerData.DivineFavor - amount);
-        var actualRemoved = oldFavor - playerData.DivineFavor;
+        var oldFavor = religionData.Favor;
+        religionData.Favor = Math.Max(0, religionData.Favor - amount);
+        var actualRemoved = oldFavor - religionData.Favor;
 
         return TextCommandResult.Success(
-            $"Removed {actualRemoved:N0} favor ({oldFavor:N0} → {playerData.DivineFavor:N0})");
+            $"Removed {actualRemoved:N0} favor ({oldFavor:N0} → {religionData.Favor:N0})");
     }
 
     /// <summary>
@@ -370,10 +361,8 @@ public class FavorCommands
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
         if (errorResult.HasValue) return errorResult.Value;
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
-
-        var oldFavor = playerData.DivineFavor;
-        playerData.DivineFavor = 0;
+        var oldFavor = religionData.Favor;
+        religionData.Favor = 0;
 
         return TextCommandResult.Success($"Favor reset to 0 (was {oldFavor:N0})");
     }
@@ -389,10 +378,8 @@ public class FavorCommands
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
         if (errorResult.HasValue) return errorResult.Value;
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
-
-        var oldFavor = playerData.DivineFavor;
-        playerData.DivineFavor = 99999;
+        var oldFavor = religionData.Favor;
+        religionData.Favor = 99999;
 
         return TextCommandResult.Success($"Favor set to maximum: 99,999 (was {oldFavor:N0})");
     }
@@ -408,8 +395,6 @@ public class FavorCommands
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
         if (errorResult.HasValue) return errorResult.Value;
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
-
         var amount = (int)args[0];
 
         // Validate amount
@@ -417,13 +402,13 @@ public class FavorCommands
 
         if (amount > 999999) return TextCommandResult.Error("Total favor earned cannot exceed 999,999.");
 
-        var oldTotal = playerData.TotalFavorEarned;
-        var oldRank = playerData.DevotionRank;
+        var oldTotal = religionData.TotalFavorEarned;
+        var oldRank = religionData.FavorRank;
 
-        playerData.TotalFavorEarned = amount;
-        playerData.UpdateDevotionRank();
+        religionData.TotalFavorEarned = amount;
+        religionData.UpdateFavorRank();
 
-        var newRank = playerData.DevotionRank;
+        var newRank = religionData.FavorRank;
 
         var sb = new StringBuilder();
         sb.AppendLine($"Total favor earned set to {amount:N0} (was {oldTotal:N0})");

@@ -150,7 +150,6 @@ public class DeityCommands
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
         var religionData = _religionDataManager.GetOrCreatePlayerData(player.PlayerUID);
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
 
         if (religionData.ActiveDeity == Models.Enum.DeityType.None)
             return TextCommandResult.Success(
@@ -162,14 +161,14 @@ public class DeityCommands
         var sb = new StringBuilder();
         sb.AppendLine("=== Your Divine Status ===");
         sb.AppendLine($"Deity: {deityName}");
-        sb.AppendLine($"Divine Favor: {playerData.DivineFavor}");
-        sb.AppendLine($"Devotion Rank: {playerData.DevotionRank}");
-        sb.AppendLine($"Kills: {playerData.KillCount}");
-        sb.AppendLine($"Total Favor Earned: {playerData.TotalFavorEarned}");
+        sb.AppendLine($"Divine Favor: {religionData.Favor}");
+        sb.AppendLine($"Favor Rank: {religionData.FavorRank}");
+        sb.AppendLine($"Kills: {religionData.KillCount}");
+        sb.AppendLine($"Total Favor Earned: {religionData.TotalFavorEarned}");
 
-        if (playerData.PledgeDate != DateTime.MinValue)
+        if (religionData.LastReligionSwitch.HasValue)
         {
-            var daysServed = (DateTime.UtcNow - playerData.PledgeDate).Days;
+            var daysServed = (DateTime.UtcNow - religionData.LastReligionSwitch.Value).Days;
             sb.AppendLine($"Days Served: {daysServed}");
         }
 
@@ -182,7 +181,6 @@ public class DeityCommands
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
         var religionData = _religionDataManager.GetOrCreatePlayerData(player.PlayerUID);
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
 
         if (religionData.ActiveDeity == Models.Enum.DeityType.None) return TextCommandResult.Success("You are not in a religion or do not have an active deity.");
 
@@ -190,7 +188,7 @@ public class DeityCommands
         var deityName = deity?.Name ?? religionData.ActiveDeity.ToString();
 
         return TextCommandResult.Success(
-            $"You have {playerData.DivineFavor} favor with {deityName} (Rank: {playerData.DevotionRank})"
+            $"You have {religionData.Favor} favor with {deityName} (Rank: {religionData.FavorRank})"
         );
     }
 }

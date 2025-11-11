@@ -82,6 +82,38 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
     }
 
     /// <summary>
+    ///     Adds fractional favor to a player (for passive favor generation)
+    /// </summary>
+    public void AddFractionalFavor(string playerUID, float amount, string reason = "")
+    {
+        var data = GetOrCreatePlayerData(playerUID);
+        var oldRank = data.FavorRank;
+
+        data.AddFractionalFavor(amount);
+
+        // Only log when favor is actually awarded (when accumulated >= 1)
+        if (data.AccumulatedFractionalFavor < amount && !string.IsNullOrEmpty(reason))
+            _sapi.Logger.Debug($"[PantheonWars] Player {playerUID} gained favor: {reason}");
+
+        // Check for rank up
+        if (data.FavorRank > oldRank) SendRankUpNotification(playerUID, data.FavorRank);
+    }
+
+    /// <summary>
+    ///     Removes favor from a player
+    /// </summary>
+    public bool RemoveFavor(string playerUID, int amount, string reason = "")
+    {
+        var data = GetOrCreatePlayerData(playerUID);
+        var success = data.RemoveFavor(amount);
+
+        if (success && !string.IsNullOrEmpty(reason))
+            _sapi.Logger.Debug($"[PantheonWars] Player {playerUID} spent {amount} favor: {reason}");
+
+        return success;
+    }
+
+    /// <summary>
     ///     Updates favor rank for a player
     /// </summary>
     public void UpdateFavorRank(string playerUID)
