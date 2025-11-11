@@ -462,6 +462,9 @@ public partial class BlessingDialog
             switch (_manager.CurrentDeity)
             {
                 case DeityType.None:
+                    _capi.World.PlaySoundAt(
+                        new AssetLocation($"pantheonwars:sounds/unlock"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
                     break;
                 case DeityType.Khoras:
                     _capi.World.PlaySoundAt(
