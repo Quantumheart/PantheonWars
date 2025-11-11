@@ -30,6 +30,7 @@ public class BlessingDialogManager
     public int CurrentPrestigeRank { get; set; } = 0;
     public int CurrentFavor { get; set; } = 0;
     public int CurrentPrestige { get; set; } = 0;
+    public int TotalFavorEarned { get; set; } = 0;
 
     // Blessing selection state
     public string? SelectedBlessingId { get; set; }
@@ -234,7 +235,7 @@ public class BlessingDialogManager
     {
         return new PlayerFavorProgress
         {
-            CurrentFavor = CurrentFavor,
+            CurrentFavor = TotalFavorEarned,
             RequiredFavor = RankRequirements.GetRequiredFavorForNextRank(CurrentFavorRank),
             CurrentRank = CurrentFavorRank,
             NextRank = CurrentFavorRank + 1,

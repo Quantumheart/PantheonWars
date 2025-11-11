@@ -64,6 +64,11 @@ public partial class BlessingDialog
         _manager!.Initialize(packet.ReligionUID, deityType, packet.ReligionName, packet.FavorRank,
             packet.PrestigeRank);
 
+        // Set current favor and prestige values for progress bars
+        _manager.CurrentFavor = packet.CurrentFavor;
+        _manager.CurrentPrestige = packet.CurrentPrestige;
+        _manager.TotalFavorEarned = packet.TotalFavorEarned;
+
         // Convert packet blessings to Blessing objects
         var playerBlessings = packet.PlayerBlessings.Select(p => new Blessing(p.BlessingId, p.Name, deityType)
         {
