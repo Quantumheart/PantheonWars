@@ -1192,3 +1192,506 @@ Apply the same renderer pattern architecture to create a polished religion manag
 - Implement minimap/zoom for large trees
 
 **Current status: v1.0 MINIMUM VIABLE COMPLETE - ready to ship with placeholders!**
+
+---
+
+## Phase 9: Favor & Prestige Progress Indicators (NEW)
+
+**Date Added:** November 11, 2025
+**Priority:** High (missing core progression feedback)
+**Estimated Time:** 3-4 hours
+
+### 🎯 Overview
+
+Currently, the Blessing Dialog lacks visual feedback for:
+1. **Player Favor Progress** - How close the player is to the next Favor Rank
+2. **Religion Prestige Progress** - How close the religion is to the next Prestige Rank
+
+These are critical UX elements that help players understand:
+- How much favor/prestige they need to unlock the next tier of blessings
+- Their current progression toward rank-up goals
+- Whether they should focus on earning more favor/prestige
+
+### 📍 Proposed Location
+
+**Integration with Religion Header (Top Banner):**
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│  [Deity Icon]  Religion Name - Deity Name                    │
+│                                                                │
+│  Player Progress:    ████████░░  Zealot (234/500 Favor)      │
+│  Religion Progress:  ██████░░░░  Renowned (1,245/2,000 Prestige) │
+└──────────────────────────────────────────────────────────────┘
+```
+
+**Alternative: Separate Progress Panel**
+- Position below Religion Header
+- More space for detailed breakdown
+- Can include "Next Unlock" preview
+
+### 🎨 Visual Design
+
+#### Progress Bar Specifications
+
+**Player Favor Bar:**
+- **Color:** Gold (#feae34) with darker gold background (#92806a)
+- **Width:** 200-300px
+- **Height:** 20px
+- **Style:** Rounded corners (4px), subtle inner shadow
+- **Animation:** Smooth fill on rank-up (lerp over 0.5 seconds)
+
+**Religion Prestige Bar:**
+- **Color:** Purple/Blue (#7b68ee) with darker background (#4b3a8e)
+- **Width:** 200-300px
+- **Height:** 20px
+- **Style:** Rounded corners (4px), subtle inner shadow
+- **Animation:** Smooth fill when prestige increases
+
+**Text Label Format:**
+```
+Rank Name (Current/Required)
+Examples:
+- "Zealot (234/500 Favor)"
+- "Renowned (1,245/2,000 Prestige)"
+```
+
+#### Visual States
+
+**1. Normal State:**
+- Standard progress bar with fill percentage
+- Current rank name displayed
+- Numeric progress shown
+
+**2. Near Rank-Up (>80% progress):**
+- Progress bar glows with pulsing animation
+- Color intensifies (brighter gold/purple)
+- Optional: "Almost there!" tooltip on hover
+
+**3. Rank-Up Animation:**
+- Fill completes (100%)
+- Brief flash/shimmer effect
+- Number transitions to new rank values
+- Audio: "rank_up.ogg" sound effect
+
+**4. Max Rank:**
+- Progress bar shows "MAX" or full gold fill
+- Different color scheme (platinum/rainbow gradient)
+- No numeric values (already at maximum)
+
+### 📐 Implementation Details
+
+#### Phase 9.1: Data Integration (1 hour)
+
+**Tasks:**
+1. **Query Current Progress from Backend**
+   ```csharp
+   // In BlessingDialogManager.cs
+   public PlayerFavorProgress GetPlayerFavorProgress()
+   {
+       var playerData = _religionDataManager.GetPlayerReligionData(_playerUID);
+       return new PlayerFavorProgress
+       {
+           CurrentFavor = playerData.DivineFavor,
+           RequiredFavor = GetRequiredFavorForNextRank(playerData.FavorRank),
+           CurrentRank = playerData.FavorRank,
+           NextRank = playerData.FavorRank + 1,
+           IsMaxRank = playerData.FavorRank >= 4
+       };
+   }
+
+   public ReligionPrestigeProgress GetReligionPrestigeProgress()
+   {
+       var religionData = _religionDataManager.GetReligionData(_currentReligionUID);
+       return new ReligionPrestigeProgress
+       {
+           CurrentPrestige = religionData.Prestige,
+           RequiredPrestige = GetRequiredPrestigeForNextRank(religionData.PrestigeRank),
+           CurrentRank = religionData.PrestigeRank,
+           NextRank = religionData.PrestigeRank + 1,
+           IsMaxRank = religionData.PrestigeRank >= 4
+       };
+   }
+   ```
+
+2. **Create Progress Data Models**
+   ```csharp
+   // Models/PlayerFavorProgress.cs
+   public class PlayerFavorProgress
+   {
+       public int CurrentFavor { get; set; }
+       public int RequiredFavor { get; set; }
+       public int CurrentRank { get; set; }
+       public int NextRank { get; set; }
+       public bool IsMaxRank { get; set; }
+       public float ProgressPercentage => IsMaxRank ? 1f : (float)CurrentFavor / RequiredFavor;
+   }
+
+   // Models/ReligionPrestigeProgress.cs
+   public class ReligionPrestigeProgress
+   {
+       public int CurrentPrestige { get; set; }
+       public int RequiredPrestige { get; set; }
+       public int CurrentRank { get; set; }
+       public int NextRank { get; set; }
+       public bool IsMaxRank { get; set; }
+       public float ProgressPercentage => IsMaxRank ? 1f : (float)CurrentPrestige / RequiredPrestige;
+   }
+   ```
+
+3. **Add Rank Requirement Lookup**
+   ```csharp
+   // In FavorSystem.cs or new helper class
+   public static int GetRequiredFavorForNextRank(int currentRank)
+   {
+       return currentRank switch
+       {
+           0 => 100,  // Initiate → Devoted
+           1 => 250,  // Devoted → Zealot
+           2 => 500,  // Zealot → Champion
+           3 => 1000, // Champion → Exalted
+           4 => 0,    // Max rank
+           _ => 0
+       };
+   }
+
+   public static int GetRequiredPrestigeForNextRank(int currentRank)
+   {
+       return currentRank switch
+       {
+           0 => 500,   // Fledgling → Established
+           1 => 1500,  // Established → Renowned
+           2 => 3500,  // Renowned → Legendary
+           3 => 7500,  // Legendary → Mythic
+           4 => 0,     // Max rank
+           _ => 0
+       };
+   }
+   ```
+
+**Files Created:**
+- `PantheonWars/Models/PlayerFavorProgress.cs`
+- `PantheonWars/Models/ReligionPrestigeProgress.cs`
+
+**Files Modified:**
+- `PantheonWars/GUI/BlessingDialogManager.cs` (add progress queries)
+- `PantheonWars/Systems/FavorSystem.cs` (add rank requirement helpers)
+
+#### Phase 9.2: Progress Bar Renderer (1-1.5 hours)
+
+**Tasks:**
+1. **Create ProgressBarRenderer.cs**
+   ```csharp
+   // UI/Renderers/Components/ProgressBarRenderer.cs
+   internal static class ProgressBarRenderer
+   {
+       public static void DrawProgressBar(
+           ImDrawListPtr drawList,
+           float x, float y, float width, float height,
+           float percentage,
+           Vector4 fillColor,
+           Vector4 backgroundColor,
+           string labelText,
+           bool showGlow = false)
+       {
+           // Background
+           var bgMin = new Vector2(x, y);
+           var bgMax = new Vector2(x + width, y + height);
+           var bgColorU32 = ImGui.ColorConvertFloat4ToU32(backgroundColor);
+           drawList.AddRectFilled(bgMin, bgMax, bgColorU32, 4f);
+
+           // Fill (progress)
+           if (percentage > 0)
+           {
+               var fillWidth = width * Math.Clamp(percentage, 0f, 1f);
+               var fillMax = new Vector2(x + fillWidth, y + height);
+               var fillColorU32 = ImGui.ColorConvertFloat4ToU32(fillColor);
+               drawList.AddRectFilled(bgMin, fillMax, fillColorU32, 4f);
+
+               // Glow effect (if >80% progress)
+               if (showGlow && percentage > 0.8f)
+               {
+                   var glowAlpha = (float)(Math.Sin(ImGui.GetTime() * 3.0) * 0.3 + 0.7);
+                   var glowColor = new Vector4(fillColor.X, fillColor.Y, fillColor.Z, glowAlpha);
+                   var glowColorU32 = ImGui.ColorConvertFloat4ToU32(glowColor);
+                   drawList.AddRect(bgMin, fillMax, glowColorU32, 4f, ImDrawFlags.None, 2f);
+               }
+           }
+
+           // Border
+           var borderColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Gold * 0.5f);
+           drawList.AddRect(bgMin, bgMax, borderColor, 4f, ImDrawFlags.None, 1f);
+
+           // Label text (centered)
+           var textSize = ImGui.CalcTextSize(labelText);
+           var textPos = new Vector2(
+               x + (width - textSize.X) / 2,
+               y + (height - textSize.Y) / 2
+           );
+           var textColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.White);
+           drawList.AddText(textPos, textColor, labelText);
+       }
+   }
+   ```
+
+2. **Add Animation Support**
+   - Track previous percentage value
+   - Lerp from old to new over time
+   - Smooth transitions on favor/prestige gain
+
+**Files Created:**
+- `PantheonWars/GUI/UI/Renderers/Components/ProgressBarRenderer.cs`
+
+#### Phase 9.3: Integrate with Religion Header (1 hour)
+
+**Tasks:**
+1. **Update ReligionHeaderRenderer.cs**
+   ```csharp
+   // Add after deity icon and name display
+   public static float Draw(...)
+   {
+       // ... existing deity icon and name rendering ...
+
+       var currentY = y + 60f; // After deity section
+
+       // Player Favor Progress
+       var favorProgress = manager.GetPlayerFavorProgress();
+       var favorLabel = favorProgress.IsMaxRank
+           ? $"{GetRankName(favorProgress.CurrentRank)} (MAX)"
+           : $"{GetRankName(favorProgress.CurrentRank)} ({favorProgress.CurrentFavor}/{favorProgress.RequiredFavor} Favor)";
+
+       // Label
+       var labelPos = new Vector2(x + padding, currentY);
+       var labelColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.White);
+       drawList.AddText(ImGui.GetFont(), 14f, labelPos, labelColor, "Player Progress:");
+       currentY += 18f;
+
+       // Progress bar
+       ProgressBarRenderer.DrawProgressBar(
+           drawList,
+           x + padding + 120f, currentY - 18f, 300f, 20f,
+           favorProgress.ProgressPercentage,
+           ColorPalette.Gold,
+           ColorPalette.DarkBrown,
+           favorLabel,
+           showGlow: favorProgress.ProgressPercentage > 0.8f
+       );
+
+       currentY += 8f;
+
+       // Religion Prestige Progress
+       var prestigeProgress = manager.GetReligionPrestigeProgress();
+       var prestigeLabel = prestigeProgress.IsMaxRank
+           ? $"{GetRankName(prestigeProgress.CurrentRank)} (MAX)"
+           : $"{GetRankName(prestigeProgress.CurrentRank)} ({prestigeProgress.CurrentPrestige}/{prestigeProgress.RequiredPrestige} Prestige)";
+
+       // Label
+       labelPos = new Vector2(x + padding, currentY);
+       drawList.AddText(ImGui.GetFont(), 14f, labelPos, labelColor, "Religion Progress:");
+       currentY += 18f;
+
+       // Progress bar
+       ProgressBarRenderer.DrawProgressBar(
+           drawList,
+           x + padding + 120f, currentY - 18f, 300f, 20f,
+           prestigeProgress.ProgressPercentage,
+           new Vector4(0.48f, 0.41f, 0.93f, 1f), // Purple
+           ColorPalette.DarkBrown,
+           prestigeLabel,
+           showGlow: prestigeProgress.ProgressPercentage > 0.8f
+       );
+
+       currentY += 12f;
+
+       return currentY - y; // Total height used
+   }
+   ```
+
+2. **Adjust Layout Heights**
+   - Update `BlessingUIRenderer.cs` to account for taller header
+   - Ensure progress bars don't overlap with blessing tree
+   - Test at different window sizes
+
+**Files Modified:**
+- `PantheonWars/GUI/UI/Renderers/ReligionHeaderRenderer.cs`
+- `PantheonWars/GUI/UI/BlessingUIRenderer.cs` (layout adjustments)
+
+#### Phase 9.4: Tooltips & Polish (0.5-1 hour)
+
+**Tasks:**
+1. **Add Hover Tooltips**
+   ```csharp
+   // Show detailed breakdown on hover
+   if (mouseOver(progressBarX, progressBarY, progressBarX + width, progressBarY + height))
+   {
+       var tooltipLines = new List<string>
+       {
+           $"Current Rank: {GetRankName(currentRank)}",
+           $"Progress: {current}/{required}",
+           $"Next Rank: {GetRankName(nextRank)}",
+           "",
+           $"Next Blessing Tier unlocks at {GetRankName(nextRank)}"
+       };
+
+       TooltipRenderer.Draw(api, tooltipLines, mouseX, mouseY);
+   }
+   ```
+
+2. **Add "Next Unlock" Preview**
+   - Show next tier blessing count
+   - Example: "2 blessings unlock at Champion rank"
+   - Display in tooltip
+
+3. **Audio Feedback**
+   - Play sound on rank-up: `rank_up.ogg` or `unlock.ogg`
+   - Subtle tick sound on hover over progress bars
+
+4. **Rank-Up Notification**
+   - When player/religion ranks up, show brief notification overlay
+   - "Congratulations! You reached Zealot rank!"
+   - Option: Flash the progress bar with animation
+
+**Files Modified:**
+- `PantheonWars/GUI/UI/Renderers/ReligionHeaderRenderer.cs` (tooltips)
+- `PantheonWars/GUI/UI/Renderers/TooltipRenderer.cs` (if needed)
+
+### 🎨 Visual Examples
+
+#### Normal State
+```
+Player Progress:    ████████░░  Zealot (234/500 Favor)
+                    [=========>-----] 47%
+```
+
+#### Near Rank-Up (Glowing)
+```
+Player Progress:    ████████▓▓  Zealot (487/500 Favor)  ✨
+                    [===============>] 97% (13 Favor to go!)
+```
+
+#### Max Rank
+```
+Player Progress:    ██████████  Exalted (MAX)
+                    [================] 100% 👑
+```
+
+### 🧪 Testing Checklist
+
+**Phase 9 Testing:**
+- [ ] Progress bars display correctly for all ranks (0-4)
+- [ ] Percentages calculate accurately
+- [ ] Max rank displays "MAX" without errors
+- [ ] Glow animation triggers at >80% progress
+- [ ] Tooltips show detailed breakdown
+- [ ] Rank-up animation plays smoothly
+- [ ] Audio feedback on rank-up works
+- [ ] Layout adapts to different window sizes
+- [ ] Progress bars update in real-time when favor/prestige changes
+- [ ] No performance issues with animations
+
+### 📦 Assets Needed
+
+**Optional Custom Textures:**
+- `progress_bar_bg.png` (8x20) - 9-patch background
+- `progress_bar_fill_gold.png` (8x20) - Gold fill gradient
+- `progress_bar_fill_purple.png` (8x20) - Purple fill gradient
+- `progress_bar_glow.png` (16x24) - Glow overlay effect
+
+**Sound Effects:**
+- `rank_up.ogg` - Played on player rank-up (triumphant tone)
+- Reuse existing `tick.ogg` for progress bar hover
+
+**Placeholder Approach:**
+- Use ImGui `AddRectFilled()` for backgrounds/fills
+- Use solid colors with alpha for glow effects
+- Ship with placeholders, add polished textures in v1.1
+
+### 🎯 Success Criteria
+
+**Minimum Viable:**
+- ✅ Player Favor progress bar displays current progress
+- ✅ Religion Prestige progress bar displays current progress
+- ✅ Both bars show rank name and numeric values
+- ✅ Progress updates when favor/prestige changes
+- ✅ Max rank displays correctly
+
+**Polished:**
+- ✅ Smooth fill animations on progress changes
+- ✅ Glow effect when near rank-up (>80%)
+- ✅ Tooltips show detailed breakdown
+- ✅ Audio feedback on rank-up
+- ✅ "Next Unlock" preview in tooltips
+- ✅ Rank-up notification overlay
+
+### ⏱️ Timeline Estimate
+
+**Total: 3-4 hours**
+- Phase 9.1: Data Integration (1 hour)
+- Phase 9.2: Progress Bar Renderer (1-1.5 hours)
+- Phase 9.3: Integration with Header (1 hour)
+- Phase 9.4: Tooltips & Polish (0.5-1 hour)
+
+**Fast Track:** 2.5 hours (skip advanced animations and notifications)
+
+### 🔗 Dependencies
+
+**Requires:**
+- `PlayerReligionDataManager` access to favor/prestige data
+- `FavorSystem` for rank requirement calculations
+- `ReligionHeaderRenderer` integration point
+
+**Optional:**
+- Custom texture assets (can use placeholders)
+- Rank-up sound effect (can reuse `unlock.ogg`)
+
+### 📊 Priority Justification
+
+**Why High Priority:**
+1. **Core Feedback Loop** - Players need to see progression toward goals
+2. **Motivation** - Visual progress encourages continued play
+3. **Clarity** - Removes confusion about "how much favor do I need?"
+4. **Standard UX** - Most progression systems show progress bars
+5. **Quick Wins** - Relatively simple to implement for high impact
+
+**Comparison to Other Features:**
+- Higher priority than "Compare Deities" (nice-to-have)
+- Higher priority than asset polish (functional > aesthetic)
+- Equal priority to Phase 7 testing (both needed for v1.0)
+
+**Recommendation:** Implement Phase 9 before v1.0 final release. This is a core UX feature, not optional polish.
+
+---
+
+## Updated Implementation Checklist
+
+### Phase 9: Progress Indicators (NEW) 🆕
+- [ ] PlayerFavorProgress model created
+- [ ] ReligionPrestigeProgress model created
+- [ ] Rank requirement lookup functions implemented
+- [ ] ProgressBarRenderer.cs created
+- [ ] Player Favor progress bar integrated into ReligionHeaderRenderer
+- [ ] Religion Prestige progress bar integrated into ReligionHeaderRenderer
+- [ ] Hover tooltips show detailed breakdown
+- [ ] Glow animation triggers at >80% progress
+- [ ] Rank-up audio feedback implemented
+- [ ] Max rank displays correctly
+- [ ] Layout tested at different window sizes
+- [ ] Progress updates in real-time when favor/prestige changes
+
+---
+
+## Updated Timeline Estimate
+
+**Original Total:** 22 hours
+**Phase 9 Addition:** +3-4 hours
+**New Total:** 25-26 hours
+
+**Updated Status: ~92% Complete (23.5 / 26 hours)**
+- Need Phase 9 implementation (3-4 hours)
+- Need final testing (1 hour)
+
+**Target: v1.0 Final with Progress Indicators**
+
+---
+
+**Current status: v1.0 RC with Phase 9 documented - ready for implementation!**

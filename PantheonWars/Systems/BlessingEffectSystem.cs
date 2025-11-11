@@ -22,7 +22,7 @@ public class BlessingEffectSystem : IBlessingEffectSystem
 
     // Cache for stat modifiers to reduce computation
     private readonly Dictionary<string, Dictionary<string, float>> _playerModifierCache = new();
-    private readonly PlayerReligionDataManager _playerReligionDataManager;
+    private readonly IPlayerReligionDataManager _playerReligionDataManager;
     private readonly ReligionManager _religionManager;
     private readonly Dictionary<string, Dictionary<string, float>> _religionModifierCache = new();
     private readonly ICoreServerAPI _sapi;
@@ -30,7 +30,7 @@ public class BlessingEffectSystem : IBlessingEffectSystem
     public BlessingEffectSystem(
         ICoreServerAPI sapi,
         BlessingRegistry blessingRegistry,
-        PlayerReligionDataManager playerReligionDataManager,
+        IPlayerReligionDataManager playerReligionDataManager,
         ReligionManager religionManager)
     {
         _sapi = sapi;

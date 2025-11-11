@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 using PantheonWars.Systems;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
@@ -14,13 +15,15 @@ public class DeityCommands
 {
     private readonly DeityRegistry _deityRegistry;
     private readonly PlayerDataManager _playerDataManager;
+    private readonly IPlayerReligionDataManager _religionDataManager;
     private readonly ICoreServerAPI _sapi;
 
-    public DeityCommands(ICoreServerAPI sapi, DeityRegistry deityRegistry, PlayerDataManager playerDataManager)
+    public DeityCommands(ICoreServerAPI sapi, DeityRegistry deityRegistry, PlayerDataManager playerDataManager, IPlayerReligionDataManager religionDataManager)
     {
         _sapi = sapi;
         _deityRegistry = deityRegistry;
         _playerDataManager = playerDataManager;
+        _religionDataManager = religionDataManager;
     }
 
     /// <summary>
@@ -117,31 +120,28 @@ public class DeityCommands
         if (deity == null)
             return TextCommandResult.Error($"Deity '{deityName}' not found. Use /deity list to see available deities.");
 
-        // Get current player data
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+        // Get current player religion data
+        var religionData = _religionDataManager.GetOrCreatePlayerData(player.PlayerUID);
 
-        // Check if already pledged to this deity
-        if (playerData.DeityType == deity.Type)
-            return TextCommandResult.Error($"You are already pledged to {deity.Name}!");
+        // Check if already pledged to this deity through religion
+        if (religionData.ActiveDeity == deity.Type)
+            return TextCommandResult.Error($"You are already pledged to {deity.Name} through your religion!");
 
-        // Warn if switching deities
-        if (playerData.HasDeity())
+        // Warn if already in a religion with a deity
+        if (religionData.ActiveDeity != Models.Enum.DeityType.None)
         {
-            var currentDeity = _deityRegistry.GetDeity(playerData.DeityType);
-            var currentName = currentDeity?.Name ?? playerData.DeityType.ToString();
+            var currentDeity = _deityRegistry.GetDeity(religionData.ActiveDeity);
+            var currentName = currentDeity?.Name ?? religionData.ActiveDeity.ToString();
             return TextCommandResult.Error(
-                $"You are already pledged to {currentName}. " +
-                "Switching deities will reset your progress. " +
-                "This feature will be implemented in a future update."
+                $"You are already pledged to {currentName} through your religion. " +
+                "Please use the religion system to join a different religion or create your own."
             );
         }
 
-        // Pledge to deity
-        _playerDataManager.SetDeity(player.PlayerUID, deity.Type);
-
-        return TextCommandResult.Success(
-            $"You have pledged yourself to {deity.Name}, God/Goddess of {deity.Domain}!\n" +
-            $"May your devotion be rewarded with divine favor."
+        // Inform player to use religion system
+        return TextCommandResult.Error(
+            $"To pledge to {deity.Name}, you must join or create a religion that worships this deity. " +
+            "Use the religion commands to create or join a religion."
         );
     }
 
@@ -150,26 +150,26 @@ public class DeityCommands
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+        var religionData = _religionDataManager.GetOrCreatePlayerData(player.PlayerUID);
 
-        if (!playerData.HasDeity())
+        if (religionData.ActiveDeity == Models.Enum.DeityType.None)
             return TextCommandResult.Success(
-                "You have not pledged to any deity. Use /deity list to see available deities.");
+                "You are not in a religion or do not have an active deity. Use /deity list to see available deities.");
 
-        var deity = _deityRegistry.GetDeity(playerData.DeityType);
-        var deityName = deity?.Name ?? playerData.DeityType.ToString();
+        var deity = _deityRegistry.GetDeity(religionData.ActiveDeity);
+        var deityName = deity?.Name ?? religionData.ActiveDeity.ToString();
 
         var sb = new StringBuilder();
         sb.AppendLine("=== Your Divine Status ===");
         sb.AppendLine($"Deity: {deityName}");
-        sb.AppendLine($"Divine Favor: {playerData.DivineFavor}");
-        sb.AppendLine($"Devotion Rank: {playerData.DevotionRank}");
-        sb.AppendLine($"Kills: {playerData.KillCount}");
-        sb.AppendLine($"Total Favor Earned: {playerData.TotalFavorEarned}");
+        sb.AppendLine($"Divine Favor: {religionData.Favor}");
+        sb.AppendLine($"Favor Rank: {religionData.FavorRank}");
+        sb.AppendLine($"Kills: {religionData.KillCount}");
+        sb.AppendLine($"Total Favor Earned: {religionData.TotalFavorEarned}");
 
-        if (playerData.PledgeDate != DateTime.MinValue)
+        if (religionData.LastReligionSwitch.HasValue)
         {
-            var daysServed = (DateTime.UtcNow - playerData.PledgeDate).Days;
+            var daysServed = (DateTime.UtcNow - religionData.LastReligionSwitch.Value).Days;
             sb.AppendLine($"Days Served: {daysServed}");
         }
 
@@ -181,15 +181,15 @@ public class DeityCommands
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+        var religionData = _religionDataManager.GetOrCreatePlayerData(player.PlayerUID);
 
-        if (!playerData.HasDeity()) return TextCommandResult.Success("You have not pledged to any deity yet.");
+        if (religionData.ActiveDeity == Models.Enum.DeityType.None) return TextCommandResult.Success("You are not in a religion or do not have an active deity.");
 
-        var deity = _deityRegistry.GetDeity(playerData.DeityType);
-        var deityName = deity?.Name ?? playerData.DeityType.ToString();
+        var deity = _deityRegistry.GetDeity(religionData.ActiveDeity);
+        var deityName = deity?.Name ?? religionData.ActiveDeity.ToString();
 
         return TextCommandResult.Success(
-            $"You have {playerData.DivineFavor} favor with {deityName} (Rank: {playerData.DevotionRank})"
+            $"You have {religionData.Favor} favor with {deityName} (Rank: {religionData.FavorRank})"
         );
     }
 }

@@ -110,26 +110,20 @@ public class BlessingTooltipData
         tooltip.SpecialEffectDescriptions.AddRange(blessing.SpecialEffects);
 
         // Determine unlock block reason
+        // Note: Don't set UnlockBlockReason for prerequisites since they're already displayed in PrerequisiteNames
         if (state is { IsUnlocked: false, CanUnlock: false })
         {
-            if (blessing.PrerequisiteBlessings is { Count: > 0 } && blessingRegistry != null)
+            // Only set unlock block reason if there are no prerequisites (they're shown separately)
+            if (blessing.PrerequisiteBlessings is not { Count: > 0 })
             {
-                // Check which prerequisites are missing
-                foreach (var prereqId in blessing.PrerequisiteBlessings)
-                    if (blessingRegistry.TryGetValue(prereqId, out var prereqBlessing))
-                    {
-                        // This is simplified - in Phase 6 we'll check actual unlock status
-                        tooltip.UnlockBlockReason = $"Requires '{prereqBlessing.Name}'";
-                        break;
-                    }
-            }
-            else if (blessing.Kind == BlessingKind.Player)
-            {
-                tooltip.UnlockBlockReason = $"Requires {tooltip.RequiredFavorRank} rank";
-            }
-            else
-            {
-                tooltip.UnlockBlockReason = $"Requires religion {tooltip.RequiredPrestigeRank} rank";
+                if (blessing.Kind == BlessingKind.Player)
+                {
+                    tooltip.UnlockBlockReason = $"Requires {tooltip.RequiredFavorRank} rank";
+                }
+                else
+                {
+                    tooltip.UnlockBlockReason = $"Requires religion {tooltip.RequiredPrestigeRank} rank";
+                }
             }
         }
 
@@ -141,11 +135,24 @@ public class BlessingTooltipData
     /// </summary>
     private static string FormatStatModifier(string statName, float value)
     {
-        // Handle percentage-based stats
-        var percentageStats = new[] { "walkspeed", "meleeDamage", "rangedDamage", "maxhealthExtraMultiplier" };
+        // Normalize stat name to lowercase for matching
+        var statLower = statName.ToLower();
+
+        // Check if this is a percentage stat (matching BlessingInfoRenderer.cs logic)
+        var percentageStats = new[]
+        {
+            "walkspeed",
+            "meleeDamage",
+            "meleeweaponsdamage",
+            "rangedDamage",
+            "rangedweaponsdamage",
+            "maxhealthExtraMultiplier",
+            "maxhealthextramultiplier"
+        };
+
         var isPercentage = false;
         foreach (var percentStat in percentageStats)
-            if (statName.Contains(percentStat))
+            if (statLower.Contains(percentStat.ToLower()))
             {
                 isPercentage = true;
                 break;
@@ -164,14 +171,22 @@ public class BlessingTooltipData
     /// </summary>
     private static string FormatStatName(string statName)
     {
-        return statName switch
+        // Normalize to lowercase for matching (matching BlessingInfoRenderer.cs logic)
+        var statLower = statName.ToLower();
+
+        return statLower switch
         {
-            "walkspeed" => "movement speed",
-            "meleeDamage" => "melee damage",
-            "rangedDamage" => "ranged damage",
-            "maxhealthExtraMultiplier" => "max health",
-            "healingeffectivness" => "healing effectiveness",
-            "rangedWeaponsSpeed" => "ranged attack speed",
+            var s when s.Contains("walkspeed") => "Movement Speed",
+            var s when s.Contains("meleeDamage") || s.Contains("meleeweaponsdamage") => "Melee Damage",
+            var s when s.Contains("rangedDamage") || s.Contains("rangedweaponsdamage") => "Ranged Damage",
+            var s when s.Contains("maxhealth") && s.Contains("multiplier") => "Max Health",
+            var s when s.Contains("maxhealth") && s.Contains("points") => "Max Health",
+            var s when s.Contains("maxhealth") => "Max Health",
+            var s when s.Contains("armor") => "Armor",
+            var s when s.Contains("speed") => "Speed",
+            var s when s.Contains("damage") => "Damage",
+            var s when s.Contains("health") => "Health",
+            var s when s.Contains("healingeffectivness") => "Healing Effectiveness",
             _ => statName
         };
     }

@@ -16,6 +16,7 @@ namespace PantheonWars.Systems;
 public class PlayerReligionDataManager : IPlayerReligionDataManager
 {
     public delegate void PlayerReligionDataChangedDelegate(IServerPlayer player, string religionUID);
+    public delegate void PlayerDataChangedDelegate(string playerUID);
 
     private const string DATA_KEY = "pantheonwars_playerreligiondata";
     private const int RELIGION_SWITCH_COOLDOWN_DAYS = 7;
@@ -32,6 +33,7 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
     }
 
     public event PlayerReligionDataChangedDelegate OnPlayerLeavesReligion = null!;
+    public event PlayerDataChangedDelegate? OnPlayerDataChanged;
 
     /// <summary>
     ///     Initializes the player religion data manager
@@ -79,6 +81,48 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
 
         // Check for rank up
         if (data.FavorRank > oldRank) SendRankUpNotification(playerUID, data.FavorRank);
+
+        // Notify listeners that player data changed (for UI updates)
+        OnPlayerDataChanged?.Invoke(playerUID);
+    }
+
+    /// <summary>
+    ///     Adds fractional favor to a player (for passive favor generation)
+    /// </summary>
+    public void AddFractionalFavor(string playerUID, float amount, string reason = "")
+    {
+        var data = GetOrCreatePlayerData(playerUID);
+        var oldRank = data.FavorRank;
+        var oldFavor = data.Favor;
+
+        data.AddFractionalFavor(amount);
+
+        // Only log when favor is actually awarded (when accumulated >= 1)
+        if (data.AccumulatedFractionalFavor < amount && !string.IsNullOrEmpty(reason))
+            _sapi.Logger.Debug($"[PantheonWars] Player {playerUID} gained favor: {reason}");
+
+        // Check for rank up
+        if (data.FavorRank > oldRank) SendRankUpNotification(playerUID, data.FavorRank);
+
+        // Notify listeners if favor actually changed (UI updates)
+        if (data.Favor != oldFavor) OnPlayerDataChanged?.Invoke(playerUID);
+    }
+
+    /// <summary>
+    ///     Removes favor from a player
+    /// </summary>
+    public bool RemoveFavor(string playerUID, int amount, string reason = "")
+    {
+        var data = GetOrCreatePlayerData(playerUID);
+        var success = data.RemoveFavor(amount);
+
+        if (success && !string.IsNullOrEmpty(reason))
+            _sapi.Logger.Debug($"[PantheonWars] Player {playerUID} spent {amount} favor: {reason}");
+
+        // Notify listeners that player data changed (for UI updates)
+        if (success) OnPlayerDataChanged?.Invoke(playerUID);
+
+        return success;
     }
 
     /// <summary>
@@ -182,6 +226,9 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
         // Clear player data
         data.ReligionUID = null;
         data.ActiveDeity = DeityType.None;
+        data.Favor = 0;
+        data.TotalFavorEarned = 0;
+        data.FavorRank = FavorRank.Initiate;
 
         _sapi.Logger.Notification($"[PantheonWars] Player {playerUID} left religion");
     }

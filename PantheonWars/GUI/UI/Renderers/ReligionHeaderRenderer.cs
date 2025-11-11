@@ -1,8 +1,10 @@
 using System;
 using System.Numerics;
 using ImGuiNET;
+using PantheonWars.GUI.UI.Renderers.Components;
 using PantheonWars.GUI.UI.Utilities;
 using PantheonWars.Models.Enum;
+using PantheonWars.Systems;
 using Vintagestory.API.Client;
 
 namespace PantheonWars.GUI.UI.Renderers;
@@ -33,7 +35,7 @@ internal static class ReligionHeaderRenderer
         Action? onManageReligionClicked = null,
         Action? onLeaveReligionClicked = null)
     {
-        const float headerHeight = 80f;
+        const float headerHeight = 130f; // Increased to accommodate progress bars
         const float padding = 16f;
 
         var drawList = ImGui.GetWindowDrawList();
@@ -137,13 +139,57 @@ internal static class ReligionHeaderRenderer
         var infoTextColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
         drawList.AddText(ImGui.GetFont(), 13f, infoTextPos, infoTextColor, infoText);
 
-        // Rank progression
-        var favorRankName = GetFavorRankName(manager.CurrentFavorRank);
-        var prestigeRankName = GetPrestigeRankName(manager.CurrentPrestigeRank);
-        var ranksText = $"Favor: {favorRankName} | Prestige: {prestigeRankName}";
-        var ranksTextPos = new Vector2(currentX, y + 54f);
-        var ranksTextColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.White);
-        drawList.AddText(ImGui.GetFont(), 13f, ranksTextPos, ranksTextColor, ranksText);
+        // Progress bars
+        currentX = x + iconSize + padding * 2;
+        var progressY = y + 54f;
+        const float progressBarWidth = 300f;
+        const float progressBarHeight = 20f;
+        const float progressBarSpacing = 28f;
+
+        // Player Favor Progress
+        var favorProgress = manager.GetPlayerFavorProgress();
+        var favorLabel = favorProgress.IsMaxRank
+            ? $"{RankRequirements.GetFavorRankName(favorProgress.CurrentRank)} (MAX)"
+            : $"{RankRequirements.GetFavorRankName(favorProgress.CurrentRank)} ({favorProgress.CurrentFavor}/{favorProgress.RequiredFavor})";
+
+        // Label
+        var favorLabelPos = new Vector2(currentX, progressY);
+        var labelColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.White);
+        drawList.AddText(ImGui.GetFont(), 12f, favorLabelPos, labelColor, "Player Progress:");
+
+        // Progress bar
+        ProgressBarRenderer.DrawProgressBar(
+            drawList,
+            currentX + 110f, progressY - 2f, progressBarWidth, progressBarHeight,
+            favorProgress.ProgressPercentage,
+            ColorPalette.Gold,
+            ColorPalette.DarkBrown,
+            favorLabel,
+            showGlow: favorProgress.ProgressPercentage > 0.8f
+        );
+
+        progressY += progressBarSpacing;
+
+        // Religion Prestige Progress
+        var prestigeProgress = manager.GetReligionPrestigeProgress();
+        var prestigeLabel = prestigeProgress.IsMaxRank
+            ? $"{RankRequirements.GetPrestigeRankName(prestigeProgress.CurrentRank)} (MAX)"
+            : $"{RankRequirements.GetPrestigeRankName(prestigeProgress.CurrentRank)} ({prestigeProgress.CurrentPrestige}/{prestigeProgress.RequiredPrestige})";
+
+        // Label
+        var prestigeLabelPos = new Vector2(currentX, progressY);
+        drawList.AddText(ImGui.GetFont(), 12f, prestigeLabelPos, labelColor, "Religion Progress:");
+
+        // Progress bar (purple color)
+        ProgressBarRenderer.DrawProgressBar(
+            drawList,
+            currentX + 110f, progressY - 2f, progressBarWidth, progressBarHeight,
+            prestigeProgress.ProgressPercentage,
+            new Vector4(0.48f, 0.41f, 0.93f, 1f), // Purple
+            ColorPalette.DarkBrown,
+            prestigeLabel,
+            showGlow: prestigeProgress.ProgressPercentage > 0.8f
+        );
 
         // Right-side buttons
         const float buttonWidth = 140f;

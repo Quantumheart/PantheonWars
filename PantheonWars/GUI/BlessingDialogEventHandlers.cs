@@ -13,6 +13,8 @@ namespace PantheonWars.GUI;
 /// </summary>
 public partial class BlessingDialog
 {
+    private const string PANTHEONWARS_SOUNDS_DEITIES = "pantheonwars:sounds/deities/";
+
     /// <summary>
     ///     Periodically check if player religion data is available
     /// </summary>
@@ -63,6 +65,11 @@ public partial class BlessingDialog
         // Initialize manager with real data
         _manager!.Initialize(packet.ReligionUID, deityType, packet.ReligionName, packet.FavorRank,
             packet.PrestigeRank);
+
+        // Set current favor and prestige values for progress bars
+        _manager.CurrentFavor = packet.CurrentFavor;
+        _manager.CurrentPrestige = packet.CurrentPrestige;
+        _manager.TotalFavorEarned = packet.TotalFavorEarned;
 
         // Convert packet blessings to Blessing objects
         var playerBlessings = packet.PlayerBlessings.Select(p => new Blessing(p.BlessingId, p.Name, deityType)
@@ -401,6 +408,37 @@ public partial class BlessingDialog
     }
 
     /// <summary>
+    ///     Handle player religion data updates (favor, rank, etc.)
+    /// </summary>
+    private void OnPlayerReligionDataUpdated(PlayerReligionDataPacket packet)
+    {
+        // Only update if dialog is open and has data loaded
+        if (!_state.IsOpen || _manager == null || !_manager.HasReligion()) return;
+
+        _capi!.Logger.Debug($"[PantheonWars] Updating blessing dialog with new favor data: {packet.Favor}, Total: {packet.TotalFavorEarned}");
+
+        // Update manager with new values
+        _manager.CurrentFavor = packet.Favor;
+        _manager.CurrentPrestige = packet.Prestige;
+        _manager.TotalFavorEarned = packet.TotalFavorEarned;
+
+        // Update rank if it changed (this affects which blessings can be unlocked)
+        // FavorRank comes as enum name (e.g., "Initiate", "Disciple"), parse to get numeric value
+        if (Enum.TryParse<FavorRank>(packet.FavorRank, out var favorRankEnum))
+        {
+            _manager.CurrentFavorRank = (int)favorRankEnum;
+        }
+
+        if (Enum.TryParse<PrestigeRank>(packet.PrestigeRank, out var prestigeRankEnum))
+        {
+            _manager.CurrentPrestigeRank = (int)prestigeRankEnum;
+        }
+
+        // Refresh blessing states in case new blessings became available
+        _manager.RefreshAllBlessingStates();
+    }
+
+    /// <summary>
     ///     Handle blessing unlock response from server
     /// </summary>
     private void OnBlessingUnlockedFromServer(string blessingId, bool success)
@@ -419,13 +457,61 @@ public partial class BlessingDialog
         _capi!.Logger.Debug($"[PantheonWars] Blessing unlocked from server: {blessingId}");
 
         // Play unlock success sound
-        _capi.World.PlaySoundAt(new AssetLocation("pantheonwars:sounds/unlock"),
-            _capi.World.Player.Entity, null, false, 16f, 1.0f);
+        if (_manager != null)
+        {
+            switch (_manager.CurrentDeity)
+            {
+                case DeityType.None:
+                    _capi.World.PlaySoundAt(
+                        new AssetLocation($"pantheonwars:sounds/unlock"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Khoras:
+                    _capi.World.PlaySoundAt(
+                        new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Khoras)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Lysa:
+                    _capi.World.PlaySoundAt(new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Lysa)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Morthen:
+                    _capi.World.PlaySoundAt(
+                        new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Morthen)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Aethra:
+                    _capi.World.PlaySoundAt(
+                        new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Aethra)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Umbros:
+                    _capi.World.PlaySoundAt(
+                        new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Umbros)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Tharos:
+                    _capi.World.PlaySoundAt(
+                        new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Tharos)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Gaia:
+                    _capi.World.PlaySoundAt(new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Gaia)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                case DeityType.Vex:
+                    _capi.World.PlaySoundAt(new AssetLocation($"{PANTHEONWARS_SOUNDS_DEITIES}{nameof(DeityType.Vex)}"),
+                        _capi.World.Player.Entity, null, false, 8f, 0.5f);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
 
-        // Update manager state
-        _manager?.SetBlessingUnlocked(blessingId, true);
+            // Update manager state
+            _manager?.SetBlessingUnlocked(blessingId, true);
 
-        // Refresh all blessing states to update prerequisites and glow effects
-        _manager?.RefreshAllBlessingStates();
+            // Refresh all blessing states to update prerequisites and glow effects
+            _manager?.RefreshAllBlessingStates();
+        }
     }
 }

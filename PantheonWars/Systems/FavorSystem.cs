@@ -1,6 +1,7 @@
 using System;
 using PantheonWars.Data;
 using PantheonWars.Models.Enum;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
@@ -20,14 +21,16 @@ public class FavorSystem
 
     private readonly DeityRegistry _deityRegistry;
     private readonly IPlayerDataManager _playerDataManager;
+    private readonly IPlayerReligionDataManager _playerReligionDataManager;
     private readonly ReligionManager _religionManager;
 
     private readonly ICoreServerAPI _sapi;
 
-    public FavorSystem(ICoreServerAPI sapi, IPlayerDataManager playerDataManager, DeityRegistry deityRegistry, ReligionManager religionManager)
+    public FavorSystem(ICoreServerAPI sapi, IPlayerDataManager playerDataManager, IPlayerReligionDataManager playerReligionDataManager, DeityRegistry deityRegistry, ReligionManager religionManager)
     {
         _sapi = sapi;
         _playerDataManager = playerDataManager;
+        _playerReligionDataManager = playerReligionDataManager;
         _deityRegistry = deityRegistry;
         _religionManager = religionManager;
     }
@@ -68,22 +71,22 @@ public class FavorSystem
     /// </summary>
     internal void ProcessPvPKill(IServerPlayer attacker, IServerPlayer victim)
     {
-        var attackerData = _playerDataManager.GetOrCreatePlayerData(attacker);
-        var victimData = _playerDataManager.GetOrCreatePlayerData(victim);
+        var attackerReligionData = _playerReligionDataManager.GetOrCreatePlayerData(attacker.PlayerUID);
+        var victimReligionData = _playerReligionDataManager.GetOrCreatePlayerData(victim.PlayerUID);
 
-        // Check if attacker has a deity
-        if (!attackerData.HasDeity()) return;
+        // Check if attacker has a deity through religion
+        if (attackerReligionData.ActiveDeity == DeityType.None) return;
 
         // Calculate favor reward
-        var favorReward = CalculateFavorReward(attackerData.DeityType, victimData.DeityType);
+        var favorReward = CalculateFavorReward(attackerReligionData.ActiveDeity, victimReligionData.ActiveDeity);
 
         // Award favor
-        _playerDataManager.AddFavor(attacker.PlayerUID, favorReward, $"PvP kill against {victim.PlayerName}");
-        attackerData.KillCount++;
+        _playerReligionDataManager.AddFavor(attacker.PlayerUID, favorReward, $"PvP kill against {victim.PlayerName}");
+        attackerReligionData.KillCount++;
 
         // Get deity for display
-        var deity = _deityRegistry.GetDeity(attackerData.DeityType);
-        var deityName = deity?.Name ?? attackerData.DeityType.ToString();
+        var deity = _deityRegistry.GetDeity(attackerReligionData.ActiveDeity);
+        var deityName = deity?.Name ?? attackerReligionData.ActiveDeity.ToString();
 
         // Notify attacker
         attacker.SendMessage(
@@ -93,10 +96,10 @@ public class FavorSystem
         );
 
         // Notify victim
-        if (victimData.HasDeity())
+        if (victimReligionData.ActiveDeity != DeityType.None)
         {
-            var victimDeity = _deityRegistry.GetDeity(victimData.DeityType);
-            var victimDeityName = victimDeity?.Name ?? victimData.DeityType.ToString();
+            var victimDeity = _deityRegistry.GetDeity(victimReligionData.ActiveDeity);
+            var victimDeityName = victimDeity?.Name ?? victimReligionData.ActiveDeity.ToString();
             victim.SendMessage(
                 GlobalConstants.GeneralChatGroup,
                 $"[Divine Favor] {victimDeityName} is displeased by your defeat.",
@@ -113,15 +116,15 @@ public class FavorSystem
     /// </summary>
     internal void ProcessDeathPenalty(IServerPlayer player)
     {
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+        var religionData = _playerReligionDataManager.GetOrCreatePlayerData(player.PlayerUID);
 
-        if (!playerData.HasDeity()) return;
+        if (religionData.ActiveDeity == DeityType.None) return;
 
         // Remove favor as penalty (minimum 0)
-        var penalty = Math.Min(DEATH_PENALTY_FAVOR, playerData.DivineFavor);
+        var penalty = Math.Min(DEATH_PENALTY_FAVOR, religionData.Favor);
         if (penalty > 0)
         {
-            _playerDataManager.RemoveFavor(player.PlayerUID, penalty, "Death penalty");
+            _playerReligionDataManager.RemoveFavor(player.PlayerUID, penalty, "Death penalty");
 
             player.SendMessage(
                 GlobalConstants.GeneralChatGroup,
@@ -154,11 +157,11 @@ public class FavorSystem
     /// </summary>
     public void AwardFavorForAction(IServerPlayer player, string actionType, int amount)
     {
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+        var religionData = _playerReligionDataManager.GetOrCreatePlayerData(player.PlayerUID);
 
-        if (!playerData.HasDeity()) return;
+        if (religionData.ActiveDeity == DeityType.None) return;
 
-        _playerDataManager.AddFavor(player.PlayerUID, amount, actionType);
+        _playerReligionDataManager.AddFavor(player.PlayerUID, amount, actionType);
 
         player.SendMessage(
             GlobalConstants.GeneralChatGroup,
@@ -189,9 +192,9 @@ public class FavorSystem
     /// </summary>
     private void AwardPassiveFavor(IServerPlayer player, float dt)
     {
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+        var religionData = _playerReligionDataManager.GetOrCreatePlayerData(player.PlayerUID);
 
-        if (!playerData.HasDeity()) return;
+        if (religionData.ActiveDeity == DeityType.None) return;
 
         // Calculate in-game hours elapsed this tick
         // dt is in real-time seconds, convert to in-game hours
@@ -201,30 +204,30 @@ public class FavorSystem
         float baseFavor = BASE_FAVOR_PER_HOUR * inGameHoursElapsed;
 
         // Apply multipliers
-        float finalFavor = baseFavor * CalculatePassiveFavorMultiplier(player, playerData);
+        float finalFavor = baseFavor * CalculatePassiveFavorMultiplier(player, religionData);
 
         // Award favor using fractional accumulation
         if (finalFavor >= 0.01f) // Only award when we have at least 0.01 favor
         {
-            _playerDataManager.AddFractionalFavor(player.PlayerUID, finalFavor, "Passive devotion");
+            _playerReligionDataManager.AddFractionalFavor(player.PlayerUID, finalFavor, "Passive devotion");
         }
     }
 
     /// <summary>
     ///     Calculates the total multiplier for passive favor generation
     /// </summary>
-    private float CalculatePassiveFavorMultiplier(IServerPlayer player, PlayerDeityData playerData)
+    private float CalculatePassiveFavorMultiplier(IServerPlayer player, PlayerReligionData religionData)
     {
         float multiplier = 1.0f;
 
-        // Devotion rank bonuses (higher ranks gain passive favor faster)
-        multiplier *= playerData.DevotionRank switch
+        // Favor rank bonuses (higher ranks gain passive favor faster)
+        multiplier *= religionData.FavorRank switch
         {
-            DevotionRank.Initiate => 1.0f,
-            DevotionRank.Disciple => 1.1f,
-            DevotionRank.Zealot => 1.2f,
-            DevotionRank.Champion => 1.3f,
-            DevotionRank.Avatar => 1.5f,
+            FavorRank.Initiate => 1.0f,
+            FavorRank.Disciple => 1.1f,
+            FavorRank.Zealot => 1.2f,
+            FavorRank.Champion => 1.3f,
+            FavorRank.Avatar => 1.5f,
             _ => 1.0f
         };
 

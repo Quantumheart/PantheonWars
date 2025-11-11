@@ -81,6 +81,7 @@ public partial class BlessingDialog : ModSystem
             _pantheonWarsSystem.ReligionListReceived += OnReligionListReceived;
             _pantheonWarsSystem.ReligionActionCompleted += OnReligionActionCompleted;
             _pantheonWarsSystem.PlayerReligionInfoReceived += OnPlayerReligionInfoReceived;
+            _pantheonWarsSystem.PlayerReligionDataUpdated += OnPlayerReligionDataUpdated;
         }
         else
         {
@@ -287,6 +288,7 @@ public partial class BlessingDialog : ModSystem
             _pantheonWarsSystem.ReligionListReceived -= OnReligionListReceived;
             _pantheonWarsSystem.ReligionActionCompleted -= OnReligionActionCompleted;
             _pantheonWarsSystem.PlayerReligionInfoReceived -= OnPlayerReligionInfoReceived;
+            _pantheonWarsSystem.PlayerReligionDataUpdated -= OnPlayerReligionDataUpdated;
         }
         
         // Dispose deity icon loader

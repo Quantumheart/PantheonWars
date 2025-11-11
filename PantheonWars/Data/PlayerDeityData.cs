@@ -5,8 +5,11 @@ using ProtoBuf;
 namespace PantheonWars.Data;
 
 /// <summary>
-///     Stores player-specific deity data for persistence
+///     Stores player-specific deity data for persistence (LEGACY - Phase 1-2)
+///     DEPRECATED: Use PlayerReligionData from Phase 3 religion system instead
+///     This model will be removed in v2.0.0
 /// </summary>
+[Obsolete("Use PlayerReligionData instead. This class will be removed in v2.0.0")]
 [ProtoContract]
 public class PlayerDeityData
 {

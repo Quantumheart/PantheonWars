@@ -21,13 +21,19 @@ public class BlessingDataResponsePacket
 
     [ProtoMember(6)] public int PrestigeRank { get; set; }
 
-    [ProtoMember(7)] public List<BlessingInfo> PlayerBlessings { get; set; } = new();
+    [ProtoMember(7)] public int CurrentFavor { get; set; }
 
-    [ProtoMember(8)] public List<BlessingInfo> ReligionBlessings { get; set; } = new();
+    [ProtoMember(8)] public int CurrentPrestige { get; set; }
 
-    [ProtoMember(9)] public List<string> UnlockedPlayerBlessings { get; set; } = new();
+    [ProtoMember(9)] public int TotalFavorEarned { get; set; }
 
-    [ProtoMember(10)] public List<string> UnlockedReligionBlessings { get; set; } = new();
+    [ProtoMember(10)] public List<BlessingInfo> PlayerBlessings { get; set; } = new();
+
+    [ProtoMember(11)] public List<BlessingInfo> ReligionBlessings { get; set; } = new();
+
+    [ProtoMember(12)] public List<string> UnlockedPlayerBlessings { get; set; } = new();
+
+    [ProtoMember(13)] public List<string> UnlockedReligionBlessings { get; set; } = new();
 
     /// <summary>
     ///     Basic blessing information needed for UI display
