@@ -2,6 +2,7 @@ using System.Linq;
 using System.Text;
 using PantheonWars.Models.Enum;
 using PantheonWars.Systems;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
@@ -14,14 +15,14 @@ public class AbilityCommands
 {
     private readonly AbilitySystem _abilitySystem;
     private readonly PlayerDataManager _playerDataManager;
-    private readonly PlayerReligionDataManager _religionDataManager;
+    private readonly IPlayerReligionDataManager _religionDataManager;
     private readonly ICoreServerAPI _sapi;
 
     public AbilityCommands(
         ICoreServerAPI sapi,
         AbilitySystem abilitySystem,
         PlayerDataManager playerDataManager,
-        PlayerReligionDataManager religionDataManager)
+        IPlayerReligionDataManager religionDataManager)
     {
         _sapi = sapi;
         _abilitySystem = abilitySystem;

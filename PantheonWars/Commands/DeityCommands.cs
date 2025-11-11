@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 using PantheonWars.Systems;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
@@ -14,10 +15,10 @@ public class DeityCommands
 {
     private readonly DeityRegistry _deityRegistry;
     private readonly PlayerDataManager _playerDataManager;
-    private readonly PlayerReligionDataManager _religionDataManager;
+    private readonly IPlayerReligionDataManager _religionDataManager;
     private readonly ICoreServerAPI _sapi;
 
-    public DeityCommands(ICoreServerAPI sapi, DeityRegistry deityRegistry, PlayerDataManager playerDataManager, PlayerReligionDataManager religionDataManager)
+    public DeityCommands(ICoreServerAPI sapi, DeityRegistry deityRegistry, PlayerDataManager playerDataManager, IPlayerReligionDataManager religionDataManager)
     {
         _sapi = sapi;
         _deityRegistry = deityRegistry;

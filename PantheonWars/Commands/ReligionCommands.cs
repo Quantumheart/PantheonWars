@@ -5,6 +5,7 @@ using PantheonWars.Data;
 using PantheonWars.Models.Enum;
 using PantheonWars.Network;
 using PantheonWars.Systems;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
@@ -16,13 +17,13 @@ namespace PantheonWars.Commands;
 /// </summary>
 public class ReligionCommands
 {
-    private readonly PlayerReligionDataManager _playerReligionDataManager;
+    private readonly IPlayerReligionDataManager _playerReligionDataManager;
     private readonly ReligionManager _religionManager;
     private readonly ICoreServerAPI _sapi;
     private readonly IServerNetworkChannel? _serverChannel;
 
     public ReligionCommands(ICoreServerAPI sapi, ReligionManager religionManager,
-        PlayerReligionDataManager playerReligionDataManager, IServerNetworkChannel? serverChannel = null)
+        IPlayerReligionDataManager playerReligionDataManager, IServerNetworkChannel? serverChannel = null)
     {
         _sapi = sapi;
         _religionManager = religionManager;
