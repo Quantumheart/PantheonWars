@@ -214,6 +214,9 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
         // Clear player data
         data.ReligionUID = null;
         data.ActiveDeity = DeityType.None;
+        data.Favor = 0;
+        data.TotalFavorEarned = 0;
+        data.FavorRank = FavorRank.Initiate;
 
         _sapi.Logger.Notification($"[PantheonWars] Player {playerUID} left religion");
     }
