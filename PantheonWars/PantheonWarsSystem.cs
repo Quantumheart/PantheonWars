@@ -7,6 +7,7 @@ using PantheonWars.Models.Enum;
 using PantheonWars.Network;
 using PantheonWars.Systems;
 using PantheonWars.Systems.BuffSystem;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -37,7 +38,7 @@ public class PantheonWarsSystem : ModSystem
     private BlessingEffectSystem? _blessingEffectSystem;
     private BlessingRegistry? _blessingRegistry;
     private PlayerDataManager? _playerDataManager;
-    private PlayerReligionDataManager? _playerReligionDataManager;
+    private IPlayerReligionDataManager? _playerReligionDataManager;
     private PvPManager? _pvpManager;
     private ReligionCommands? _religionCommands;
     private ReligionManagementDialog? _religionDialog;
@@ -142,7 +143,7 @@ public class PantheonWarsSystem : ModSystem
         _abilityCommands = new AbilityCommands(api, _abilitySystem, _playerDataManager, _playerReligionDataManager);
         _abilityCommands.RegisterCommands();
 
-        _favorCommands = new FavorCommands(api, _deityRegistry, _playerDataManager, _playerReligionDataManager);
+        _favorCommands = new FavorCommands(api, _deityRegistry, _playerReligionDataManager);
         _favorCommands.RegisterCommands();
 
         _religionCommands = new ReligionCommands(api, _religionManager, _playerReligionDataManager, _serverChannel);
@@ -674,6 +675,9 @@ public class PantheonWarsSystem : ModSystem
             response.Deity = playerData.ActiveDeity.ToString();
             response.FavorRank = (int)playerData.FavorRank;
             response.PrestigeRank = (int)religion.PrestigeRank;
+            response.CurrentFavor = playerData.Favor;
+            response.CurrentPrestige = religion.Prestige;
+            response.TotalFavorEarned = playerData.TotalFavorEarned;
 
             // Get player blessings for this deity
             var playerBlessings = _blessingRegistry!.GetBlessingsForDeity(playerData.ActiveDeity, BlessingKind.Player);
@@ -784,32 +788,6 @@ public class PantheonWarsSystem : ModSystem
                 packet.Prestige,
                 packet.PrestigeRank
             );
-    }
-
-    private bool OpenDeitySelectionDialog(KeyCombination key)
-    {
-        if (_capi == null || _clientDeityRegistry == null) return false;
-
-        var dialog = new DeitySelectionDialog(_capi, _clientDeityRegistry, OnDeitySelectedInDialog);
-        dialog.TryOpen();
-        return true;
-    }
-
-    private void OnDeitySelectedInDialog(DeityType selectedDeity)
-    {
-        if (_capi == null) return;
-
-        // For now, tell player to use command
-        // In future, send network packet to server
-        _capi.ShowChatMessage($"Selected deity: {selectedDeity}. Use /deity select {selectedDeity} to confirm.");
-    }
-
-    private bool OpenReligionManagementDialog(KeyCombination key)
-    {
-        if (_capi == null || _religionDialog == null) return false;
-
-        _religionDialog.TryOpen();
-        return true;
     }
 
     private void OnReligionListResponse(ReligionListResponsePacket packet)
