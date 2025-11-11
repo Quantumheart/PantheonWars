@@ -16,6 +16,7 @@ namespace PantheonWars.Systems;
 public class PlayerReligionDataManager : IPlayerReligionDataManager
 {
     public delegate void PlayerReligionDataChangedDelegate(IServerPlayer player, string religionUID);
+    public delegate void PlayerDataChangedDelegate(string playerUID);
 
     private const string DATA_KEY = "pantheonwars_playerreligiondata";
     private const int RELIGION_SWITCH_COOLDOWN_DAYS = 7;
@@ -32,6 +33,7 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
     }
 
     public event PlayerReligionDataChangedDelegate OnPlayerLeavesReligion = null!;
+    public event PlayerDataChangedDelegate? OnPlayerDataChanged;
 
     /// <summary>
     ///     Initializes the player religion data manager
@@ -79,6 +81,9 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
 
         // Check for rank up
         if (data.FavorRank > oldRank) SendRankUpNotification(playerUID, data.FavorRank);
+
+        // Notify listeners that player data changed (for UI updates)
+        OnPlayerDataChanged?.Invoke(playerUID);
     }
 
     /// <summary>
@@ -88,6 +93,7 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
     {
         var data = GetOrCreatePlayerData(playerUID);
         var oldRank = data.FavorRank;
+        var oldFavor = data.Favor;
 
         data.AddFractionalFavor(amount);
 
@@ -97,6 +103,9 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
 
         // Check for rank up
         if (data.FavorRank > oldRank) SendRankUpNotification(playerUID, data.FavorRank);
+
+        // Notify listeners if favor actually changed (UI updates)
+        if (data.Favor != oldFavor) OnPlayerDataChanged?.Invoke(playerUID);
     }
 
     /// <summary>
@@ -109,6 +118,9 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
 
         if (success && !string.IsNullOrEmpty(reason))
             _sapi.Logger.Debug($"[PantheonWars] Player {playerUID} spent {amount} favor: {reason}");
+
+        // Notify listeners that player data changed (for UI updates)
+        if (success) OnPlayerDataChanged?.Invoke(playerUID);
 
         return success;
     }

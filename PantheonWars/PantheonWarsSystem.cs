@@ -110,6 +110,7 @@ public class PantheonWarsSystem : ModSystem
 
         _playerReligionDataManager = new PlayerReligionDataManager(api, _religionManager);
         _playerReligionDataManager.Initialize();
+        _playerReligionDataManager.OnPlayerDataChanged += OnPlayerDataChanged;
 
         // Initialize favor system (with religion manager for passive favor multipliers)
         _favorSystem = new FavorSystem(api, _playerDataManager, _playerReligionDataManager, _deityRegistry, _religionManager);
@@ -737,6 +738,18 @@ public class PantheonWarsSystem : ModSystem
         SendPlayerDataToClient(player);
     }
 
+    /// <summary>
+    ///     Handle player data changes (favor, rank, etc.) and notify client
+    /// </summary>
+    private void OnPlayerDataChanged(string playerUID)
+    {
+        var player = _sapi!.World.PlayerByUid(playerUID) as IServerPlayer;
+        if (player != null)
+        {
+            SendPlayerDataToClient(player);
+        }
+    }
+
     private void SendPlayerDataToClient(IServerPlayer player)
     {
         if (_playerDataManager == null || _deityRegistry == null || _serverChannel == null) return;
@@ -749,8 +762,13 @@ public class PantheonWarsSystem : ModSystem
         if (religionData != null)
         {
             var packet = new PlayerReligionDataPacket(
-                religionData.ReligionName, deityName, playerReligionData.Favor,
-                playerReligionData.FavorRank.ToString(), religionData.Prestige, religionData.PrestigeRank.ToString()
+                religionData.ReligionName,
+                deityName,
+                playerReligionData.Favor,
+                playerReligionData.FavorRank.ToString(),
+                religionData.Prestige,
+                religionData.PrestigeRank.ToString(),
+                playerReligionData.TotalFavorEarned
             );
 
             _serverChannel.SendPacket(packet, player);
@@ -778,16 +796,19 @@ public class PantheonWarsSystem : ModSystem
 
     private void OnServerPlayerDataUpdate(PlayerReligionDataPacket packet)
     {
-        // Update HUD with server data
+        // Update HUD with server data (deprecated)
         if (_favorHud != null)
             _favorHud.UpdateReligionDisplay(
-                packet.ReligionName, // Religion name not sent yet
+                packet.ReligionName,
                 packet.Deity,
                 packet.Favor,
                 packet.FavorRank,
                 packet.Prestige,
                 packet.PrestigeRank
             );
+
+        // Trigger event for BlessingDialog and other UI components
+        PlayerReligionDataUpdated?.Invoke(packet);
     }
 
     private void OnReligionListResponse(ReligionListResponsePacket packet)
@@ -1007,6 +1028,11 @@ public class PantheonWarsSystem : ModSystem
         _clientChannel.SendPacket(request);
         _capi?.Logger.Debug("[PantheonWars] Sent edit description request");
     }
+
+    /// <summary>
+    /// Event fired when player religion data is updated from the server
+    /// </summary>
+    public event Action<PlayerReligionDataPacket>? PlayerReligionDataUpdated;
 
     /// <summary>
     /// Event fired when blessing data is received from the server

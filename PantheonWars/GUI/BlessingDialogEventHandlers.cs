@@ -406,6 +406,37 @@ public partial class BlessingDialog
     }
 
     /// <summary>
+    ///     Handle player religion data updates (favor, rank, etc.)
+    /// </summary>
+    private void OnPlayerReligionDataUpdated(PlayerReligionDataPacket packet)
+    {
+        // Only update if dialog is open and has data loaded
+        if (!_state.IsOpen || _manager == null || !_manager.HasReligion()) return;
+
+        _capi!.Logger.Debug($"[PantheonWars] Updating blessing dialog with new favor data: {packet.Favor}, Total: {packet.TotalFavorEarned}");
+
+        // Update manager with new values
+        _manager.CurrentFavor = packet.Favor;
+        _manager.CurrentPrestige = packet.Prestige;
+        _manager.TotalFavorEarned = packet.TotalFavorEarned;
+
+        // Update rank if it changed (this affects which blessings can be unlocked)
+        // FavorRank comes as enum name (e.g., "Initiate", "Disciple"), parse to get numeric value
+        if (Enum.TryParse<FavorRank>(packet.FavorRank, out var favorRankEnum))
+        {
+            _manager.CurrentFavorRank = (int)favorRankEnum;
+        }
+
+        if (Enum.TryParse<PrestigeRank>(packet.PrestigeRank, out var prestigeRankEnum))
+        {
+            _manager.CurrentPrestigeRank = (int)prestigeRankEnum;
+        }
+
+        // Refresh blessing states in case new blessings became available
+        _manager.RefreshAllBlessingStates();
+    }
+
+    /// <summary>
     ///     Handle blessing unlock response from server
     /// </summary>
     private void OnBlessingUnlockedFromServer(string blessingId, bool success)

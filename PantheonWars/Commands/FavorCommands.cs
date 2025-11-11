@@ -123,10 +123,10 @@ public class FavorCommands
     /// </summary>
     private int GetCurrentFavorRank(int totalFavorEarned)
     {
-        if (totalFavorEarned >= 1000) return 4; // Exalted
-        if (totalFavorEarned >= 500) return 3;  // Champion
-        if (totalFavorEarned >= 250) return 2;  // Zealot
-        if (totalFavorEarned >= 100) return 1;  // Devoted
+        if (totalFavorEarned >= 10000) return 4; // Avatar
+        if (totalFavorEarned >= 5000) return 3;  // Champion
+        if (totalFavorEarned >= 2000) return 2;  // Zealot
+        if (totalFavorEarned >= 500) return 1;   // Disciple
         return 0; // Initiate
     }
 

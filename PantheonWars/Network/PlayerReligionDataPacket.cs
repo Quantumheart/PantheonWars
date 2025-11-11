@@ -15,7 +15,8 @@ public class PlayerReligionDataPacket
         int favor,
         string favorRank,
         int prestige,
-        string prestigeRank)
+        string prestigeRank,
+        int totalFavorEarned = 0)
     {
         ReligionName = religionName;
         Deity = deity;
@@ -23,6 +24,7 @@ public class PlayerReligionDataPacket
         FavorRank = favorRank;
         Prestige = prestige;
         PrestigeRank = prestigeRank;
+        TotalFavorEarned = totalFavorEarned;
     }
 
     [ProtoMember(1)] public string ReligionName { get; set; } = string.Empty;
@@ -36,4 +38,6 @@ public class PlayerReligionDataPacket
     [ProtoMember(5)] public int Prestige { get; set; }
 
     [ProtoMember(6)] public string? PrestigeRank { get; set; }
+
+    [ProtoMember(7)] public int TotalFavorEarned { get; set; }
 }

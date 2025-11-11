@@ -108,11 +108,11 @@ public class PlayerReligionData
     {
         FavorRank = TotalFavorEarned switch
         {
-            >= 10000 => FavorRank.Avatar,
-            >= 5000 => FavorRank.Champion,
-            >= 2000 => FavorRank.Zealot,
-            >= 500 => FavorRank.Disciple,
-            _ => FavorRank.Initiate
+            >= 10000 => FavorRank.Avatar,      // 10000+ = Avatar (Rank 4)
+            >= 5000 => FavorRank.Champion,     // 5000-9999 = Champion (Rank 3)
+            >= 2000 => FavorRank.Zealot,       // 2000-4999 = Zealot (Rank 2)
+            >= 500 => FavorRank.Disciple,      // 500-1999 = Disciple (Rank 1)
+            _ => FavorRank.Initiate            // 0-499 = Initiate (Rank 0)
         };
     }
 

@@ -8,6 +8,8 @@ public interface IPlayerReligionDataManager
 {
     event PlayerReligionDataManager.PlayerReligionDataChangedDelegate OnPlayerLeavesReligion;
 
+    event PlayerReligionDataManager.PlayerDataChangedDelegate OnPlayerDataChanged;
+
     /// <summary>
     ///     Initializes the player religion data manager
     /// </summary>

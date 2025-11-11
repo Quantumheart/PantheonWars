@@ -14,12 +14,12 @@ public static class RankRequirements
     {
         return currentRank switch
         {
-            0 => 100,  // Initiate → Devoted
-            1 => 250,  // Devoted → Zealot
-            2 => 500,  // Zealot → Champion
-            3 => 1000, // Champion → Exalted
-            4 => 0,    // Max rank
-            _ => 0     // Invalid rank
+            0 => 500,   // Initiate → Disciple
+            1 => 2000,  // Disciple → Zealot
+            2 => 5000,  // Zealot → Champion
+            3 => 10000, // Champion → Avatar
+            4 => 0,     // Max rank
+            _ => 0      // Invalid rank
         };
     }
 
@@ -51,10 +51,10 @@ public static class RankRequirements
         return rank switch
         {
             0 => "Initiate",
-            1 => "Devoted",
+            1 => "Disciple",
             2 => "Zealot",
             3 => "Champion",
-            4 => "Exalted",
+            4 => "Avatar",
             _ => $"Rank {rank}"
         };
     }
