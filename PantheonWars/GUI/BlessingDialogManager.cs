@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
+using PantheonWars.Systems;
 using Vintagestory.API.Client;
 
 namespace PantheonWars.GUI;
@@ -27,6 +28,8 @@ public class BlessingDialogManager
     // Player progression state
     public int CurrentFavorRank { get; set; } = 0;
     public int CurrentPrestigeRank { get; set; } = 0;
+    public int CurrentFavor { get; set; } = 0;
+    public int CurrentPrestige { get; set; } = 0;
 
     // Blessing selection state
     public string? SelectedBlessingId { get; set; }
@@ -222,5 +225,35 @@ public class BlessingDialogManager
         }
 
         return true; // All requirements met
+    }
+
+    /// <summary>
+    ///     Get player favor progress data
+    /// </summary>
+    public PlayerFavorProgress GetPlayerFavorProgress()
+    {
+        return new PlayerFavorProgress
+        {
+            CurrentFavor = CurrentFavor,
+            RequiredFavor = RankRequirements.GetRequiredFavorForNextRank(CurrentFavorRank),
+            CurrentRank = CurrentFavorRank,
+            NextRank = CurrentFavorRank + 1,
+            IsMaxRank = CurrentFavorRank >= 4
+        };
+    }
+
+    /// <summary>
+    ///     Get religion prestige progress data
+    /// </summary>
+    public ReligionPrestigeProgress GetReligionPrestigeProgress()
+    {
+        return new ReligionPrestigeProgress
+        {
+            CurrentPrestige = CurrentPrestige,
+            RequiredPrestige = RankRequirements.GetRequiredPrestigeForNextRank(CurrentPrestigeRank),
+            CurrentRank = CurrentPrestigeRank,
+            NextRank = CurrentPrestigeRank + 1,
+            IsMaxRank = CurrentPrestigeRank >= 4
+        };
     }
 }
