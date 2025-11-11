@@ -14,17 +14,20 @@ public class FavorCommands
 {
     private readonly DeityRegistry _deityRegistry;
     private readonly PlayerDataManager _playerDataManager;
+    private readonly PlayerReligionDataManager _religionDataManager;
     private readonly ICoreServerAPI _sapi;
 
     // ReSharper disable once ConvertToPrimaryConstructor
     public FavorCommands(
         ICoreServerAPI sapi,
         DeityRegistry deityRegistry,
-        PlayerDataManager playerDataManager)
+        PlayerDataManager playerDataManager,
+        PlayerReligionDataManager religionDataManager)
     {
         _sapi = sapi;
         _deityRegistry = deityRegistry;
         _playerDataManager = playerDataManager;
+        _religionDataManager = religionDataManager;
     }
 
     /// <summary>
@@ -96,6 +99,28 @@ public class FavorCommands
     #region Helper Methods
 
     /// <summary>
+    ///     Get player's religion data and validate they have a deity
+    /// </summary>
+    private (Data.PlayerReligionData? religionData, string? religionName, TextCommandResult? errorResult) ValidatePlayerHasDeity(IServerPlayer player)
+    {
+        var religionData = _religionDataManager.GetOrCreatePlayerData(player.PlayerUID);
+
+        if (religionData.ActiveDeity == DeityType.None)
+        {
+            return (null, null, TextCommandResult.Error("You are not in a religion or do not have an active deity."));
+        }
+
+        // Get religion name if in a religion
+        string? religionName = null;
+        if (!string.IsNullOrEmpty(religionData.ReligionUID))
+        {
+            religionName = religionData.ReligionUID; // This will be improved when we have access to ReligionManager
+        }
+
+        return (religionData, religionName, null);
+    }
+
+    /// <summary>
     ///     Gets the current favor rank as integer (0-4)
     /// </summary>
     private int GetCurrentFavorRank(int totalFavorEarned)
@@ -119,12 +144,12 @@ public class FavorCommands
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
+        var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
+        if (errorResult.HasValue) return errorResult.Value;
+
         var playerData = _playerDataManager.GetOrCreatePlayerData(player);
-
-        if (!playerData.HasDeity()) return TextCommandResult.Success("You have not pledged to any deity yet.");
-
-        var deity = _deityRegistry.GetDeity(playerData.DeityType);
-        var deityName = deity?.Name ?? playerData.DeityType.ToString();
+        var deity = _deityRegistry.GetDeity(religionData!.ActiveDeity);
+        var deityName = deity?.Name ?? religionData.ActiveDeity.ToString();
 
         return TextCommandResult.Success(
             $"You have {playerData.DivineFavor} favor with {deityName} (Rank: {playerData.DevotionRank})"
@@ -139,12 +164,12 @@ public class FavorCommands
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
+        var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
+        if (errorResult.HasValue) return errorResult.Value;
+
         var playerData = _playerDataManager.GetOrCreatePlayerData(player);
-
-        if (!playerData.HasDeity()) return TextCommandResult.Success("You have not pledged to any deity yet.");
-
-        var deity = _deityRegistry.GetDeity(playerData.DeityType);
-        var deityName = deity?.Name ?? playerData.DeityType.ToString();
+        var deity = _deityRegistry.GetDeity(religionData!.ActiveDeity);
+        var deityName = deity?.Name ?? religionData.ActiveDeity.ToString();
 
         // Get current rank based on total favor
         var currentRank = GetCurrentFavorRank(playerData.TotalFavorEarned);
@@ -186,12 +211,12 @@ public class FavorCommands
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
+        var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
+        if (errorResult.HasValue) return errorResult.Value;
+
         var playerData = _playerDataManager.GetOrCreatePlayerData(player);
-
-        if (!playerData.HasDeity()) return TextCommandResult.Success("You have not pledged to any deity yet.");
-
-        var deity = _deityRegistry.GetDeity(playerData.DeityType);
-        var deityName = deity?.Name ?? playerData.DeityType.ToString();
+        var deity = _deityRegistry.GetDeity(religionData!.ActiveDeity);
+        var deityName = deity?.Name ?? religionData.ActiveDeity.ToString();
 
         // Get current rank based on total favor
         var currentRank = GetCurrentFavorRank(playerData.TotalFavorEarned);
@@ -263,9 +288,10 @@ public class FavorCommands
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+        var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
+        if (errorResult.HasValue) return errorResult.Value;
 
-        if (!playerData.HasDeity()) return TextCommandResult.Error("You have not pledged to any deity yet.");
+        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
 
         var amount = (int)args[0];
 
@@ -287,9 +313,10 @@ public class FavorCommands
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+        var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
+        if (errorResult.HasValue) return errorResult.Value;
 
-        if (!playerData.HasDeity()) return TextCommandResult.Error("You have not pledged to any deity yet.");
+        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
 
         var amount = (int)args[0];
 
@@ -312,9 +339,10 @@ public class FavorCommands
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+        var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
+        if (errorResult.HasValue) return errorResult.Value;
 
-        if (!playerData.HasDeity()) return TextCommandResult.Error("You have not pledged to any deity yet.");
+        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
 
         var amount = (int)args[0];
 
@@ -339,9 +367,10 @@ public class FavorCommands
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+        var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
+        if (errorResult.HasValue) return errorResult.Value;
 
-        if (!playerData.HasDeity()) return TextCommandResult.Error("You have not pledged to any deity yet.");
+        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
 
         var oldFavor = playerData.DivineFavor;
         playerData.DivineFavor = 0;
@@ -357,9 +386,10 @@ public class FavorCommands
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+        var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
+        if (errorResult.HasValue) return errorResult.Value;
 
-        if (!playerData.HasDeity()) return TextCommandResult.Error("You have not pledged to any deity yet.");
+        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
 
         var oldFavor = playerData.DivineFavor;
         playerData.DivineFavor = 99999;
@@ -375,9 +405,10 @@ public class FavorCommands
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+        var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
+        if (errorResult.HasValue) return errorResult.Value;
 
-        if (!playerData.HasDeity()) return TextCommandResult.Error("You have not pledged to any deity yet.");
+        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
 
         var amount = (int)args[0];
 

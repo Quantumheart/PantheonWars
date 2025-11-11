@@ -14,16 +14,19 @@ public class AbilityCommands
 {
     private readonly AbilitySystem _abilitySystem;
     private readonly PlayerDataManager _playerDataManager;
+    private readonly PlayerReligionDataManager _religionDataManager;
     private readonly ICoreServerAPI _sapi;
 
     public AbilityCommands(
         ICoreServerAPI sapi,
         AbilitySystem abilitySystem,
-        PlayerDataManager playerDataManager)
+        PlayerDataManager playerDataManager,
+        PlayerReligionDataManager religionDataManager)
     {
         _sapi = sapi;
         _abilitySystem = abilitySystem;
         _playerDataManager = playerDataManager;
+        _religionDataManager = religionDataManager;
     }
 
     /// <summary>
@@ -62,11 +65,11 @@ public class AbilityCommands
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+        var religionData = _religionDataManager.GetOrCreatePlayerData(player.PlayerUID);
 
-        if (!playerData.HasDeity())
+        if (religionData.ActiveDeity == DeityType.None)
             return TextCommandResult.Success(
-                "You have not pledged to any deity yet. Use /deity list to see available deities.");
+                "You are not in a religion or do not have an active deity. Use /deity list to see available deities.");
 
         var abilities = _abilitySystem.GetPlayerAbilities(player).ToList();
         if (!abilities.Any()) return TextCommandResult.Success("No abilities available.");
@@ -102,7 +105,8 @@ public class AbilityCommands
                 $"Ability '{abilityId}' not found. Use /ability list to see your abilities.");
 
         var playerData = _playerDataManager.GetOrCreatePlayerData(player);
-        var canUse = playerData.HasDeity() && ability.Deity == playerData.DeityType;
+        var religionData = _religionDataManager.GetOrCreatePlayerData(player.PlayerUID);
+        var canUse = religionData.ActiveDeity != DeityType.None && ability.Deity == religionData.ActiveDeity;
 
         var sb = new StringBuilder();
         sb.AppendLine($"=== {ability.Name} ===");
@@ -165,9 +169,9 @@ public class AbilityCommands
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
-        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+        var religionData = _religionDataManager.GetOrCreatePlayerData(player.PlayerUID);
 
-        if (!playerData.HasDeity()) return TextCommandResult.Success("You have not pledged to any deity yet.");
+        if (religionData.ActiveDeity == DeityType.None) return TextCommandResult.Success("You are not in a religion or do not have an active deity.");
 
         var abilities = _abilitySystem.GetPlayerAbilities(player).ToList();
         if (!abilities.Any()) return TextCommandResult.Success("No abilities available.");

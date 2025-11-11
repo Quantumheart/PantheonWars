@@ -63,7 +63,9 @@ public class PlayerDataManager : IPlayerDataManager
 
     /// <summary>
     ///     Checks if player has pledged to a deity
+    ///     DEPRECATED: Use PlayerReligionDataManager.GetOrCreatePlayerData() and check ActiveDeity instead
     /// </summary>
+    [Obsolete("Use PlayerReligionDataManager.GetOrCreatePlayerData() and check ActiveDeity != DeityType.None instead. This method will be removed in v2.0.0")]
     public bool HasDeity(string playerUID)
     {
         var data = GetOrCreatePlayerData(playerUID);
@@ -72,7 +74,9 @@ public class PlayerDataManager : IPlayerDataManager
 
     /// <summary>
     ///     Sets player's deity (initial pledge or switch)
+    ///     DEPRECATED: Use PlayerReligionDataManager.JoinReligion() instead
     /// </summary>
+    [Obsolete("Use PlayerReligionDataManager.JoinReligion() instead. This method will be removed in v2.0.0")]
     public void SetDeity(string playerUID, DeityType deityType)
     {
         var data = GetOrCreatePlayerData(playerUID);

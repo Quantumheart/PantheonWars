@@ -107,16 +107,16 @@ public class PantheonWarsSystem : ModSystem
         _religionManager = new ReligionManager(api);
         _religionManager.Initialize();
 
+        _playerReligionDataManager = new PlayerReligionDataManager(api, _religionManager);
+        _playerReligionDataManager.Initialize();
+
         // Initialize favor system (with religion manager for passive favor multipliers)
-        _favorSystem = new FavorSystem(api, _playerDataManager, _deityRegistry, _religionManager);
+        _favorSystem = new FavorSystem(api, _playerDataManager, _playerReligionDataManager, _deityRegistry, _religionManager);
         _favorSystem.Initialize();
 
         // Initialize ability system (pass buff manager to it)
         _abilitySystem = new AbilitySystem(api, _abilityRegistry, _playerDataManager, _cooldownManager, _buffManager);
         _abilitySystem.Initialize();
-
-        _playerReligionDataManager = new PlayerReligionDataManager(api, _religionManager);
-        _playerReligionDataManager.Initialize();
 
         _religionPrestigeManager = new ReligionPrestigeManager(api, _religionManager);
         _religionPrestigeManager.Initialize();
@@ -136,13 +136,13 @@ public class PantheonWarsSystem : ModSystem
         _religionPrestigeManager.SetBlessingSystems(_blessingRegistry, _blessingEffectSystem);
 
         // Register commands
-        _deityCommands = new DeityCommands(api, _deityRegistry, _playerDataManager);
+        _deityCommands = new DeityCommands(api, _deityRegistry, _playerDataManager, _playerReligionDataManager);
         _deityCommands.RegisterCommands();
 
-        _abilityCommands = new AbilityCommands(api, _abilitySystem, _playerDataManager);
+        _abilityCommands = new AbilityCommands(api, _abilitySystem, _playerDataManager, _playerReligionDataManager);
         _abilityCommands.RegisterCommands();
 
-        _favorCommands = new FavorCommands(api, _deityRegistry, _playerDataManager);
+        _favorCommands = new FavorCommands(api, _deityRegistry, _playerDataManager, _playerReligionDataManager);
         _favorCommands.RegisterCommands();
 
         _religionCommands = new ReligionCommands(api, _religionManager, _playerReligionDataManager, _serverChannel);
