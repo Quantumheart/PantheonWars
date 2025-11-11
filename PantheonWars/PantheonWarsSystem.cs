@@ -103,17 +103,17 @@ public class PantheonWarsSystem : ModSystem
         // Initialize buff manager
         _buffManager = new BuffManager(api);
 
-        // Initialize favor system
-        _favorSystem = new FavorSystem(api, _playerDataManager, _deityRegistry);
+        // Initialize religion systems first (needed by FavorSystem for passive favor)
+        _religionManager = new ReligionManager(api);
+        _religionManager.Initialize();
+
+        // Initialize favor system (with religion manager for passive favor multipliers)
+        _favorSystem = new FavorSystem(api, _playerDataManager, _deityRegistry, _religionManager);
         _favorSystem.Initialize();
 
         // Initialize ability system (pass buff manager to it)
         _abilitySystem = new AbilitySystem(api, _abilityRegistry, _playerDataManager, _cooldownManager, _buffManager);
         _abilitySystem.Initialize();
-
-        // Initialize religion systems (Phase 3.1 & 3.2)
-        _religionManager = new ReligionManager(api);
-        _religionManager.Initialize();
 
         _playerReligionDataManager = new PlayerReligionDataManager(api, _religionManager);
         _playerReligionDataManager.Initialize();
