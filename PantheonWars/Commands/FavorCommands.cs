@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using PantheonWars.Models.Enum;
 using PantheonWars.Systems;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 
@@ -13,21 +14,18 @@ namespace PantheonWars.Commands;
 public class FavorCommands
 {
     private readonly DeityRegistry _deityRegistry;
-    private readonly PlayerDataManager _playerDataManager;
-    private readonly PlayerReligionDataManager _religionDataManager;
+    private readonly IPlayerReligionDataManager _playerReligionDataManager;
     private readonly ICoreServerAPI _sapi;
 
     // ReSharper disable once ConvertToPrimaryConstructor
     public FavorCommands(
         ICoreServerAPI sapi,
         DeityRegistry deityRegistry,
-        PlayerDataManager playerDataManager,
-        PlayerReligionDataManager religionDataManager)
+        IPlayerReligionDataManager playerReligionDataManager)
     {
         _sapi = sapi;
         _deityRegistry = deityRegistry;
-        _playerDataManager = playerDataManager;
-        _religionDataManager = religionDataManager;
+        _playerReligionDataManager = playerReligionDataManager;
     }
 
     /// <summary>
@@ -103,7 +101,7 @@ public class FavorCommands
     /// </summary>
     private (Data.PlayerReligionData? religionData, string? religionName, TextCommandResult? errorResult) ValidatePlayerHasDeity(IServerPlayer player)
     {
-        var religionData = _religionDataManager.GetOrCreatePlayerData(player.PlayerUID);
+        var religionData = _playerReligionDataManager.GetOrCreatePlayerData(player.PlayerUID);
 
         if (religionData.ActiveDeity == DeityType.None)
         {
@@ -145,7 +143,7 @@ public class FavorCommands
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
-        if (errorResult.HasValue) return errorResult.Value;
+        if (errorResult is { Status: EnumCommandStatus.Error }) return errorResult;
 
         var deity = _deityRegistry.GetDeity(religionData!.ActiveDeity);
         var deityName = deity?.Name ?? religionData.ActiveDeity.ToString();
@@ -164,7 +162,7 @@ public class FavorCommands
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
-        if (errorResult.HasValue) return errorResult.Value;
+        if (errorResult is { Status: EnumCommandStatus.Error }) return errorResult;
 
         var deity = _deityRegistry.GetDeity(religionData!.ActiveDeity);
         var deityName = deity?.Name ?? religionData.ActiveDeity.ToString();
@@ -210,7 +208,7 @@ public class FavorCommands
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
-        if (errorResult.HasValue) return errorResult.Value;
+        if (errorResult is { Status: EnumCommandStatus.Error }) return errorResult;
 
         var deity = _deityRegistry.GetDeity(religionData!.ActiveDeity);
         var deityName = deity?.Name ?? religionData.ActiveDeity.ToString();
@@ -286,7 +284,7 @@ public class FavorCommands
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
-        if (errorResult.HasValue) return errorResult.Value;
+        if (errorResult is { Status: EnumCommandStatus.Error }) return errorResult;
 
         var amount = (int)args[0];
 
@@ -309,7 +307,7 @@ public class FavorCommands
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
-        if (errorResult.HasValue) return errorResult.Value;
+        if (errorResult is { Status: EnumCommandStatus.Error }) return errorResult;
 
         var amount = (int)args[0];
 
@@ -319,8 +317,8 @@ public class FavorCommands
         if (amount > 999999) return TextCommandResult.Error("Amount cannot exceed 999,999.");
 
         var oldFavor = religionData.Favor;
-        religionData.Favor += amount;
-
+        _playerReligionDataManager.AddFavor(player.PlayerUID, amount);
+        
         return TextCommandResult.Success($"Added {amount:N0} favor ({oldFavor:N0} → {religionData.Favor:N0})");
     }
 
@@ -333,7 +331,7 @@ public class FavorCommands
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
-        if (errorResult.HasValue) return errorResult.Value;
+        if (errorResult is { Status: EnumCommandStatus.Error }) return errorResult;
 
         var amount = (int)args[0];
 
@@ -343,7 +341,7 @@ public class FavorCommands
         if (amount > 999999) return TextCommandResult.Error("Amount cannot exceed 999,999.");
 
         var oldFavor = religionData.Favor;
-        religionData.Favor = Math.Max(0, religionData.Favor - amount);
+        _playerReligionDataManager.RemoveFavor(player.PlayerUID, amount);
         var actualRemoved = oldFavor - religionData.Favor;
 
         return TextCommandResult.Success(
@@ -359,7 +357,7 @@ public class FavorCommands
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
-        if (errorResult.HasValue) return errorResult.Value;
+        if (errorResult is { Status: EnumCommandStatus.Error }) return errorResult;
 
         var oldFavor = religionData.Favor;
         religionData.Favor = 0;
@@ -376,7 +374,7 @@ public class FavorCommands
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
-        if (errorResult.HasValue) return errorResult.Value;
+        if (errorResult is { Status: EnumCommandStatus.Error }) return errorResult;
 
         var oldFavor = religionData.Favor;
         religionData.Favor = 99999;
@@ -393,7 +391,7 @@ public class FavorCommands
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
 
         var (religionData, religionName, errorResult) = ValidatePlayerHasDeity(player);
-        if (errorResult.HasValue) return errorResult.Value;
+        if (errorResult is { Status: EnumCommandStatus.Error }) return errorResult;
 
         var amount = (int)args[0];
 
