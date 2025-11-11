@@ -75,6 +75,12 @@ public class PlayerDeityData
     public int DataVersion { get; set; } = 1;
 
     /// <summary>
+    ///     Accumulated fractional favor (not yet awarded)
+    /// </summary>
+    [ProtoMember(10)]
+    public float AccumulatedFractionalFavor { get; set; } = 0f;
+
+    /// <summary>
     ///     Checks if player has pledged to a deity
     /// </summary>
     public bool HasDeity()
@@ -99,7 +105,7 @@ public class PlayerDeityData
     }
 
     /// <summary>
-    ///     Adds favor and updates statistics
+    ///     Adds favor and updates statistics (integer version)
     /// </summary>
     public void AddFavor(int amount)
     {
@@ -108,6 +114,28 @@ public class PlayerDeityData
             DivineFavor += amount;
             TotalFavorEarned += amount;
             UpdateDevotionRank();
+        }
+    }
+
+    /// <summary>
+    ///     Adds fractional favor and updates statistics when accumulated amount >= 1
+    /// </summary>
+    public void AddFractionalFavor(float amount)
+    {
+        if (amount > 0)
+        {
+            AccumulatedFractionalFavor += amount;
+
+            // Award integer favor when we have accumulated >= 1.0
+            if (AccumulatedFractionalFavor >= 1.0f)
+            {
+                int favorToAward = (int)AccumulatedFractionalFavor;
+                AccumulatedFractionalFavor -= favorToAward; // Keep the fractional remainder
+
+                DivineFavor += favorToAward;
+                TotalFavorEarned += favorToAward;
+                UpdateDevotionRank();
+            }
         }
     }
 

@@ -14,16 +14,21 @@ public class FavorSystem
 {
     private const int BASE_KILL_FAVOR = 10;
     private const int DEATH_PENALTY_FAVOR = 5;
+    private const float BASE_FAVOR_PER_HOUR = 2.0f; // Passive favor generation rate
+    private const int PASSIVE_TICK_INTERVAL_MS = 1000; // 1 second ticks
+
     private readonly DeityRegistry _deityRegistry;
     private readonly IPlayerDataManager _playerDataManager;
+    private readonly ReligionManager _religionManager;
 
     private readonly ICoreServerAPI _sapi;
 
-    public FavorSystem(ICoreServerAPI sapi, IPlayerDataManager playerDataManager, DeityRegistry deityRegistry)
+    public FavorSystem(ICoreServerAPI sapi, IPlayerDataManager playerDataManager, DeityRegistry deityRegistry, ReligionManager religionManager)
     {
         _sapi = sapi;
         _playerDataManager = playerDataManager;
         _deityRegistry = deityRegistry;
+        _religionManager = religionManager;
     }
 
     /// <summary>
@@ -36,7 +41,10 @@ public class FavorSystem
         // Hook into player death event for PvP favor rewards
         _sapi.Event.PlayerDeath += OnPlayerDeath;
 
-        _sapi.Logger.Notification("[PantheonWars] Favor System initialized");
+        // Register passive favor generation tick (once per second)
+        _sapi.Event.RegisterGameTickListener(OnGameTick, PASSIVE_TICK_INTERVAL_MS);
+
+        _sapi.Logger.Notification("[PantheonWars] Favor System initialized with passive favor generation");
     }
 
     /// <summary>
@@ -157,4 +165,88 @@ public class FavorSystem
             EnumChatType.Notification
         );
     }
+
+    #region Passive Favor Generation
+
+    /// <summary>
+    ///     Game tick handler for passive favor generation
+    /// </summary>
+    private void OnGameTick(float dt)
+    {
+        // Award passive favor to all online players with deities
+        foreach (var player in _sapi.World.AllOnlinePlayers)
+        {
+            if (player is IServerPlayer serverPlayer)
+            {
+                AwardPassiveFavor(serverPlayer, dt);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Awards passive favor to a player based on their devotion and time played
+    /// </summary>
+    private void AwardPassiveFavor(IServerPlayer player, float dt)
+    {
+        var playerData = _playerDataManager.GetOrCreatePlayerData(player);
+
+        if (!playerData.HasDeity()) return;
+
+        // Calculate in-game hours elapsed this tick
+        // dt is in real-time seconds, convert to in-game hours
+        float inGameHoursElapsed = dt / _sapi.World.Calendar.HoursPerDay;
+
+        // Calculate base favor for this tick
+        float baseFavor = BASE_FAVOR_PER_HOUR * inGameHoursElapsed;
+
+        // Apply multipliers
+        float finalFavor = baseFavor * CalculatePassiveFavorMultiplier(player, playerData);
+
+        // Award favor using fractional accumulation
+        if (finalFavor >= 0.01f) // Only award when we have at least 0.01 favor
+        {
+            _playerDataManager.AddFractionalFavor(player.PlayerUID, finalFavor, "Passive devotion");
+        }
+    }
+
+    /// <summary>
+    ///     Calculates the total multiplier for passive favor generation
+    /// </summary>
+    private float CalculatePassiveFavorMultiplier(IServerPlayer player, PlayerDeityData playerData)
+    {
+        float multiplier = 1.0f;
+
+        // Devotion rank bonuses (higher ranks gain passive favor faster)
+        multiplier *= playerData.DevotionRank switch
+        {
+            DevotionRank.Initiate => 1.0f,
+            DevotionRank.Disciple => 1.1f,
+            DevotionRank.Zealot => 1.2f,
+            DevotionRank.Champion => 1.3f,
+            DevotionRank.Avatar => 1.5f,
+            _ => 1.0f
+        };
+
+        // Religion prestige bonuses (active religions provide better passive gains)
+        var religion = _religionManager.GetPlayerReligion(player.PlayerUID);
+        if (religion != null)
+        {
+            multiplier *= religion.PrestigeRank switch
+            {
+                PrestigeRank.Fledgling => 1.0f,
+                PrestigeRank.Established => 1.1f,
+                PrestigeRank.Renowned => 1.2f,
+                PrestigeRank.Legendary => 1.3f,
+                PrestigeRank.Mythic => 1.5f,
+                _ => 1.0f
+            };
+        }
+
+        // TODO: Future activity bonuses (prayer, sacred territory, time-of-day, etc.)
+        // These will be added in Phase 3
+
+        return multiplier;
+    }
+
+    #endregion
 }
