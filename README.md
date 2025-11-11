@@ -98,15 +98,19 @@ Open `PantheonWars.sln` in your IDE and select either:
 
 For detailed information about the mod's systems and mechanics, see:
 
-**Phase 3 Documentation:**
-- **[Implementation Guide](docs/implementation_guide.md)** - Development roadmap and phase breakdown (updated for Phase 3)
-- **[Phase 3 Task Breakdown](docs/phase3_task_breakdown.md)** - Detailed task list and progress tracking
-- **[Phase 3 Design Guide](docs/phase3_group_deity_blessings_guide.md)** - Religion and blessing system design specifications
+**Documentation Index:**
+- **[Documentation Home](docs/README.md)** - Complete documentation index organized by topic
 
-**Legacy Documentation (Phase 1-2):**
-- **[Deity Reference](docs/deity_reference.md)** - Complete deity information, relationships, and lore
-- **[Favor System Guide](docs/favor_reference.md)** - How favor works, earning methods, and devotion ranks
-- **[Ability Reference](docs/ability_reference.md)** - Old ability system (deprecated)
+**Phase 3 Documentation:**
+- **[Implementation Guide](docs/topics/implementation/implementation_guide.md)** - Development roadmap and phase breakdown
+- **[Phase 3 Task Breakdown](docs/topics/planning/phase3_task_breakdown.md)** - Detailed task list and progress tracking
+- **[Phase 3 Design Guide](docs/topics/planning/phase3_group_deity_blessings_guide.md)** - Religion and blessing system design specifications
+
+**Reference Documentation:**
+- **[Deity Reference](docs/topics/reference/deity_reference.md)** - Complete deity information, relationships, and lore
+- **[Favor System Guide](docs/topics/reference/favor_reference.md)** - How favor works, earning methods, and devotion ranks
+- **[Blessing Reference](docs/topics/reference/blessing_reference.md)** - Blessing system mechanics
+- **[Ability Reference](docs/topics/reference/ability_reference.md)** - Old ability system (deprecated)
 
 ## Project Structure
 
@@ -116,12 +120,16 @@ PantheonWars/
 │   ├── Program.cs          # Build tasks and packaging
 │   └── CakeBuild.csproj
 ├── docs/                   # Documentation
-│   ├── implementation_guide.md          # Development roadmap
-│   ├── phase3_task_breakdown.md         # Phase 3 detailed tasks
-│   ├── phase3_group_deity_blessings_guide.md # Phase 3 design doc
-│   ├── deity_reference.md
-│   ├── favor_reference.md
-│   └── ability_reference.md (legacy)
+│   ├── README.md           # Documentation index
+│   └── topics/             # Documentation organized by topic
+│       ├── reference/      # Game system references
+│       ├── implementation/ # Implementation guides
+│       ├── ui-design/      # UI design documents
+│       ├── testing/        # Testing guides
+│       ├── art-assets/     # Icon and asset specs
+│       ├── planning/       # Phase planning docs
+│       ├── integration/    # System integration guides
+│       └── analysis/       # External mod analysis
 ├── PantheonWars/           # Main mod project
 │   ├── Abilities/ (legacy) # Old ability system (Phase 1-2)
 │   │   ├── Khoras/         # To be removed in Phase 3.5
@@ -276,7 +284,7 @@ The mod is **ready for launch** with all core religion and blessing systems func
 - **Patch 1.4:** Status effects (poison DoT, plague aura, death aura, companions)
 - **Patch 1.5+:** Visual blessing tree GUI, balance tuning, community feedback
 
-For detailed phase breakdowns, tasks, and timeline, see the **[Implementation Guide](docs/implementation_guide.md)**.
+For detailed phase breakdowns, tasks, and timeline, see the **[Implementation Guide](docs/topics/implementation/implementation_guide.md)**.
 
 ### Available Commands
 
