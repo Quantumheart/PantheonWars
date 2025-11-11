@@ -96,19 +96,15 @@ public class FavorCommands
     #region Helper Methods
 
     /// <summary>
-    ///     Gets the next devotion rank and its requirement
+    ///     Gets the current favor rank as integer (0-4)
     /// </summary>
-    private (DevotionRank? nextRank, int threshold) GetNextRank(DevotionRank currentRank)
+    private int GetCurrentFavorRank(int totalFavorEarned)
     {
-        return currentRank switch
-        {
-            DevotionRank.Initiate => (DevotionRank.Disciple, 500),
-            DevotionRank.Disciple => (DevotionRank.Zealot, 2000),
-            DevotionRank.Zealot => (DevotionRank.Champion, 5000),
-            DevotionRank.Champion => (DevotionRank.Avatar, 10000),
-            DevotionRank.Avatar => (null, 0), // Max rank
-            _ => (null, 0)
-        };
+        if (totalFavorEarned >= 1000) return 4; // Exalted
+        if (totalFavorEarned >= 500) return 3;  // Champion
+        if (totalFavorEarned >= 250) return 2;  // Zealot
+        if (totalFavorEarned >= 100) return 1;  // Devoted
+        return 0; // Initiate
     }
 
     #endregion
@@ -150,18 +146,25 @@ public class FavorCommands
         var deity = _deityRegistry.GetDeity(playerData.DeityType);
         var deityName = deity?.Name ?? playerData.DeityType.ToString();
 
+        // Get current rank based on total favor
+        var currentRank = GetCurrentFavorRank(playerData.TotalFavorEarned);
+        var currentRankName = RankRequirements.GetFavorRankName(currentRank);
+
         var sb = new StringBuilder();
         sb.AppendLine("=== Divine Favor ===");
         sb.AppendLine($"Deity: {deityName}");
         sb.AppendLine($"Current Favor: {playerData.DivineFavor:N0}");
         sb.AppendLine($"Total Favor Earned: {playerData.TotalFavorEarned:N0}");
-        sb.AppendLine($"Current Rank: {playerData.DevotionRank}");
+        sb.AppendLine($"Current Rank: {currentRankName}");
 
         // Calculate next rank
-        var (nextRank, nextThreshold) = GetNextRank(playerData.DevotionRank);
-        if (nextRank.HasValue)
+        if (currentRank < 4) // Not at max rank
         {
-            sb.AppendLine($"Next Rank: {nextRank.Value} ({nextThreshold:N0} total favor required)");
+            var nextRank = currentRank + 1;
+            var nextRankName = RankRequirements.GetFavorRankName(nextRank);
+            var nextThreshold = RankRequirements.GetRequiredFavorForNextRank(currentRank);
+
+            sb.AppendLine($"Next Rank: {nextRankName} ({nextThreshold:N0} total favor required)");
 
             var remaining = nextThreshold - playerData.TotalFavorEarned;
             var progress = (float)playerData.TotalFavorEarned / nextThreshold * 100f;
@@ -190,12 +193,16 @@ public class FavorCommands
         var deity = _deityRegistry.GetDeity(playerData.DeityType);
         var deityName = deity?.Name ?? playerData.DeityType.ToString();
 
+        // Get current rank based on total favor
+        var currentRank = GetCurrentFavorRank(playerData.TotalFavorEarned);
+        var currentRankName = RankRequirements.GetFavorRankName(currentRank);
+
         var sb = new StringBuilder();
         sb.AppendLine("=== Divine Statistics ===");
         sb.AppendLine($"Deity: {deityName}");
         sb.AppendLine($"Current Favor: {playerData.DivineFavor:N0}");
         sb.AppendLine($"Total Favor Earned: {playerData.TotalFavorEarned:N0}");
-        sb.AppendLine($"Devotion Rank: {playerData.DevotionRank}");
+        sb.AppendLine($"Devotion Rank: {currentRankName}");
         sb.AppendLine($"Kill Count: {playerData.KillCount}");
 
         if (playerData.PledgeDate != DateTime.MinValue)
@@ -206,12 +213,15 @@ public class FavorCommands
         }
 
         // Calculate next rank
-        var (nextRank, nextThreshold) = GetNextRank(playerData.DevotionRank);
-        if (nextRank.HasValue)
+        if (currentRank < 4) // Not at max rank
         {
+            var nextRank = currentRank + 1;
+            var nextRankName = RankRequirements.GetFavorRankName(nextRank);
+            var nextThreshold = RankRequirements.GetRequiredFavorForNextRank(currentRank);
             var remaining = nextThreshold - playerData.TotalFavorEarned;
+
             sb.AppendLine();
-            sb.AppendLine($"Next Rank: {nextRank.Value}");
+            sb.AppendLine($"Next Rank: {nextRankName}");
             sb.AppendLine($"Favor Needed: {remaining:N0}");
         }
 
@@ -225,14 +235,18 @@ public class FavorCommands
     private TextCommandResult OnListRanks(TextCommandCallingArgs args)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("=== Devotion Ranks ===");
-        sb.AppendLine("Initiate: 0 total favor");
-        sb.AppendLine("Disciple: 500 total favor");
-        sb.AppendLine("Zealot: 2,000 total favor");
-        sb.AppendLine("Champion: 5,000 total favor");
-        sb.AppendLine("Avatar: 10,000 total favor");
+        sb.AppendLine("=== Favor Ranks ===");
+
+        // List all ranks with their requirements
+        for (int rank = 0; rank <= 4; rank++)
+        {
+            var rankName = RankRequirements.GetFavorRankName(rank);
+            var totalRequired = rank == 0 ? 0 : RankRequirements.GetRequiredFavorForNextRank(rank - 1);
+            sb.AppendLine($"{rankName}: {totalRequired:N0} total favor");
+        }
+
         sb.AppendLine();
-        sb.AppendLine("Higher ranks unlock more powerful abilities.");
+        sb.AppendLine("Higher ranks unlock more powerful blessings.");
 
         return TextCommandResult.Success(sb.ToString());
     }
