@@ -412,12 +412,13 @@ public partial class BlessingDialog
     /// </summary>
     private void OnPlayerReligionDataUpdated(PlayerReligionDataPacket packet)
     {
-        // Only update if dialog is open and has data loaded
-        if (!_state.IsOpen || _manager == null || !_manager.HasReligion()) return;
+        // Skip if manager is not initialized yet
+        if (_manager == null) return;
 
         _capi!.Logger.Debug($"[PantheonWars] Updating blessing dialog with new favor data: {packet.Favor}, Total: {packet.TotalFavorEarned}");
 
-        // Update manager with new values
+        // Always update manager with new values, even if dialog is closed
+        // This ensures the UI shows correct values when opened
         _manager.CurrentFavor = packet.Favor;
         _manager.CurrentPrestige = packet.Prestige;
         _manager.TotalFavorEarned = packet.TotalFavorEarned;
@@ -435,7 +436,11 @@ public partial class BlessingDialog
         }
 
         // Refresh blessing states in case new blessings became available
-        _manager.RefreshAllBlessingStates();
+        // Only do this if dialog is open to avoid unnecessary processing
+        if (_state.IsOpen && _manager.HasReligion())
+        {
+            _manager.RefreshAllBlessingStates();
+        }
     }
 
     /// <summary>
