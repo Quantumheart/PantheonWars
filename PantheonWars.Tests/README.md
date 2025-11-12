@@ -2,6 +2,11 @@
 
 This directory contains comprehensive unit and integration tests for the PantheonWars mod, following industry best practices with proper mocking and dependency injection.
 
+## Quick Links
+
+- **📊 [Code Coverage Guide](../docs/CODE_COVERAGE.md)** - Generate and view coverage reports
+- **📋 [Test Plan](../docs/TEST_PLAN.md)** - Complete testing strategy and roadmap
+
 ## Test Infrastructure
 
 ### TestFixtures (`Helpers/TestFixtures.cs`)
