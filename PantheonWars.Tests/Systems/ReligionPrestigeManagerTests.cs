@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Moq;
 using PantheonWars.Data;
@@ -10,7 +9,6 @@ using PantheonWars.Tests.Helpers;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
-using Xunit;
 
 namespace PantheonWars.Tests.Systems;
 
@@ -479,6 +477,262 @@ public class ReligionPrestigeManagerTests
         Assert.Equal(0, current);
         Assert.Equal(0, nextThreshold);
         Assert.Equal(PrestigeRank.Fledgling, nextRank);
+    }
+
+    #endregion
+
+    #region Notification Tests
+
+    [Fact]
+    public void AddPrestige_ThatCausesRankUp_NotifiesMembers()
+    {
+        // Arrange
+        _testReligion.TotalPrestige = 450;
+        _testReligion.PrestigeRank = PrestigeRank.Fledgling;
+        _testReligion.AddMember("member-1");
+        _testReligion.AddMember("member-2");
+
+        var mockWorld = new Mock<IServerWorldAccessor>();
+        var mockPlayer1 = new Mock<IServerPlayer>();
+        var mockPlayer2 = new Mock<IServerPlayer>();
+
+        mockWorld.Setup(w => w.PlayerByUid("member-1")).Returns(mockPlayer1.Object);
+        mockWorld.Setup(w => w.PlayerByUid("member-2")).Returns(mockPlayer2.Object);
+        _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
+
+        // Act - Add prestige to trigger rank-up
+        _prestigeManager.AddPrestige("test-religion-uid", 100);
+
+        // Assert - Both members should receive notifications
+        mockPlayer1.Verify(
+            p => p.SendMessage(
+                It.Is<int>(g => g == GlobalConstants.GeneralChatGroup),
+                It.Is<string>(s => s.Contains("ascended") && s.Contains("Established")),
+                It.Is<EnumChatType>(t => t == EnumChatType.Notification),
+                It.IsAny<string>()
+            ),
+            Times.Once()
+        );
+
+        mockPlayer2.Verify(
+            p => p.SendMessage(
+                It.Is<int>(g => g == GlobalConstants.GeneralChatGroup),
+                It.Is<string>(s => s.Contains("ascended") && s.Contains("Established")),
+                It.Is<EnumChatType>(t => t == EnumChatType.Notification),
+                It.IsAny<string>()
+            ),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public void AddPrestige_WithoutRankUp_DoesNotNotifyMembers()
+    {
+        // Arrange
+        _testReligion.TotalPrestige = 100;
+        _testReligion.PrestigeRank = PrestigeRank.Fledgling;
+        _testReligion.AddMember("member-1");
+
+        var mockWorld = new Mock<IServerWorldAccessor>();
+        var mockPlayer = new Mock<IServerPlayer>();
+
+        mockWorld.Setup(w => w.PlayerByUid("member-1")).Returns(mockPlayer.Object);
+        _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
+
+        // Act - Add prestige but don't rank up
+        _prestigeManager.AddPrestige("test-religion-uid", 50);
+
+        // Assert - No notification should be sent
+        mockPlayer.Verify(
+            p => p.SendMessage(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<EnumChatType>(), It.IsAny<string>()),
+            Times.Never()
+        );
+    }
+
+    [Fact]
+    public void AddPrestige_WithNullPlayer_DoesNotCrash()
+    {
+        // Arrange
+        _testReligion.TotalPrestige = 450;
+        _testReligion.PrestigeRank = PrestigeRank.Fledgling;
+        _testReligion.AddMember("offline-player");
+
+        var mockWorld = new Mock<IServerWorldAccessor>();
+        mockWorld.Setup(w => w.PlayerByUid("offline-player")).Returns((IServerPlayer)null!);
+        _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
+
+        // Act & Assert - Should not throw
+        _prestigeManager.AddPrestige("test-religion-uid", 100);
+        Assert.Equal(PrestigeRank.Established, _testReligion.PrestigeRank);
+    }
+
+    #endregion
+
+    #region Blessing Unlock Notification Tests
+
+    [Fact]
+    public void UpdatePrestigeRank_WithNewBlessingsAvailable_NotifiesMembers()
+    {
+        // Arrange
+        var mockBlessingRegistry = new Mock<IBlessingRegistry>();
+        var mockBlessingEffectSystem = new Mock<IBlessingEffectSystem>();
+
+        var blessing = new Blessing
+        {
+            BlessingId = "test_blessing",
+            Name = "Test Blessing",
+            Deity = DeityType.Khoras,
+            Kind = BlessingKind.Religion,
+            RequiredPrestigeRank = 1, // Established
+            PrerequisiteBlessings = new List<string>()
+        };
+
+        mockBlessingRegistry
+            .Setup(r => r.GetBlessingsForDeity(DeityType.Khoras, BlessingKind.Religion))
+            .Returns(new List<Blessing> { blessing });
+
+        _prestigeManager.SetBlessingSystems(mockBlessingRegistry.Object, mockBlessingEffectSystem.Object);
+
+        _testReligion.TotalPrestige = 500;
+        _testReligion.PrestigeRank = PrestigeRank.Fledgling;
+        _testReligion.AddMember("member-1");
+
+        var mockWorld = new Mock<IServerWorldAccessor>();
+        var mockPlayer = new Mock<IServerPlayer>();
+        mockWorld.Setup(w => w.PlayerByUid("member-1")).Returns(mockPlayer.Object);
+        _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
+
+        // Act
+        _prestigeManager.UpdatePrestigeRank("test-religion-uid");
+
+        // Assert - Player should be notified about new blessings
+        mockPlayer.Verify(
+            p => p.SendMessage(
+                It.Is<int>(g => g == GlobalConstants.GeneralChatGroup),
+                It.Is<string>(s => s.Contains("New blessings available") && s.Contains("Test Blessing")),
+                It.Is<EnumChatType>(t => t == EnumChatType.Notification),
+                It.IsAny<string>()
+            ),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public void UpdatePrestigeRank_WithoutBlessingRegistry_SkipsUnlockCheck()
+    {
+        // Arrange - Don't set blessing systems
+        _testReligion.TotalPrestige = 500;
+        _testReligion.PrestigeRank = PrestigeRank.Fledgling;
+
+        // Act
+        _prestigeManager.UpdatePrestigeRank("test-religion-uid");
+
+        // Assert - Should log debug message about skipping
+        _mockLogger.Verify(
+            l => l.Debug(It.Is<string>(s => s.Contains("not yet initialized"))),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public void UpdatePrestigeRank_WithNoNewBlessings_LogsDebug()
+    {
+        // Arrange
+        var mockBlessingRegistry = new Mock<IBlessingRegistry>();
+        var mockBlessingEffectSystem = new Mock<IBlessingEffectSystem>();
+
+        // Return empty blessing list
+        mockBlessingRegistry
+            .Setup(r => r.GetBlessingsForDeity(DeityType.Khoras, BlessingKind.Religion))
+            .Returns(new List<Blessing>());
+
+        _prestigeManager.SetBlessingSystems(mockBlessingRegistry.Object, mockBlessingEffectSystem.Object);
+
+        _testReligion.TotalPrestige = 500;
+        _testReligion.PrestigeRank = PrestigeRank.Fledgling;
+
+        // Act
+        _prestigeManager.UpdatePrestigeRank("test-religion-uid");
+
+        // Assert
+        _mockLogger.Verify(
+            l => l.Debug(It.Is<string>(s => s.Contains("No new blessings available"))),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public void UpdatePrestigeRank_WithPrerequisiteNotMet_DoesNotUnlockBlessing()
+    {
+        // Arrange
+        var mockBlessingRegistry = new Mock<IBlessingRegistry>();
+        var mockBlessingEffectSystem = new Mock<IBlessingEffectSystem>();
+
+        var blessing = new Blessing
+        {
+            BlessingId = "test_blessing_2",
+            Name = "Test Blessing 2",
+            Deity = DeityType.Khoras,
+            Kind = BlessingKind.Religion,
+            RequiredPrestigeRank = 1,
+            PrerequisiteBlessings = new List<string> { "prerequisite_blessing" } // Has prerequisite
+        };
+
+        mockBlessingRegistry
+            .Setup(r => r.GetBlessingsForDeity(DeityType.Khoras, BlessingKind.Religion))
+            .Returns(new List<Blessing> { blessing });
+
+        _prestigeManager.SetBlessingSystems(mockBlessingRegistry.Object, mockBlessingEffectSystem.Object);
+
+        _testReligion.TotalPrestige = 500;
+        _testReligion.PrestigeRank = PrestigeRank.Fledgling;
+
+        // Act
+        _prestigeManager.UpdatePrestigeRank("test-religion-uid");
+
+        // Assert - Should not notify about this blessing since prerequisite isn't met
+        _mockLogger.Verify(
+            l => l.Debug(It.Is<string>(s => s.Contains("No new blessings available"))),
+            Times.Once()
+        );
+    }
+
+    #endregion
+
+    #region Blessing Effect Refresh Tests
+
+    [Fact]
+    public void UnlockReligionBlessing_TriggersEffectRefresh()
+    {
+        // Arrange
+        var mockBlessingRegistry = new Mock<IBlessingRegistry>();
+        var mockBlessingEffectSystem = new Mock<IBlessingEffectSystem>();
+
+        _prestigeManager.SetBlessingSystems(mockBlessingRegistry.Object, mockBlessingEffectSystem.Object);
+
+        // Act
+        _prestigeManager.UnlockReligionBlessing("test-religion-uid", "new_blessing");
+
+        // Assert
+        mockBlessingEffectSystem.Verify(
+            s => s.RefreshReligionBlessings("test-religion-uid"),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public void UnlockReligionBlessing_WithoutBlessingEffectSystem_LogsDebug()
+    {
+        // Arrange - Don't set blessing systems
+
+        // Act
+        _prestigeManager.UnlockReligionBlessing("test-religion-uid", "new_blessing");
+
+        // Assert
+        _mockLogger.Verify(
+            l => l.Debug(It.Is<string>(s => s.Contains("Blessing effect system not yet initialized"))),
+            Times.Once()
+        );
     }
 
     #endregion

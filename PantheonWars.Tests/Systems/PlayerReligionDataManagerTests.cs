@@ -1,4 +1,3 @@
-using System;
 using System.Diagnostics.CodeAnalysis;
 using Moq;
 using PantheonWars.Data;
@@ -7,9 +6,7 @@ using PantheonWars.Systems;
 using PantheonWars.Systems.Interfaces;
 using PantheonWars.Tests.Helpers;
 using Vintagestory.API.Common;
-using Vintagestory.API.Config;
 using Vintagestory.API.Server;
-using Xunit;
 
 namespace PantheonWars.Tests.Systems;
 
@@ -156,7 +153,7 @@ public class PlayerReligionDataManagerTests
     {
         // Arrange
         var data = _dataManager.GetOrCreatePlayerData("player-uid");
-        data.Favor = 90; // Close to Disciple threshold (100)
+        data.TotalFavorEarned = 490; // Close to Disciple threshold (500)
 
         var eventFired = false;
         _dataManager.OnPlayerDataChanged += (playerUID) => eventFired = true;
@@ -165,7 +162,7 @@ public class PlayerReligionDataManagerTests
         _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
 
         // Act
-        _dataManager.AddFavor("player-uid", 520); // Should rank up
+        _dataManager.AddFavor("player-uid", 20); // Should rank up
 
         // Assert
         Assert.Equal(FavorRank.Disciple, data.FavorRank);
@@ -681,6 +678,424 @@ public class PlayerReligionDataManagerTests
         _mockLogger.Verify(
             l => l.Notification(It.Is<string>(s =>
                 s.Contains("Applying religion switch penalty") && s.Contains("player-uid"))),
+            Times.Once()
+        );
+    }
+
+    #endregion
+
+    #region Event Firing Tests
+
+    [Fact]
+    public void LeaveReligion_FiresOnPlayerLeavesReligionEvent()
+    {
+        // Arrange
+        var religion = TestFixtures.CreateTestReligion("religion-uid", "Test Religion", DeityType.Khoras);
+        _mockReligionManager.Setup(m => m.GetReligion("religion-uid")).Returns(religion);
+
+        var mockWorld = new Mock<IServerWorldAccessor>();
+        var mockPlayer = new Mock<IServerPlayer>();
+        mockPlayer.Setup(p => p.PlayerUID).Returns("player-uid");
+
+        mockWorld.Setup(w => w.PlayerByUid("player-uid")).Returns(mockPlayer.Object);
+        _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
+
+        _dataManager.JoinReligion("player-uid", "religion-uid");
+
+        IServerPlayer? capturedPlayer = null;
+        string? capturedReligionUID = null;
+        _dataManager.OnPlayerLeavesReligion += (player, uid) =>
+        {
+            capturedPlayer = player;
+            capturedReligionUID = uid;
+        };
+
+        // Act
+        _dataManager.LeaveReligion("player-uid");
+
+        // Assert
+        Assert.NotNull(capturedPlayer);
+        Assert.Equal("player-uid", capturedPlayer!.PlayerUID);
+        Assert.Equal("religion-uid", capturedReligionUID);
+    }
+
+    [Fact]
+    public void JoinReligion_LogsNotificationWithReligionName()
+    {
+        // Arrange
+        var religion = TestFixtures.CreateTestReligion("religion-uid", "Test Religion", DeityType.Khoras);
+        _mockReligionManager.Setup(m => m.GetReligion("religion-uid")).Returns(religion);
+
+        // Act
+        _dataManager.JoinReligion("player-uid", "religion-uid");
+
+        // Assert
+        _mockLogger.Verify(
+            l => l.Notification(It.Is<string>(s =>
+                s.Contains("player-uid") && s.Contains("joined religion") && s.Contains("Test Religion"))),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public void LeaveReligion_LogsNotification()
+    {
+        // Arrange
+        var religion = TestFixtures.CreateTestReligion("religion-uid", "Test Religion", DeityType.Khoras);
+        _mockReligionManager.Setup(m => m.GetReligion("religion-uid")).Returns(religion);
+
+        var mockWorld = new Mock<IServerWorldAccessor>();
+        var mockPlayer = new Mock<IServerPlayer>();
+        mockPlayer.Setup(p => p.PlayerUID).Returns("player-uid");
+        mockWorld.Setup(w => w.PlayerByUid("player-uid")).Returns(mockPlayer.Object);
+        _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
+
+        // Subscribe to the event to prevent null reference
+        _dataManager.OnPlayerLeavesReligion += (player, uid) => { };
+
+        _dataManager.JoinReligion("player-uid", "religion-uid");
+
+        // Act
+        _dataManager.LeaveReligion("player-uid");
+
+        // Assert
+        _mockLogger.Verify(
+            l => l.Notification(It.Is<string>(s =>
+                s.Contains("player-uid") && s.Contains("left religion"))),
+            Times.Once()
+        );
+    }
+
+    #endregion
+
+    #region Rank-up Behavior Tests
+
+    [Fact]
+    public void AddFavorRankUp_WithNullPlayer_DoesNotCrash()
+    {
+        // Arrange
+        var mockWorld = new Mock<IServerWorldAccessor>();
+        mockWorld.Setup(w => w.PlayerByUid("player-uid")).Returns((IServerPlayer)null!);
+        _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
+
+        var data = _dataManager.GetOrCreatePlayerData("player-uid");
+        data.TotalFavorEarned = 490; // Close to Disciple threshold (500)
+
+        // Act & Assert - Should not throw
+        _dataManager.AddFavor("player-uid", 20);
+
+        // Verify rank changed
+        Assert.Equal(FavorRank.Disciple, data.FavorRank);
+    }
+
+    [Fact]
+    public void AddFractionalFavor_ThatCausesRankUp_UpdatesRank()
+    {
+        // Arrange
+        var data = _dataManager.GetOrCreatePlayerData("player-uid");
+        data.TotalFavorEarned = 495; // Close to Disciple threshold (500)
+
+        var mockWorld = new Mock<IServerWorldAccessor>();
+        _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
+
+        // Act
+        _dataManager.AddFractionalFavor("player-uid", 10.5f); // Should award 10 favor and rank up
+
+        // Assert
+        Assert.Equal(FavorRank.Disciple, data.FavorRank);
+    }
+
+    #endregion
+
+    #region IsBlessingUnlocked Tests
+
+    [Fact]
+    public void IsBlessingUnlocked_WithUnlockedBlessing_ReturnsTrue()
+    {
+        // Arrange
+        var data = _dataManager.GetOrCreatePlayerData("player-uid");
+        data.UnlockBlessing("blessing_id");
+
+        // Act
+        var isUnlocked = data.IsBlessingUnlocked("blessing_id");
+
+        // Assert
+        Assert.True(isUnlocked);
+    }
+
+    [Fact]
+    public void IsBlessingUnlocked_WithLockedBlessing_ReturnsFalse()
+    {
+        // Arrange
+        var data = _dataManager.GetOrCreatePlayerData("player-uid");
+
+        // Act
+        var isUnlocked = data.IsBlessingUnlocked("blessing_id");
+
+        // Assert
+        Assert.False(isUnlocked);
+    }
+
+    #endregion
+
+    #region Persistence Tests
+
+    [Fact]
+    public void SavePlayerData_WithExistingData_SavesSuccessfully()
+    {
+        // Arrange
+        var mockWorldManager = new Mock<IWorldManagerAPI>();
+        var mockSaveGame = new Mock<ISaveGame>();
+        _mockAPI.Setup(a => a.WorldManager).Returns(mockWorldManager.Object);
+        mockWorldManager.Setup(w => w.SaveGame).Returns(mockSaveGame.Object);
+
+        var data = _dataManager.GetOrCreatePlayerData("player-uid");
+        data.Favor = 100;
+        data.ActiveDeity = DeityType.Khoras;
+
+        byte[]? savedData = null;
+        mockSaveGame
+            .Setup(s => s.StoreData(It.IsAny<string>(), It.IsAny<byte[]>()))
+            .Callback<string, byte[]>((key, bytes) => savedData = bytes);
+
+        // Act
+        _dataManager.SavePlayerData("player-uid");
+
+        // Assert
+        Assert.NotNull(savedData);
+        mockSaveGame.Verify(s => s.StoreData("pantheonwars_playerreligiondata_player-uid", It.IsAny<byte[]>()), Times.Once());
+        _mockLogger.Verify(
+            l => l.Debug(It.Is<string>(s => s.Contains("Saved religion data") && s.Contains("player-uid"))),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public void SavePlayerData_WithNonExistentPlayer_DoesNotSave()
+    {
+        // Arrange
+        var mockWorldManager = new Mock<IWorldManagerAPI>();
+        var mockSaveGame = new Mock<ISaveGame>();
+        _mockAPI.Setup(a => a.WorldManager).Returns(mockWorldManager.Object);
+        mockWorldManager.Setup(w => w.SaveGame).Returns(mockSaveGame.Object);
+
+        // Act
+        _dataManager.SavePlayerData("non-existent-uid");
+
+        // Assert
+        mockSaveGame.Verify(s => s.StoreData(It.IsAny<string>(), It.IsAny<byte[]>()), Times.Never());
+    }
+
+    [Fact]
+    public void SavePlayerData_WhenExceptionOccurs_LogsError()
+    {
+        // Arrange
+        var mockWorldManager = new Mock<IWorldManagerAPI>();
+        var mockSaveGame = new Mock<ISaveGame>();
+        _mockAPI.Setup(a => a.WorldManager).Returns(mockWorldManager.Object);
+        mockWorldManager.Setup(w => w.SaveGame).Returns(mockSaveGame.Object);
+
+        _dataManager.GetOrCreatePlayerData("player-uid");
+
+        mockSaveGame
+            .Setup(s => s.StoreData(It.IsAny<string>(), It.IsAny<byte[]>()))
+            .Throws(new Exception("Save failed"));
+
+        // Act
+        _dataManager.SavePlayerData("player-uid");
+
+        // Assert
+        _mockLogger.Verify(
+            l => l.Error(It.Is<string>(s => s.Contains("Failed to save") && s.Contains("player-uid"))),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public void LoadPlayerData_WithExistingData_LoadsSuccessfully()
+    {
+        // Arrange
+        var mockWorldManager = new Mock<IWorldManagerAPI>();
+        var mockSaveGame = new Mock<ISaveGame>();
+        _mockAPI.Setup(a => a.WorldManager).Returns(mockWorldManager.Object);
+        mockWorldManager.Setup(w => w.SaveGame).Returns(mockSaveGame.Object);
+
+        var savedData = new PlayerReligionData("player-uid")
+        {
+            Favor = 150,
+            ActiveDeity = DeityType.Lysa,
+            TotalFavorEarned = 200
+        };
+        var serialized = Vintagestory.API.Util.SerializerUtil.Serialize(savedData);
+
+        mockSaveGame
+            .Setup(s => s.GetData("pantheonwars_playerreligiondata_player-uid"))
+            .Returns(serialized);
+
+        // Act
+        _dataManager.LoadPlayerData("player-uid");
+
+        // Assert
+        var loadedData = _dataManager.GetOrCreatePlayerData("player-uid");
+        Assert.Equal(150, loadedData.Favor);
+        Assert.Equal(DeityType.Lysa, loadedData.ActiveDeity);
+        Assert.Equal(200, loadedData.TotalFavorEarned);
+        _mockLogger.Verify(
+            l => l.Debug(It.Is<string>(s => s.Contains("Loaded religion data") && s.Contains("player-uid"))),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public void LoadPlayerData_WithNoData_DoesNotCreateData()
+    {
+        // Arrange
+        var mockWorldManager = new Mock<IWorldManagerAPI>();
+        var mockSaveGame = new Mock<ISaveGame>();
+        _mockAPI.Setup(a => a.WorldManager).Returns(mockWorldManager.Object);
+        mockWorldManager.Setup(w => w.SaveGame).Returns(mockSaveGame.Object);
+
+        mockSaveGame
+            .Setup(s => s.GetData(It.IsAny<string>()))
+            .Returns((byte[]?)null);
+
+        // Act
+        _dataManager.LoadPlayerData("player-uid");
+
+        // Assert - Should not log anything when no data exists
+        _mockLogger.Verify(
+            l => l.Debug(It.Is<string>(s => s.Contains("Loaded religion data"))),
+            Times.Never()
+        );
+    }
+
+    [Fact]
+    public void LoadPlayerData_WhenExceptionOccurs_LogsError()
+    {
+        // Arrange
+        var mockWorldManager = new Mock<IWorldManagerAPI>();
+        var mockSaveGame = new Mock<ISaveGame>();
+        _mockAPI.Setup(a => a.WorldManager).Returns(mockWorldManager.Object);
+        mockWorldManager.Setup(w => w.SaveGame).Returns(mockSaveGame.Object);
+
+        mockSaveGame
+            .Setup(s => s.GetData(It.IsAny<string>()))
+            .Throws(new Exception("Load failed"));
+
+        // Act
+        _dataManager.LoadPlayerData("player-uid");
+
+        // Assert
+        _mockLogger.Verify(
+            l => l.Error(It.Is<string>(s => s.Contains("Failed to load") && s.Contains("player-uid"))),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public void SaveAllPlayerData_SavesAllPlayers()
+    {
+        // Arrange
+        var mockWorldManager = new Mock<IWorldManagerAPI>();
+        var mockSaveGame = new Mock<ISaveGame>();
+        _mockAPI.Setup(a => a.WorldManager).Returns(mockWorldManager.Object);
+        mockWorldManager.Setup(w => w.SaveGame).Returns(mockSaveGame.Object);
+
+        _dataManager.GetOrCreatePlayerData("player-1");
+        _dataManager.GetOrCreatePlayerData("player-2");
+        _dataManager.GetOrCreatePlayerData("player-3");
+
+        // Act
+        _dataManager.SaveAllPlayerData();
+
+        // Assert
+        mockSaveGame.Verify(s => s.StoreData(It.IsAny<string>(), It.IsAny<byte[]>()), Times.Exactly(3));
+        _mockLogger.Verify(
+            l => l.Notification(It.Is<string>(s => s.Contains("Saving all player religion data"))),
+            Times.Once()
+        );
+        _mockLogger.Verify(
+            l => l.Notification(It.Is<string>(s => s.Contains("Saved religion data for 3 players"))),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public void LoadAllPlayerData_LogsNotification()
+    {
+        // Act
+        _dataManager.LoadAllPlayerData();
+
+        // Assert
+        _mockLogger.Verify(
+            l => l.Notification(It.Is<string>(s => s.Contains("Loading all player religion data"))),
+            Times.Once()
+        );
+    }
+
+    #endregion
+
+    #region Event Handler Tests
+
+    [Fact]
+    public void OnPlayerJoin_LoadsPlayerData()
+    {
+        // Arrange
+        var mockWorldManager = new Mock<IWorldManagerAPI>();
+        var mockSaveGame = new Mock<ISaveGame>();
+        _mockAPI.Setup(a => a.WorldManager).Returns(mockWorldManager.Object);
+        mockWorldManager.Setup(w => w.SaveGame).Returns(mockSaveGame.Object);
+
+        var mockPlayer = new Mock<IServerPlayer>();
+        mockPlayer.Setup(p => p.PlayerUID).Returns("player-uid");
+
+        var savedData = new PlayerReligionData("player-uid") { Favor = 50 };
+        var serialized = Vintagestory.API.Util.SerializerUtil.Serialize(savedData);
+
+        mockSaveGame
+            .Setup(s => s.GetData("pantheonwars_playerreligiondata_player-uid"))
+            .Returns(serialized);
+
+        // Act
+        _dataManager.OnPlayerJoin(mockPlayer.Object);
+
+        // Assert
+        var loadedData = _dataManager.GetOrCreatePlayerData("player-uid");
+        Assert.Equal(50, loadedData.Favor);
+    }
+
+    [Fact]
+    public void OnSaveGameLoaded_CallsLoadAllPlayerData()
+    {
+        // Act
+        _dataManager.OnSaveGameLoaded();
+
+        // Assert
+        _mockLogger.Verify(
+            l => l.Notification(It.Is<string>(s => s.Contains("Loading all player religion data"))),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public void OnGameWorldSave_SavesAllPlayerData()
+    {
+        // Arrange
+        var mockWorldManager = new Mock<IWorldManagerAPI>();
+        var mockSaveGame = new Mock<ISaveGame>();
+        _mockAPI.Setup(a => a.WorldManager).Returns(mockWorldManager.Object);
+        mockWorldManager.Setup(w => w.SaveGame).Returns(mockSaveGame.Object);
+
+        _dataManager.GetOrCreatePlayerData("player-1");
+        _dataManager.GetOrCreatePlayerData("player-2");
+
+        // Act
+        _dataManager.OnGameWorldSave();
+
+        // Assert
+        mockSaveGame.Verify(s => s.StoreData(It.IsAny<string>(), It.IsAny<byte[]>()), Times.Exactly(2));
+        _mockLogger.Verify(
+            l => l.Notification(It.Is<string>(s => s.Contains("Saved religion data for 2 players"))),
             Times.Once()
         );
     }
