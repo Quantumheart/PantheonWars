@@ -20,12 +20,12 @@ public class ReligionPrestigeManager : IReligionPrestigeManager
     private const int RENOWNED_THRESHOLD = 2000;
     private const int LEGENDARY_THRESHOLD = 5000;
     private const int MYTHIC_THRESHOLD = 10000;
-    private readonly ReligionManager _religionManager;
+    private readonly IReligionManager _religionManager;
     private readonly ICoreServerAPI _sapi;
     private BlessingEffectSystem? _blessingEffectSystem;
     private BlessingRegistry? _blessingRegistry;
 
-    public ReligionPrestigeManager(ICoreServerAPI sapi, ReligionManager religionManager)
+    public ReligionPrestigeManager(ICoreServerAPI sapi, IReligionManager religionManager)
     {
         _sapi = sapi;
         _religionManager = religionManager;

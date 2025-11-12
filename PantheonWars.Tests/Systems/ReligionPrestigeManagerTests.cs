@@ -5,6 +5,7 @@ using PantheonWars.Data;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using PantheonWars.Systems;
+using PantheonWars.Systems.Interfaces;
 using PantheonWars.Tests.Helpers;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -22,7 +23,7 @@ public class ReligionPrestigeManagerTests
 {
     private readonly Mock<ICoreServerAPI> _mockAPI;
     private readonly Mock<ILogger> _mockLogger;
-    private readonly Mock<ReligionManager> _mockReligionManager;
+    private readonly Mock<IReligionManager> _mockReligionManager;
     private readonly ReligionPrestigeManager _prestigeManager;
     private readonly ReligionData _testReligion;
 
@@ -32,7 +33,7 @@ public class ReligionPrestigeManagerTests
         _mockLogger = new Mock<ILogger>();
         _mockAPI.Setup(a => a.Logger).Returns(_mockLogger.Object);
 
-        _mockReligionManager = new Mock<ReligionManager>(_mockAPI.Object);
+        _mockReligionManager = new Mock<IReligionManager>();
 
         _testReligion = TestFixtures.CreateTestReligion(
             "test-religion-uid",

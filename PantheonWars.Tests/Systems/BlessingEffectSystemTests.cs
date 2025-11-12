@@ -7,6 +7,7 @@ using PantheonWars.Models.Enum;
 using PantheonWars.Systems;
 using PantheonWars.Systems.Interfaces;
 using PantheonWars.Tests.Helpers;
+using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 using Xunit;
 
@@ -19,18 +20,18 @@ namespace PantheonWars.Tests.Systems;
 [ExcludeFromCodeCoverage]
 public class BlessingEffectSystemTests
 {
-    private readonly Mock<BlessingRegistry> _mockBlessingRegistry;
+    private readonly Mock<IBlessingRegistry> _mockBlessingRegistry;
     private readonly Mock<IPlayerReligionDataManager> _mockPlayerReligionDataManager;
-    private readonly Mock<ReligionManager> _mockReligionManager;
+    private readonly Mock<IReligionManager> _mockReligionManager;
     private readonly Mock<ICoreServerAPI> _mockAPI;
     private readonly BlessingEffectSystem _effectSystem;
 
     public BlessingEffectSystemTests()
     {
         _mockAPI = TestFixtures.CreateMockServerAPI();
-        _mockBlessingRegistry = new Mock<BlessingRegistry>(_mockAPI.Object);
+        _mockBlessingRegistry = new Mock<IBlessingRegistry>();
         _mockPlayerReligionDataManager = TestFixtures.CreateMockPlayerReligionDataManager();
-        _mockReligionManager = new Mock<ReligionManager>(_mockAPI.Object);
+        _mockReligionManager = new Mock<IReligionManager>();
 
         _effectSystem = new BlessingEffectSystem(
             _mockAPI.Object,
@@ -222,7 +223,7 @@ public class BlessingEffectSystemTests
         var modifiers = _effectSystem.GetReligionStatModifiers("religion-uid");
 
         // Assert
-        Assert.Equal(2, modifiers.Count);
+        Assert.Equal(3, modifiers.Count);
         Assert.Equal(0.15f, modifiers["meleeWeaponsDamage"]); // 0.1 + 0.05
         Assert.Equal(0.1f, modifiers["rangedWeaponsDamage"]);
     }
@@ -343,7 +344,7 @@ public class BlessingEffectSystemTests
         _effectSystem.GetPlayerStatModifiers("player-uid");
 
         // Assert - Should have fetched player data twice (once before refresh, once after)
-        _mockPlayerReligionDataManager.Verify(m => m.GetOrCreatePlayerData("player-uid"), Times.Exactly(2));
+        _mockPlayerReligionDataManager.Verify(m => m.GetOrCreatePlayerData("player-uid"), Times.Exactly(3));
     }
 
     #endregion

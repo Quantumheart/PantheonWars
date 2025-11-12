@@ -21,12 +21,12 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
     private const string DATA_KEY = "pantheonwars_playerreligiondata";
     private const int RELIGION_SWITCH_COOLDOWN_DAYS = 7;
     private readonly Dictionary<string, PlayerReligionData> _playerData = new();
-    private readonly ReligionManager _religionManager;
+    private readonly IReligionManager _religionManager;
 
     private readonly ICoreServerAPI _sapi;
 
     // ReSharper disable once ConvertToPrimaryConstructor
-    public PlayerReligionDataManager(ICoreServerAPI sapi, ReligionManager religionManager)
+    public PlayerReligionDataManager(ICoreServerAPI sapi, IReligionManager religionManager)
     {
         _sapi = sapi;
         _religionManager = religionManager;

@@ -275,6 +275,7 @@ public static class TestFixtures
             {
                 { "walkspeed", 0.1f }
             },
+            Kind = kind,
             SpecialEffects = new List<string>()
         };
     }

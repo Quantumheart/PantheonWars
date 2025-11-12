@@ -4,6 +4,7 @@ using Moq;
 using PantheonWars.Data;
 using PantheonWars.Models.Enum;
 using PantheonWars.Systems;
+using PantheonWars.Systems.Interfaces;
 using PantheonWars.Tests.Helpers;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -21,7 +22,7 @@ public class PlayerReligionDataManagerTests
 {
     private readonly Mock<ICoreServerAPI> _mockAPI;
     private readonly Mock<ILogger> _mockLogger;
-    private readonly Mock<ReligionManager> _mockReligionManager;
+    private readonly Mock<IReligionManager> _mockReligionManager;
     private readonly PlayerReligionDataManager _dataManager;
 
     public PlayerReligionDataManagerTests()
@@ -30,7 +31,7 @@ public class PlayerReligionDataManagerTests
         _mockLogger = new Mock<ILogger>();
         _mockAPI.Setup(a => a.Logger).Returns(_mockLogger.Object);
 
-        _mockReligionManager = new Mock<ReligionManager>(_mockAPI.Object);
+        _mockReligionManager = new Mock<IReligionManager>();
 
         _dataManager = new PlayerReligionDataManager(_mockAPI.Object, _mockReligionManager.Object);
     }
@@ -162,7 +163,7 @@ public class PlayerReligionDataManagerTests
         _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
 
         // Act
-        _dataManager.AddFavor("player-uid", 20); // Should rank up
+        _dataManager.AddFavor("player-uid", 520); // Should rank up
 
         // Assert
         Assert.Equal(FavorRank.Disciple, data.FavorRank);
@@ -308,7 +309,7 @@ public class PlayerReligionDataManagerTests
     {
         // Arrange
         var data = _dataManager.GetOrCreatePlayerData("player-uid");
-        data.TotalFavorEarned = 100; // Should be Disciple rank
+        data.TotalFavorEarned = 500; // Should be Disciple rank
 
         // Act
         _dataManager.UpdateFavorRank("player-uid");
@@ -322,15 +323,15 @@ public class PlayerReligionDataManagerTests
     {
         // Arrange
         var data = _dataManager.GetOrCreatePlayerData("player-uid");
-        data.TotalFavorEarned = 100;
-        data.FavorRank = FavorRank.Believer;
+        data.TotalFavorEarned = 500;
+        data.FavorRank = FavorRank.Initiate;
 
         // Act
         _dataManager.UpdateFavorRank("player-uid");
 
         // Assert
         _mockLogger.Verify(
-            l => l.Notification(It.Is<string>(s => s.Contains("rank changed") && s.Contains("Believer") && s.Contains("Disciple"))),
+            l => l.Notification(It.Is<string>(s => s.Contains("rank changed") && s.Contains("Initiate") && s.Contains("Disciple"))),
             Times.Once()
         );
     }
@@ -459,6 +460,10 @@ public class PlayerReligionDataManagerTests
 
         var mockWorld = new Mock<IServerWorldAccessor>();
         _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
+        _mockAPI.Setup(a => a.World.PlayerByUid("player-uid")).Returns(new TestPlayer());
+
+        int count =0;
+        _dataManager.OnPlayerLeavesReligion += (player, uid) => count++;
 
         // Join first religion
         _dataManager.JoinReligion("player-uid", "old-religion-uid");
@@ -672,4 +677,37 @@ public class PlayerReligionDataManagerTests
     }
 
     #endregion
+}
+
+
+internal class TestPlayer : IPlayer
+{
+    public PlayerGroupMembership[] GetGroups()
+    {
+        throw new NotImplementedException();
+    }
+
+    public PlayerGroupMembership GetGroup(int groupId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public bool HasPrivilege(string privilegeCode)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IPlayerRole Role { get; set; }
+    public PlayerGroupMembership[] Groups { get; }
+    public List<Entitlement> Entitlements { get; }
+    public BlockSelection CurrentBlockSelection { get; }
+    public EntitySelection CurrentEntitySelection { get; }
+    public string PlayerName { get; }
+    public string PlayerUID { get; } = "player-uid";
+    public int ClientId { get; }
+    public EntityPlayer Entity { get; }
+    public IWorldPlayerData WorldData { get; }
+    public IPlayerInventoryManager InventoryManager { get; }
+    public string[] Privileges { get; }
+    public bool ImmersiveFpMode { get; }
 }

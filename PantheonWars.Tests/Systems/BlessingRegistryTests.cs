@@ -333,7 +333,7 @@ public class BlessingRegistryTests
     {
         // Arrange
         var playerData = TestFixtures.CreateTestPlayerReligionData("player-uid", DeityType.Khoras, "religion-uid");
-        playerData.FavorRank = FavorRank.Believer; // Rank 0
+        playerData.FavorRank = FavorRank.Initiate; // Rank 0
 
         var blessing = TestFixtures.CreateTestBlessing("test", "Test", DeityType.Khoras, BlessingKind.Player);
         blessing.RequiredFavorRank = 2; // Requires Disciple
@@ -343,7 +343,7 @@ public class BlessingRegistryTests
 
         // Assert
         Assert.False(canUnlock);
-        Assert.Contains("Requires Disciple favor rank", reason);
+        Assert.Contains("Requires Zealot favor rank", reason);
     }
 
     [Fact]

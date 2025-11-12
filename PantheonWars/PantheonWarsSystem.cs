@@ -29,24 +29,24 @@ public class PantheonWarsSystem : ModSystem
     // Client-side systems
     private ICoreClientAPI? _capi;
     private IClientNetworkChannel? _clientChannel;
-    private IDeityRegistry? _clientDeityRegistry;
+    private DeityRegistry? _clientDeityRegistry;
     private AbilityCooldownManager? _cooldownManager;
     private CreateReligionDialog? _createReligionDialog;
     private DeityCommands? _deityCommands;
-    private IDeityRegistry? _deityRegistry;
+    private DeityRegistry? _deityRegistry;
     private FavorCommands? _favorCommands;
     private FavorHudElement? _favorHud;
-    private IFavorSystem? _favorSystem;
+    private FavorSystem? _favorSystem;
     private BlessingCommands? _blessingCommands;
     private BlessingEffectSystem? _blessingEffectSystem;
     private BlessingRegistry? _blessingRegistry;
     private PlayerDataManager? _playerDataManager;
-    private IPlayerReligionDataManager? _playerReligionDataManager;
+    private PlayerReligionDataManager? _playerReligionDataManager;
     private PvPManager? _pvpManager;
     private ReligionCommands? _religionCommands;
     private ReligionManagementDialog? _religionDialog;
     private ReligionManager? _religionManager;
-    private IReligionPrestigeManager? _religionPrestigeManager;
+    private ReligionPrestigeManager? _religionPrestigeManager;
 
     // Server-side systems
     private ICoreServerAPI? _sapi;
