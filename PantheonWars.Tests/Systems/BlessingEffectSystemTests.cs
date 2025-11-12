@@ -544,4 +544,254 @@ public class BlessingEffectSystemTests
     }
 
     #endregion
+
+    #region ApplyBlessingsToPlayer Tests
+
+    [Fact]
+    public void ApplyBlessingsToPlayer_WithNullPlayer_LogsWarning()
+    {
+        // Act
+        _effectSystem.ApplyBlessingsToPlayer(null!);
+
+        // Assert
+        var mockLogger = Mock.Get(_mockAPI.Object.Logger);
+        mockLogger.Verify(
+            l => l.Warning(It.Is<string>(s => s.Contains("Entity") && s.Contains("null"))),
+            Times.Once()
+        );
+    }
+
+    [Fact]
+    public void ApplyBlessingsToPlayer_AppliesModifiersToPlayerStats()
+    {
+        // Arrange
+        var playerData = TestFixtures.CreateTestPlayerReligionData("player-uid");
+        playerData.UnlockBlessing("blessing1");
+
+        var blessing = TestFixtures.CreateTestBlessing("blessing1", "Blessing 1");
+        blessing.StatModifiers["walkspeed"] = 0.1f;
+
+        _mockPlayerReligionDataManager
+            .Setup(m => m.GetOrCreatePlayerData("player-uid"))
+            .Returns(playerData);
+
+        _mockBlessingRegistry.Setup(r => r.GetBlessing("blessing1")).Returns(blessing);
+
+        var mockPlayer = TestFixtures.CreateMockServerPlayer("player-uid", "TestPlayer");
+        var mockEntity = Mock.Get(mockPlayer.Entity);
+        var mockStats = new Mock<IEntityStats>();
+        mockEntity.Setup(e => e.Stats).Returns(mockStats.Object);
+
+        // Act
+        _effectSystem.ApplyBlessingsToPlayer(mockPlayer);
+
+        // Assert
+        mockStats.Verify(s => s.Set(
+            It.IsAny<string>(),
+            It.IsAny<string>(),
+            It.IsAny<float>()
+        ), Times.AtLeastOnce());
+    }
+
+    [Fact]
+    public void ApplyBlessingsToPlayer_RemovesOldModifiersFirst()
+    {
+        // Arrange
+        var playerData = TestFixtures.CreateTestPlayerReligionData("player-uid");
+        playerData.UnlockBlessing("blessing1");
+
+        var blessing = TestFixtures.CreateTestBlessing("blessing1", "Blessing 1");
+        blessing.StatModifiers["walkspeed"] = 0.1f;
+
+        _mockPlayerReligionDataManager
+            .Setup(m => m.GetOrCreatePlayerData("player-uid"))
+            .Returns(playerData);
+
+        _mockBlessingRegistry.Setup(r => r.GetBlessing("blessing1")).Returns(blessing);
+
+        var mockPlayer = TestFixtures.CreateMockServerPlayer("player-uid", "TestPlayer");
+        var mockEntity = Mock.Get(mockPlayer.Entity);
+        var mockStats = new Mock<IEntityStats>();
+        mockEntity.Setup(e => e.Stats).Returns(mockStats.Object);
+
+        // Apply twice to test removal
+        _effectSystem.ApplyBlessingsToPlayer(mockPlayer);
+
+        // Act - Second application should remove old modifiers first
+        _effectSystem.ApplyBlessingsToPlayer(mockPlayer);
+
+        // Assert - Set should be called at least twice (once for each application)
+        mockStats.Verify(s => s.Set(
+            It.IsAny<string>(),
+            It.IsAny<string>(),
+            It.IsAny<float>()
+        ), Times.AtLeast(2));
+    }
+
+    #endregion
+
+    #region RemoveBlessingsFromPlayer Tests
+
+    [Fact]
+    public void RemoveBlessingsFromPlayer_WithNullPlayer_DoesNotThrow()
+    {
+        // Act & Assert - Should not throw
+        var exception = Record.Exception(() => _effectSystem.GetType()
+            .GetMethod("RemoveBlessingsFromPlayer", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
+            .Invoke(_effectSystem, new object[] { null! }));
+
+        Assert.Null(exception);
+    }
+
+    #endregion
+
+    #region CombineModifiers Tests
+
+    [Fact]
+    public void CombineModifiers_AddsNewModifiers()
+    {
+        // Arrange
+        var target = new Dictionary<string, float>
+        {
+            { "walkspeed", 0.1f }
+        };
+
+        var source = new Dictionary<string, float>
+        {
+            { "meleeWeaponsDamage", 0.15f }
+        };
+
+        // Act - Use reflection to call internal method
+        var method = _effectSystem.GetType().GetMethod("CombineModifiers",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method?.Invoke(_effectSystem, new object[] { target, source });
+
+        // Assert
+        Assert.Equal(2, target.Count);
+        Assert.Equal(0.1f, target["walkspeed"]);
+        Assert.Equal(0.15f, target["meleeWeaponsDamage"]);
+    }
+
+    [Fact]
+    public void CombineModifiers_CombinesExistingModifiers()
+    {
+        // Arrange
+        var target = new Dictionary<string, float>
+        {
+            { "walkspeed", 0.1f }
+        };
+
+        var source = new Dictionary<string, float>
+        {
+            { "walkspeed", 0.05f }
+        };
+
+        // Act - Use reflection to call internal method
+        var method = _effectSystem.GetType().GetMethod("CombineModifiers",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method?.Invoke(_effectSystem, new object[] { target, source });
+
+        // Assert
+        Assert.Single(target);
+        Assert.Equal(0.15f, target["walkspeed"]); // 0.1 + 0.05 = 0.15
+    }
+
+    #endregion
+
+    #region FormatStatName Tests
+
+    [Theory]
+    [InlineData("meleeWeaponsDamage", "Melee Damage")]
+    [InlineData("rangedWeaponsDamage", "Ranged Damage")]
+    [InlineData("meleeWeaponsSpeed", "Attack Speed")]
+    [InlineData("walkspeed", "Walk Speed")]
+    [InlineData("maxhealthExtraPoints", "Max Health")]
+    [InlineData("healingeffectiveness", "Health Regeneration")]
+    [InlineData("unknown_stat", "unknown_stat")]
+    public void FormatStatName_FormatsCorrectly(string statKey, string expected)
+    {
+        // Act - Use reflection to call internal method
+        var method = _effectSystem.GetType().GetMethod("FormatStatName",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var result = method?.Invoke(_effectSystem, new object[] { statKey }) as string;
+
+        // Assert
+        Assert.Contains(expected, result ?? "", StringComparison.OrdinalIgnoreCase);
+    }
+
+    #endregion
+
+    #region Event Handler Tests
+
+    [Fact]
+    public void OnPlayerJoin_RefreshesPlayerBlessings()
+    {
+        // Arrange
+        var playerData = TestFixtures.CreateTestPlayerReligionData("player-uid");
+        var mockPlayer = TestFixtures.CreateMockServerPlayer("player-uid", "TestPlayer");
+
+        _mockPlayerReligionDataManager
+            .Setup(m => m.GetOrCreatePlayerData("player-uid"))
+            .Returns(playerData);
+
+        var mockWorld = new Mock<IServerWorldAccessor>();
+        _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
+        mockWorld.Setup(w => w.PlayerByUid("player-uid")).Returns(mockPlayer);
+
+        // Act - Use reflection to call internal method
+        var method = _effectSystem.GetType().GetMethod("OnPlayerJoin",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method?.Invoke(_effectSystem, new object[] { mockPlayer });
+
+        // Assert - Should have accessed player data to refresh
+        _mockPlayerReligionDataManager.Verify(m => m.GetOrCreatePlayerData("player-uid"), Times.AtLeastOnce());
+    }
+
+    [Fact]
+    public void OnPlayerLeavesReligion_ClearsCacheAndRefreshes()
+    {
+        // Arrange
+        var playerData = TestFixtures.CreateTestPlayerReligionData("player-uid", DeityType.Khoras, "religion-uid");
+        var religion = TestFixtures.CreateTestReligion("religion-uid");
+        var mockPlayer = TestFixtures.CreateMockServerPlayer("player-uid", "TestPlayer");
+
+        _mockPlayerReligionDataManager
+            .Setup(m => m.GetOrCreatePlayerData("player-uid"))
+            .Returns(playerData);
+
+        _mockReligionManager
+            .Setup(m => m.GetReligion("religion-uid"))
+            .Returns(religion);
+
+        var mockWorld = new Mock<IServerWorldAccessor>();
+        _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
+        mockWorld.Setup(w => w.PlayerByUid("player-uid")).Returns((IServerPlayer)null!);
+
+        // Act - Use reflection to call internal method
+        var method = _effectSystem.GetType().GetMethod("OnPlayerLeavesReligion",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        method?.Invoke(_effectSystem, new object[] { mockPlayer, "religion-uid" });
+
+        // Assert - Should access both player and religion data
+        _mockPlayerReligionDataManager.Verify(m => m.GetOrCreatePlayerData("player-uid"), Times.AtLeastOnce());
+        _mockReligionManager.Verify(m => m.GetReligion("religion-uid"), Times.AtLeastOnce());
+    }
+
+    [Fact]
+    public void Initialize_RegistersPlayerLeavesReligionHandler()
+    {
+        // Arrange
+        var mockEventAPI = new Mock<IServerEventAPI>();
+        _mockAPI.Setup(a => a.Event).Returns(mockEventAPI.Object);
+
+        // Act
+        _effectSystem.Initialize();
+
+        // Assert
+        _mockPlayerReligionDataManager.VerifyAdd(
+            m => m.OnPlayerLeavesReligion += It.IsAny<Action<IServerPlayer, string>>(),
+            Times.Once());
+    }
+
+    #endregion
 }

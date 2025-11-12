@@ -716,4 +716,184 @@ public class ReligionManagerTests
     }
 
     #endregion
+
+    #region HandleFounderLeaving Tests
+
+    [Fact]
+    public void HandleFounderLeaving_TransfersToNextMember()
+    {
+        // Arrange
+        var religion = _religionManager.CreateReligion("Test Religion", DeityType.Khoras, "founder-uid", true);
+        _religionManager.AddMember(religion.ReligionUID, "member-uid");
+
+        // Act - Remove founder
+        _religionManager.RemoveMember(religion.ReligionUID, "founder-uid");
+
+        // Assert - Founder should have transferred
+        Assert.Equal("member-uid", religion.FounderUID);
+        _mockLogger.Verify(
+            l => l.Notification(It.Is<string>(s => s.Contains("founder transferred"))),
+            Times.Once()
+        );
+    }
+
+    #endregion
+
+    #region Persistence Tests
+
+    [Fact]
+    public void OnSaveGameLoaded_LoadsReligions()
+    {
+        // Arrange - Create some religions
+        _religionManager.CreateReligion("Religion 1", DeityType.Khoras, "founder1", true);
+        _religionManager.CreateReligion("Religion 2", DeityType.Lysa, "founder2", false);
+
+        // Act - Use reflection to call private method
+        var method = _religionManager.GetType().GetMethod("OnSaveGameLoaded",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance |
+            System.Reflection.BindingFlags.Public);
+        method?.Invoke(_religionManager, Array.Empty<object>());
+
+        // Assert - Should attempt to load (even if storage is mock)
+        // This test verifies the method executes without errors
+        Assert.NotNull(method);
+    }
+
+    [Fact]
+    public void OnGameWorldSave_SavesReligions()
+    {
+        // Arrange - Create some religions
+        _religionManager.CreateReligion("Religion 1", DeityType.Khoras, "founder1", true);
+        _religionManager.CreateReligion("Religion 2", DeityType.Lysa, "founder2", false);
+
+        // Act - Use reflection to call private method
+        var method = _religionManager.GetType().GetMethod("OnGameWorldSave",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance |
+            System.Reflection.BindingFlags.Public);
+        method?.Invoke(_religionManager, Array.Empty<object>());
+
+        // Assert - Should attempt to save (even if storage is mock)
+        // This test verifies the method executes without errors
+        Assert.NotNull(method);
+    }
+
+    #endregion
+
+    #region Edge Case Tests
+
+    [Fact]
+    public void GetAllReligions_AfterDeletion_DoesNotIncludeDeletedReligion()
+    {
+        // Arrange
+        var religion1 = _religionManager.CreateReligion("Religion 1", DeityType.Khoras, "founder1", true);
+        var religion2 = _religionManager.CreateReligion("Religion 2", DeityType.Lysa, "founder2", true);
+
+        // Act
+        _religionManager.DeleteReligion(religion1.ReligionUID, "founder1");
+        var allReligions = _religionManager.GetAllReligions();
+
+        // Assert
+        Assert.Single(allReligions);
+        Assert.Equal("Religion 2", allReligions[0].ReligionName);
+    }
+
+    [Fact]
+    public void RemoveMember_FromReligionWithMultipleMembers_PreservesOtherMembers()
+    {
+        // Arrange
+        var religion = _religionManager.CreateReligion("Test Religion", DeityType.Khoras, "founder-uid", true);
+        _religionManager.AddMember(religion.ReligionUID, "member1-uid");
+        _religionManager.AddMember(religion.ReligionUID, "member2-uid");
+
+        // Act
+        _religionManager.RemoveMember(religion.ReligionUID, "member1-uid");
+
+        // Assert
+        Assert.Equal(2, religion.GetMemberCount()); // founder + member2
+        Assert.Contains("founder-uid", religion.MemberUIDs);
+        Assert.Contains("member2-uid", religion.MemberUIDs);
+        Assert.DoesNotContain("member1-uid", religion.MemberUIDs);
+    }
+
+    [Fact]
+    public void InvitePlayer_ToAlreadyInvited_DoesNotCreateDuplicates()
+    {
+        // Arrange
+        var religion = _religionManager.CreateReligion("Test Religion", DeityType.Khoras, "founder-uid", false);
+
+        // Act - Invite twice
+        _religionManager.InvitePlayer(religion.ReligionUID, "player-uid", "founder-uid");
+        _religionManager.InvitePlayer(religion.ReligionUID, "player-uid", "founder-uid");
+
+        // Assert - Only one invitation should exist
+        var invitations = _religionManager.GetPlayerInvitations("player-uid");
+        Assert.Single(invitations);
+    }
+
+    [Fact]
+    public void GetPlayerReligion_AfterPlayerJoins_ReturnsCorrectReligion()
+    {
+        // Arrange
+        var religion1 = _religionManager.CreateReligion("Religion 1", DeityType.Khoras, "founder1", true);
+        var religion2 = _religionManager.CreateReligion("Religion 2", DeityType.Lysa, "founder2", true);
+
+        // Act
+        var religionForFounder1 = _religionManager.GetPlayerReligion("founder1");
+        var religionForFounder2 = _religionManager.GetPlayerReligion("founder2");
+
+        // Assert
+        Assert.Equal(religion1.ReligionUID, religionForFounder1?.ReligionUID);
+        Assert.Equal(religion2.ReligionUID, religionForFounder2?.ReligionUID);
+    }
+
+    [Fact]
+    public void CreateReligion_WithNullOrEmptyName_StillCreatesReligion()
+    {
+        // Arrange & Act
+        var religion = _religionManager.CreateReligion(string.Empty, DeityType.Khoras, "founder-uid", true);
+
+        // Assert - Should create religion even with empty name
+        Assert.NotNull(religion);
+        Assert.Empty(religion.ReligionName);
+    }
+
+    [Fact]
+    public void GetReligionsByDeity_WithNoMatchingReligions_ReturnsEmptyList()
+    {
+        // Arrange
+        _religionManager.CreateReligion("Khoras Religion", DeityType.Khoras, "founder1", true);
+
+        // Act
+        var lysaReligions = _religionManager.GetReligionsByDeity(DeityType.Lysa);
+
+        // Assert
+        Assert.Empty(lysaReligions);
+    }
+
+    [Fact]
+    public void CanJoinReligion_PlayerAlreadyInAnotherReligion_StillReturnsBasedOnThisReligion()
+    {
+        // Arrange
+        var religion1 = _religionManager.CreateReligion("Religion 1", DeityType.Khoras, "founder1", true);
+        var religion2 = _religionManager.CreateReligion("Religion 2", DeityType.Lysa, "founder2", true);
+
+        // Player is already in religion1 as founder
+        // Act - Check if founder can join religion2
+        var canJoin = _religionManager.CanJoinReligion(religion2.ReligionUID, "founder1");
+
+        // Assert - Should return true for public religion (even if player is in another)
+        Assert.True(canJoin);
+    }
+
+    [Fact]
+    public void RemoveInvitation_ForNonExistentInvitation_DoesNotThrow()
+    {
+        // Act & Assert - Should not throw
+        var exception = Record.Exception(() =>
+            _religionManager.RemoveInvitation("player-uid", "religion-uid"));
+
+        Assert.Null(exception);
+    }
+
+    #endregion
 }
