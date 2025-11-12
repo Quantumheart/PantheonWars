@@ -12,21 +12,21 @@ namespace PantheonWars.Systems;
 /// <summary>
 ///     Manages divine favor rewards and penalties
 /// </summary>
-public class FavorSystem
+public class FavorSystem : IFavorSystem
 {
     private const int BASE_KILL_FAVOR = 10;
     private const int DEATH_PENALTY_FAVOR = 5;
     private const float BASE_FAVOR_PER_HOUR = 2.0f; // Passive favor generation rate
     private const int PASSIVE_TICK_INTERVAL_MS = 1000; // 1 second ticks
 
-    private readonly DeityRegistry _deityRegistry;
+    private readonly IDeityRegistry _deityRegistry;
     private readonly IPlayerDataManager _playerDataManager;
     private readonly IPlayerReligionDataManager _playerReligionDataManager;
     private readonly ReligionManager _religionManager;
 
     private readonly ICoreServerAPI _sapi;
 
-    public FavorSystem(ICoreServerAPI sapi, IPlayerDataManager playerDataManager, IPlayerReligionDataManager playerReligionDataManager, DeityRegistry deityRegistry, ReligionManager religionManager)
+    public FavorSystem(ICoreServerAPI sapi, IPlayerDataManager playerDataManager, IPlayerReligionDataManager playerReligionDataManager, IDeityRegistry deityRegistry, ReligionManager religionManager)
     {
         _sapi = sapi;
         _playerDataManager = playerDataManager;

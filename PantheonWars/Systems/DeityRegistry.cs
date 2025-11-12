@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
 
 namespace PantheonWars.Systems;
@@ -8,7 +9,7 @@ namespace PantheonWars.Systems;
 /// <summary>
 ///     Central registry for managing all deities in the game
 /// </summary>
-public class DeityRegistry
+public class DeityRegistry : IDeityRegistry
 {
     private readonly ICoreAPI _api;
     private readonly Dictionary<DeityType, Deity> _deities = new();

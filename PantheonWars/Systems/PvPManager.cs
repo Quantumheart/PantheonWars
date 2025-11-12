@@ -15,9 +15,9 @@ public class PvPManager : IPvPManager
     private const int BASE_FAVOR_REWARD = 10;
     private const int BASE_PRESTIGE_REWARD = 15;
     private const int DEATH_PENALTY_FAVOR = 5;
-    private readonly DeityRegistry _deityRegistry;
+    private readonly IDeityRegistry _deityRegistry;
     private readonly IPlayerReligionDataManager _playerReligionDataManager;
-    private readonly ReligionPrestigeManager _prestigeManager;
+    private readonly IReligionPrestigeManager _prestigeManager;
     private readonly IReligionManager _religionManager;
 
     private readonly ICoreServerAPI _sapi;
@@ -26,8 +26,8 @@ public class PvPManager : IPvPManager
         ICoreServerAPI sapi,
         IPlayerReligionDataManager playerReligionDataManager,
         IReligionManager religionManager,
-        ReligionPrestigeManager prestigeManager,
-        DeityRegistry deityRegistry)
+        IReligionPrestigeManager prestigeManager,
+        IDeityRegistry deityRegistry)
     {
         _sapi = sapi;
         _playerReligionDataManager = playerReligionDataManager;

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using PantheonWars.Systems.BuffSystem.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
@@ -9,7 +10,7 @@ namespace PantheonWars.Systems.BuffSystem;
 /// <summary>
 ///     Central manager for applying and removing buffs/debuffs
 /// </summary>
-public class BuffManager
+public class BuffManager : IBuffManager
 {
     private readonly ICoreServerAPI sapi;
 

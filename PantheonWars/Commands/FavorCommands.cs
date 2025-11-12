@@ -13,14 +13,14 @@ namespace PantheonWars.Commands;
 /// </summary>
 public class FavorCommands
 {
-    private readonly DeityRegistry _deityRegistry;
+    private readonly IDeityRegistry _deityRegistry;
     private readonly IPlayerReligionDataManager _playerReligionDataManager;
     private readonly ICoreServerAPI _sapi;
 
     // ReSharper disable once ConvertToPrimaryConstructor
     public FavorCommands(
         ICoreServerAPI sapi,
-        DeityRegistry deityRegistry,
+        IDeityRegistry deityRegistry,
         IPlayerReligionDataManager playerReligionDataManager)
     {
         _sapi = sapi;

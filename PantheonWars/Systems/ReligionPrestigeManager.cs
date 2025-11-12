@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
@@ -11,7 +12,7 @@ namespace PantheonWars.Systems;
 /// <summary>
 ///     Manages religion prestige progression and religion-wide blessings
 /// </summary>
-public class ReligionPrestigeManager
+public class ReligionPrestigeManager : IReligionPrestigeManager
 {
     // Prestige rank thresholds
     private const int FLEDGLING_THRESHOLD = 0;
