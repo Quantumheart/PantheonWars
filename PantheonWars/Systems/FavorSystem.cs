@@ -22,11 +22,11 @@ public class FavorSystem : IFavorSystem
     private readonly IDeityRegistry _deityRegistry;
     private readonly IPlayerDataManager _playerDataManager;
     private readonly IPlayerReligionDataManager _playerReligionDataManager;
-    private readonly ReligionManager _religionManager;
+    private readonly IReligionManager _religionManager;
 
     private readonly ICoreServerAPI _sapi;
 
-    public FavorSystem(ICoreServerAPI sapi, IPlayerDataManager playerDataManager, IPlayerReligionDataManager playerReligionDataManager, IDeityRegistry deityRegistry, ReligionManager religionManager)
+    public FavorSystem(ICoreServerAPI sapi, IPlayerDataManager playerDataManager, IPlayerReligionDataManager playerReligionDataManager, IDeityRegistry deityRegistry, IReligionManager religionManager)
     {
         _sapi = sapi;
         _playerDataManager = playerDataManager;

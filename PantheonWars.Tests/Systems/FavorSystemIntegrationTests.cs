@@ -8,6 +8,7 @@ using PantheonWars.Tests.Helpers;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
 using Xunit;
+using IPlayerDataManager = PantheonWars.Systems.Interfaces.IPlayerDataManager;
 
 namespace PantheonWars.Tests.Systems;
 
@@ -70,7 +71,7 @@ public class FavorSystemIntegrationTests
 
         // Assert
         mockEventAPI.Verify(
-            e => e.RegisterGameTickListener(It.IsAny<Action<float>>(), It.Is<int>(i => i == 1000)),
+            e => e.RegisterGameTickListener(It.IsAny<Action<float>>(), It.Is<int>(i => i == 1000), 0),
             Times.Once()
         );
     }
@@ -349,7 +350,8 @@ public class FavorSystemIntegrationTests
             p => p.SendMessage(
                 It.IsAny<int>(),
                 It.Is<string>(s => s.Contains("lost") && s.Contains("favor")),
-                EnumChatType.Notification),
+                EnumChatType.Notification,
+                It.IsAny<string>()),
             Times.Once()
         );
     }

@@ -109,14 +109,20 @@ public class BuffManagerTests
             .Returns(mockBuffTracker.Object);
 
         // Act
+        var speedBuff = "speed_buff";
+        var duration = 15.0f;
+        var sourceAbilityId = "swift_feet";
+        var casterPlayerUid = "player-123";
+        var statName = "walkspeed";
+        var statValue = 0.3f;
         var result = _buffManager.ApplySimpleBuff(
             mockEntity.Object,
-            "speed_buff",
-            15.0f,
-            "swift_feet",
-            "player-123",
-            "walkspeed",
-            0.3f
+            speedBuff,
+            duration,
+            sourceAbilityId,
+            casterPlayerUid,
+            statName,
+            statValue
         );
 
         // Assert
@@ -124,7 +130,7 @@ public class BuffManagerTests
         mockBuffTracker.Verify(
             bt => bt.AddEffect(It.Is<ActiveEffect>(e =>
                 e.EffectId == "speed_buff" &&
-                e.Duration == 15.0f &&
+                e.DurationRemaining == 15.0f &&
                 e.SourceAbilityId == "swift_feet"
             )),
             Times.Once()

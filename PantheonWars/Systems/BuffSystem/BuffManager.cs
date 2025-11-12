@@ -36,7 +36,7 @@ public class BuffManager : IBuffManager
         float duration,
         string sourceAbilityId,
         string casterPlayerUID,
-        Dictionary<string, float> statModifiers,
+        Dictionary<string, float>? statModifiers,
         bool isBuff = true)
     {
         if (target == null || string.IsNullOrEmpty(effectId)) return false;
@@ -49,9 +49,11 @@ public class BuffManager : IBuffManager
         var effect = new ActiveEffect(effectId, duration, sourceAbilityId, casterPlayerUID, isBuff);
 
         // Add stat modifiers
-        if (statModifiers != null)
-            foreach (var modifier in statModifiers)
-                effect.AddStatModifier(modifier.Key, modifier.Value);
+        if (statModifiers is null)
+            return false;
+        
+        foreach (var modifier in statModifiers)
+            effect.AddStatModifier(modifier.Key, modifier.Value);
 
         // Apply the effect
         buffTracker.AddEffect(effect);

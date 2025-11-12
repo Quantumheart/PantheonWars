@@ -6,9 +6,11 @@ using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using PantheonWars.Systems.BuffSystem.Interfaces;
 using PantheonWars.Systems.Interfaces;
+using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Common.Entities;
 using Vintagestory.API.Server;
+using IPlayerDataManager = PantheonWars.Systems.Interfaces.IPlayerDataManager;
 
 namespace PantheonWars.Tests.Helpers;
 
@@ -242,10 +244,9 @@ public static class TestFixtures
             ReligionUID = religionUID,
             ReligionName = religionName,
             Deity = deity,
-            FounderPlayerUID = founderUID,
+            FounderUID = founderUID,
             Description = "A test religion",
             IsPublic = true,
-            AllowInvites = true,
             MemberUIDs = new List<string> { founderUID },
             Prestige = 0,
             TotalPrestige = 0,
@@ -263,7 +264,7 @@ public static class TestFixtures
         DeityType deity = DeityType.Khoras,
         BlessingKind kind = BlessingKind.Player)
     {
-        return new Blessing(id, name, deity, kind)
+        return new Blessing(id, name, deity)
         {
             Description = "A test blessing",
             Category = BlessingCategory.Combat,
