@@ -175,7 +175,7 @@ public class FavorSystem : IFavorSystem
     /// <summary>
     ///     Game tick handler for passive favor generation
     /// </summary>
-    private void OnGameTick(float dt)
+    internal void OnGameTick(float dt)
     {
         // Award passive favor to all online players with deities
         foreach (var player in _sapi.World.AllOnlinePlayers)
@@ -190,7 +190,7 @@ public class FavorSystem : IFavorSystem
     /// <summary>
     ///     Awards passive favor to a player based on their devotion and time played
     /// </summary>
-    private void AwardPassiveFavor(IServerPlayer player, float dt)
+    internal void AwardPassiveFavor(IServerPlayer player, float dt)
     {
         var religionData = _playerReligionDataManager.GetOrCreatePlayerData(player.PlayerUID);
 
@@ -216,7 +216,7 @@ public class FavorSystem : IFavorSystem
     /// <summary>
     ///     Calculates the total multiplier for passive favor generation
     /// </summary>
-    private float CalculatePassiveFavorMultiplier(IServerPlayer player, PlayerReligionData religionData)
+    internal float CalculatePassiveFavorMultiplier(IServerPlayer player, PlayerReligionData religionData)
     {
         float multiplier = 1.0f;
 

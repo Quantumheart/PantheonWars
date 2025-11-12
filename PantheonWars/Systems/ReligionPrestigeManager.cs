@@ -22,8 +22,8 @@ public class ReligionPrestigeManager : IReligionPrestigeManager
     private const int MYTHIC_THRESHOLD = 10000;
     private readonly IReligionManager _religionManager;
     private readonly ICoreServerAPI _sapi;
-    private BlessingEffectSystem? _blessingEffectSystem;
-    private BlessingRegistry? _blessingRegistry;
+    private IBlessingEffectSystem? _blessingEffectSystem;
+    private IBlessingRegistry? _blessingRegistry;
 
     public ReligionPrestigeManager(ICoreServerAPI sapi, IReligionManager religionManager)
     {
@@ -34,7 +34,7 @@ public class ReligionPrestigeManager : IReligionPrestigeManager
     /// <summary>
     ///     Sets the blessing registry and effect system (called after they're initialized)
     /// </summary>
-    public void SetBlessingSystems(BlessingRegistry blessingRegistry, BlessingEffectSystem blessingEffectSystem)
+    public void SetBlessingSystems(IBlessingRegistry blessingRegistry, IBlessingEffectSystem blessingEffectSystem)
     {
         _blessingRegistry = blessingRegistry;
         _blessingEffectSystem = blessingEffectSystem;

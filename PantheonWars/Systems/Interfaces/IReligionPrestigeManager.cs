@@ -11,7 +11,7 @@ public interface IReligionPrestigeManager
     /// <summary>
     ///     Sets the blessing registry and effect system (called after they're initialized)
     /// </summary>
-    void SetBlessingSystems(BlessingRegistry blessingRegistry, BlessingEffectSystem blessingEffectSystem);
+    void SetBlessingSystems(IBlessingRegistry blessingRegistry, IBlessingEffectSystem blessingEffectSystem);
 
     /// <summary>
     ///     Initializes the religion prestige manager
