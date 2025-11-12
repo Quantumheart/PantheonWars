@@ -7,6 +7,7 @@ using PantheonWars.Models.Enum;
 using PantheonWars.Network;
 using PantheonWars.Systems;
 using PantheonWars.Systems.BuffSystem;
+using PantheonWars.Systems.BuffSystem.Interfaces;
 using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
@@ -21,19 +22,21 @@ public class PantheonWarsSystem : ModSystem
     private AbilityCommands? _abilityCommands;
     private AbilityRegistry? _abilityRegistry;
     private AbilitySystem? _abilitySystem;
-    private BuffManager? _buffManager;
+
+    // Use interfaces for better testability and dependency injection
+    private IBuffManager? _buffManager;
 
     // Client-side systems
     private ICoreClientAPI? _capi;
     private IClientNetworkChannel? _clientChannel;
-    private DeityRegistry? _clientDeityRegistry;
+    private IDeityRegistry? _clientDeityRegistry;
     private AbilityCooldownManager? _cooldownManager;
     private CreateReligionDialog? _createReligionDialog;
     private DeityCommands? _deityCommands;
-    private DeityRegistry? _deityRegistry;
+    private IDeityRegistry? _deityRegistry;
     private FavorCommands? _favorCommands;
     private FavorHudElement? _favorHud;
-    private FavorSystem? _favorSystem;
+    private IFavorSystem? _favorSystem;
     private BlessingCommands? _blessingCommands;
     private BlessingEffectSystem? _blessingEffectSystem;
     private BlessingRegistry? _blessingRegistry;
@@ -43,7 +46,7 @@ public class PantheonWarsSystem : ModSystem
     private ReligionCommands? _religionCommands;
     private ReligionManagementDialog? _religionDialog;
     private ReligionManager? _religionManager;
-    private ReligionPrestigeManager? _religionPrestigeManager;
+    private IReligionPrestigeManager? _religionPrestigeManager;
 
     // Server-side systems
     private ICoreServerAPI? _sapi;
@@ -85,7 +88,7 @@ public class PantheonWarsSystem : ModSystem
         // Register entity behaviors
         api.RegisterEntityBehaviorClass("PantheonWarsBuffTracker", typeof(EntityBehaviorBuffTracker));
 
-        // Initialize deity registry
+        // Initialize deity registry (concrete implementation, stored as interface)
         _deityRegistry = new DeityRegistry(api);
         _deityRegistry.Initialize();
 
@@ -101,7 +104,7 @@ public class PantheonWarsSystem : ModSystem
         _cooldownManager = new AbilityCooldownManager(api);
         _cooldownManager.Initialize();
 
-        // Initialize buff manager
+        // Initialize buff manager (concrete implementation, stored as interface)
         _buffManager = new BuffManager(api);
 
         // Initialize religion systems first (needed by FavorSystem for passive favor)
@@ -112,17 +115,20 @@ public class PantheonWarsSystem : ModSystem
         _playerReligionDataManager.Initialize();
         _playerReligionDataManager.OnPlayerDataChanged += OnPlayerDataChanged;
 
-        // Initialize favor system (with religion manager for passive favor multipliers)
+        // Initialize favor system (concrete implementation, stored as interface)
+        // Pass interfaces for loose coupling
         _favorSystem = new FavorSystem(api, _playerDataManager, _playerReligionDataManager, _deityRegistry, _religionManager);
         _favorSystem.Initialize();
 
-        // Initialize ability system (pass buff manager to it)
+        // Initialize ability system (pass buff manager interface)
         _abilitySystem = new AbilitySystem(api, _abilityRegistry, _playerDataManager, _cooldownManager, _buffManager);
         _abilitySystem.Initialize();
 
+        // Initialize religion prestige manager (concrete implementation, stored as interface)
         _religionPrestigeManager = new ReligionPrestigeManager(api, _religionManager);
         _religionPrestigeManager.Initialize();
 
+        // Initialize PvP manager (pass interfaces for loose coupling)
         _pvpManager = new PvPManager(api, _playerReligionDataManager, _religionManager, _religionPrestigeManager,
             _deityRegistry);
         _pvpManager.Initialize();
@@ -137,7 +143,7 @@ public class PantheonWarsSystem : ModSystem
         // Connect blessing systems to religion prestige manager
         _religionPrestigeManager.SetBlessingSystems(_blessingRegistry, _blessingEffectSystem);
 
-        // Register commands
+        // Register commands (pass interfaces for loose coupling)
         _deityCommands = new DeityCommands(api, _deityRegistry, _playerDataManager, _playerReligionDataManager);
         _deityCommands.RegisterCommands();
 
