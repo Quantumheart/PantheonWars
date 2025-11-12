@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Utilities;
@@ -10,6 +11,7 @@ namespace PantheonWars.GUI.UI.Components.Inputs;
 ///     Checkbox input component with label
 ///     Handles rendering, hover, and click interaction
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class Checkbox
 {
     /// <summary>

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace PantheonWars.Constants;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace PantheonWars.Constants;
 ///     These are the actual stat names used by VS's entity.Stats API.
 ///     Use these constants in blessing definitions to ensure consistency.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class VintageStoryStats
 {
     // Combat Stats

@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace PantheonWars.Constants;
 
 /// <summary>
@@ -5,6 +7,7 @@ namespace PantheonWars.Constants;
 ///     These effects are not yet implemented but are reserved for future functionality.
 ///     Use these constants instead of hardcoded strings to prevent typos and enable refactoring.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class SpecialEffects
 {
     #region Damage Reduction Effects

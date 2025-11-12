@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Utilities;
@@ -9,6 +10,7 @@ namespace PantheonWars.GUI.UI.Components;
 ///     Generic tab control component for switching between views
 ///     Handles tab rendering, hover, selection, and click detection
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class TabControl
 {
     /// <summary>

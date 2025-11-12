@@ -1,6 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace PantheonWars.Constants;
 
 // Command and subcommand names
+[ExcludeFromCodeCoverage]
 public static class BlessingCommandConstants
 {
     public const string CommandName = "blessings";
@@ -14,6 +17,7 @@ public static class BlessingCommandConstants
 }
 
 // Parameter names
+[ExcludeFromCodeCoverage]
 public static class ParameterConstants
 {
     public const string ParamBlessingId = "blessingid";
@@ -21,6 +25,7 @@ public static class ParameterConstants
 }
 
 // Command descriptions
+[ExcludeFromCodeCoverage]
 public static class BlessingDescriptionConstants
 {
     public const string CommandDescription = "Manage blessings and view blessing information";
@@ -34,6 +39,7 @@ public static class BlessingDescriptionConstants
 }
 
 // Common messages
+[ExcludeFromCodeCoverage]
 public static class ErrorMessageConstants
 {
     public const string ErrorPlayerNotFound = "Player not found";
@@ -48,6 +54,7 @@ public static class ErrorMessageConstants
 }
 
 // Usage messages
+[ExcludeFromCodeCoverage]
 public static class UsageMessageConstants
 {
     public const string UsageBlessingsInfo = "Usage: /blessings info <blessingid>";
@@ -55,6 +62,7 @@ public static class UsageMessageConstants
 }
 
 // Success messages
+[ExcludeFromCodeCoverage]
 public static class SuccessMessageConstants
 {
     public const string SuccessUnlockedPlayerBlessing = "Unlocked player blessing: {0}!";
@@ -63,6 +71,7 @@ public static class SuccessMessageConstants
 }
 
 // Info messages
+[ExcludeFromCodeCoverage]
 public static class InfoMessageConstants
 {
     public const string InfoNoPlayerBlessings = "You have no unlocked player blessings yet.";
