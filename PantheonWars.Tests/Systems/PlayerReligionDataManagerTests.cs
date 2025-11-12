@@ -67,7 +67,8 @@ public class PlayerReligionDataManagerTests
 
         // Assert
         _mockLogger.Verify(
-            l => l.Notification(It.Is<string>(s => s.Contains("Initializing") && s.Contains("Player Religion Data Manager"))),
+            l => l.Notification(It.Is<string>(s =>
+                s.Contains("Initializing") && s.Contains("Player Religion Data Manager"))),
             Times.Once()
         );
     }
@@ -112,7 +113,8 @@ public class PlayerReligionDataManagerTests
 
         // Assert
         _mockLogger.Verify(
-            l => l.Debug(It.Is<string>(s => s.Contains("Created new player religion data") && s.Contains("new-player-uid"))),
+            l => l.Debug(It.Is<string>(s =>
+                s.Contains("Created new player religion data") && s.Contains("new-player-uid"))),
             Times.Once()
         );
     }
@@ -295,7 +297,8 @@ public class PlayerReligionDataManagerTests
 
         // Assert
         _mockLogger.Verify(
-            l => l.Debug(It.Is<string>(s => s.Contains("player-uid") && s.Contains("spent 10 favor") && s.Contains("Blessing unlock"))),
+            l => l.Debug(It.Is<string>(s =>
+                s.Contains("player-uid") && s.Contains("spent 10 favor") && s.Contains("Blessing unlock"))),
             Times.Once()
         );
     }
@@ -331,7 +334,8 @@ public class PlayerReligionDataManagerTests
 
         // Assert
         _mockLogger.Verify(
-            l => l.Notification(It.Is<string>(s => s.Contains("rank changed") && s.Contains("Initiate") && s.Contains("Disciple"))),
+            l => l.Notification(It.Is<string>(s =>
+                s.Contains("rank changed") && s.Contains("Initiate") && s.Contains("Disciple"))),
             Times.Once()
         );
     }
@@ -376,7 +380,8 @@ public class PlayerReligionDataManagerTests
 
         // Assert
         _mockLogger.Verify(
-            l => l.Notification(It.Is<string>(s => s.Contains("player-uid") && s.Contains("unlocked blessing") && s.Contains("blessing_id"))),
+            l => l.Notification(It.Is<string>(s =>
+                s.Contains("player-uid") && s.Contains("unlocked blessing") && s.Contains("blessing_id"))),
             Times.Once()
         );
     }
@@ -460,9 +465,8 @@ public class PlayerReligionDataManagerTests
 
         var mockWorld = new Mock<IServerWorldAccessor>();
         _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
-        _mockAPI.Setup(a => a.World.PlayerByUid("player-uid")).Returns(new TestPlayer());
 
-        int count =0;
+        int count = 0;
         _dataManager.OnPlayerLeavesReligion += (player, uid) => count++;
 
         // Join first religion
@@ -509,6 +513,8 @@ public class PlayerReligionDataManagerTests
         var data = _dataManager.GetOrCreatePlayerData("player-uid");
         _dataManager.JoinReligion("player-uid", "religion-uid");
         data.Favor = 100;
+        int count = 0;
+        _dataManager.OnPlayerLeavesReligion += (player, uid) => count++;
 
         // Act
         _dataManager.LeaveReligion("player-uid");
@@ -532,6 +538,8 @@ public class PlayerReligionDataManagerTests
         _mockAPI.Setup(a => a.World).Returns(mockWorld.Object);
 
         _dataManager.JoinReligion("player-uid", "religion-uid");
+        int count = 0;
+        _dataManager.OnPlayerLeavesReligion += (player, uid) => count++;
 
         // Act
         _dataManager.LeaveReligion("player-uid");
@@ -671,43 +679,11 @@ public class PlayerReligionDataManagerTests
 
         // Assert
         _mockLogger.Verify(
-            l => l.Notification(It.Is<string>(s => s.Contains("Applying religion switch penalty") && s.Contains("player-uid"))),
+            l => l.Notification(It.Is<string>(s =>
+                s.Contains("Applying religion switch penalty") && s.Contains("player-uid"))),
             Times.Once()
         );
     }
 
     #endregion
-}
-
-
-internal class TestPlayer : IPlayer
-{
-    public PlayerGroupMembership[] GetGroups()
-    {
-        throw new NotImplementedException();
-    }
-
-    public PlayerGroupMembership GetGroup(int groupId)
-    {
-        throw new NotImplementedException();
-    }
-
-    public bool HasPrivilege(string privilegeCode)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IPlayerRole Role { get; set; }
-    public PlayerGroupMembership[] Groups { get; }
-    public List<Entitlement> Entitlements { get; }
-    public BlockSelection CurrentBlockSelection { get; }
-    public EntitySelection CurrentEntitySelection { get; }
-    public string PlayerName { get; }
-    public string PlayerUID { get; } = "player-uid";
-    public int ClientId { get; }
-    public EntityPlayer Entity { get; }
-    public IWorldPlayerData WorldData { get; }
-    public IPlayerInventoryManager InventoryManager { get; }
-    public string[] Privileges { get; }
-    public bool ImmersiveFpMode { get; }
 }
