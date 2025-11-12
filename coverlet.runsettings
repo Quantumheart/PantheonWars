@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<RunSettings>
+  <DataCollectionRunSettings>
+    <DataCollectors>
+      <DataCollector friendlyName="XPlat Code Coverage">
+        <Configuration>
+          <!-- Output formats: cobertura, opencover, json, lcov -->
+          <Format>cobertura,opencover,json</Format>
+
+          <!-- Exclude test assemblies and generated code -->
+          <Exclude>[*Tests]*,[*]*.Generated.*</Exclude>
+
+          <!-- Exclude by attribute -->
+          <ExcludeByAttribute>Obsolete,GeneratedCodeAttribute,CompilerGeneratedAttribute,ExcludeFromCodeCoverageAttribute</ExcludeByAttribute>
+
+          <!-- Include only PantheonWars assembly -->
+          <Include>[PantheonWars]*</Include>
+
+          <!-- Thresholds (will fail build if not met) -->
+          <!-- Commented out for now, uncomment to enforce -->
+          <!--
+          <Threshold>80</Threshold>
+          <ThresholdType>Line,Branch</ThresholdType>
+          <ThresholdStat>Total</ThresholdStat>
+          -->
+
+          <!-- Single hit prevents counting lines multiple times -->
+          <SingleHit>false</SingleHit>
+
+          <!-- Include test assembly in coverage collection path -->
+          <IncludeDirectory>../PantheonWars/bin/</IncludeDirectory>
+        </Configuration>
+      </DataCollector>
+    </DataCollectors>
+  </DataCollectionRunSettings>
+
+  <!-- Test run parameters -->
+  <RunConfiguration>
+    <!-- Maximum number of test threads -->
+    <MaxCpuCount>0</MaxCpuCount>
+
+    <!-- Timeout for test execution (in milliseconds) -->
+    <TestSessionTimeout>600000</TestSessionTimeout>
+  </RunConfiguration>
+</RunSettings>

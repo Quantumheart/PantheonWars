@@ -21,6 +21,8 @@ This document outlines a comprehensive testing strategy for the PantheonWars mod
 
 ---
 
+**📊 Code Coverage:** See [CODE_COVERAGE.md](CODE_COVERAGE.md) for instructions on generating coverage reports.
+
 ## Table of Contents
 
 1. [Interface Extraction Plan](#1-interface-extraction-plan)
