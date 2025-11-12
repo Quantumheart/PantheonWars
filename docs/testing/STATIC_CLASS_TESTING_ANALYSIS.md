@@ -286,7 +286,7 @@ The following files contain static rendering methods that may have **some** busi
 ## Recommendations
 
 ### 1. **Update Test Plan**
-Update `/docs/TEST_PLAN.md` to explicitly exclude these static classes from coverage requirements.
+Update `/docs/testing/TEST_PLAN.md` to explicitly exclude these static classes from coverage requirements.
 
 ### 2. **Add `[ExcludeFromCodeCoverage]` Attributes**
 Consider adding this attribute to classes that shouldn't be counted in coverage:

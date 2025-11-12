@@ -4,8 +4,8 @@ This directory contains comprehensive unit and integration tests for the Pantheo
 
 ## Quick Links
 
-- **📊 [Code Coverage Guide](../docs/CODE_COVERAGE.md)** - Generate and view coverage reports
-- **📋 [Test Plan](../docs/TEST_PLAN.md)** - Complete testing strategy and roadmap
+- **📊 [Code Coverage Guide](../docs/testing/CODE_COVERAGE.md)** - Generate and view coverage reports
+- **📋 [Test Plan](../docs/testing/TEST_PLAN.md)** - Complete testing strategy and roadmap
 
 ## Test Infrastructure
 
@@ -293,7 +293,7 @@ When adding new tests:
 
 ## References
 
-- **Test Plan:** `/docs/TEST_PLAN.md` - Comprehensive testing strategy
+- **Test Plan:** `/docs/testing/TEST_PLAN.md` - Comprehensive testing strategy
 - **Moq Documentation:** https://github.com/moq/moq4
 - **xUnit Documentation:** https://xunit.net/
 
