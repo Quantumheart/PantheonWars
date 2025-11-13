@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using PantheonWars.Systems.BuffSystem.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
@@ -9,7 +10,7 @@ namespace PantheonWars.Systems.BuffSystem;
 /// <summary>
 ///     Central manager for applying and removing buffs/debuffs
 /// </summary>
-public class BuffManager
+public class BuffManager : IBuffManager
 {
     private readonly ICoreServerAPI sapi;
 
@@ -35,7 +36,7 @@ public class BuffManager
         float duration,
         string sourceAbilityId,
         string casterPlayerUID,
-        Dictionary<string, float> statModifiers,
+        Dictionary<string, float>? statModifiers,
         bool isBuff = true)
     {
         if (target == null || string.IsNullOrEmpty(effectId)) return false;
@@ -48,9 +49,11 @@ public class BuffManager
         var effect = new ActiveEffect(effectId, duration, sourceAbilityId, casterPlayerUID, isBuff);
 
         // Add stat modifiers
-        if (statModifiers != null)
-            foreach (var modifier in statModifiers)
-                effect.AddStatModifier(modifier.Key, modifier.Value);
+        if (statModifiers is null)
+            return false;
+        
+        foreach (var modifier in statModifiers)
+            effect.AddStatModifier(modifier.Key, modifier.Value);
 
         // Apply the effect
         buffTracker.AddEffect(effect);

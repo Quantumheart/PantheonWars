@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Utilities;
@@ -9,6 +10,7 @@ namespace PantheonWars.GUI.UI.Components.Lists;
 ///     Reusable scrollbar component
 ///     Provides consistent scrollbar styling for scrollable content
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class Scrollbar
 {
     /// <summary>

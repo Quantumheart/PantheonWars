@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using PantheonWars.Models;
 
@@ -9,6 +10,7 @@ namespace PantheonWars.GUI;
 ///     Calculates positions for blessing nodes in the tree layout
 ///     Uses tier-based vertical arrangement with horizontal spacing
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class BlessingTreeLayout
 {
     // Layout constants

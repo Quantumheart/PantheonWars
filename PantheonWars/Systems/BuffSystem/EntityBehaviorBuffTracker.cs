@@ -57,7 +57,7 @@ public class EntityBehaviorBuffTracker : EntityBehavior
     /// <summary>
     ///     Add a new effect to this entity
     /// </summary>
-    public void AddEffect(ActiveEffect effect)
+    public virtual void AddEffect(ActiveEffect effect)
     {
         if (effect == null) return;
 
@@ -84,7 +84,7 @@ public class EntityBehaviorBuffTracker : EntityBehavior
     /// <summary>
     ///     Remove an effect by ID
     /// </summary>
-    public bool RemoveEffect(string effectId)
+    public virtual bool RemoveEffect(string effectId)
     {
         var effect = activeEffects.FirstOrDefault(e => e.EffectId == effectId);
         if (effect != null)
@@ -106,15 +106,15 @@ public class EntityBehaviorBuffTracker : EntityBehavior
     /// <summary>
     ///     Get all active effects on this entity
     /// </summary>
-    public List<ActiveEffect> GetActiveEffects()
+    public virtual List<ActiveEffect> GetActiveEffects()
     {
-        return new List<ActiveEffect>(activeEffects);
+        return [..activeEffects];
     }
 
     /// <summary>
     ///     Check if entity has a specific effect active
     /// </summary>
-    public bool HasEffect(string effectId)
+    public virtual bool HasEffect(string effectId)
     {
         return activeEffects.Any(e => e.EffectId == effectId);
     }
@@ -217,7 +217,7 @@ public class EntityBehaviorBuffTracker : EntityBehavior
     /// <summary>
     ///     Get the total damage multiplier this entity should deal (for buffs like War Banner)
     /// </summary>
-    public float GetOutgoingDamageMultiplier()
+    public virtual float GetOutgoingDamageMultiplier()
     {
         var multiplier = 1.0f;
 
@@ -236,7 +236,7 @@ public class EntityBehaviorBuffTracker : EntityBehavior
     /// <summary>
     ///     Check if entity is marked (for Hunter's Mark debuff)
     /// </summary>
-    public float GetReceivedDamageMultiplier()
+    public virtual float GetReceivedDamageMultiplier()
     {
         var multiplier = 1.0f;
 

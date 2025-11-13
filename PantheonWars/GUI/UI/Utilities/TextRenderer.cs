@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 
@@ -7,6 +8,7 @@ namespace PantheonWars.GUI.UI.Utilities;
 ///     Utility class for rendering various text styles
 ///     Provides consistent text rendering for labels, info text, errors, etc.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class TextRenderer
 {
     /// <summary>

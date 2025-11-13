@@ -1,8 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace PantheonWars.Systems;
 
 /// <summary>
 ///     Provides rank requirement calculations and lookups
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class RankRequirements
 {
     /// <summary>

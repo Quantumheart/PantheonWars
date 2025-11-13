@@ -21,12 +21,12 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
     private const string DATA_KEY = "pantheonwars_playerreligiondata";
     private const int RELIGION_SWITCH_COOLDOWN_DAYS = 7;
     private readonly Dictionary<string, PlayerReligionData> _playerData = new();
-    private readonly ReligionManager _religionManager;
+    private readonly IReligionManager _religionManager;
 
     private readonly ICoreServerAPI _sapi;
 
     // ReSharper disable once ConvertToPrimaryConstructor
-    public PlayerReligionDataManager(ICoreServerAPI sapi, ReligionManager religionManager)
+    public PlayerReligionDataManager(ICoreServerAPI sapi, IReligionManager religionManager)
     {
         _sapi = sapi;
         _religionManager = religionManager;
@@ -279,7 +279,7 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
     /// <summary>
     ///     Sends rank-up notification to player
     /// </summary>
-    private void SendRankUpNotification(string playerUID, FavorRank newRank)
+    internal void SendRankUpNotification(string playerUID, FavorRank newRank)
     {
         var player = _sapi.World.PlayerByUid(playerUID) as IServerPlayer;
         if (player != null)
@@ -292,7 +292,7 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
 
     #region Event Handlers
 
-    private void OnPlayerJoin(IServerPlayer player)
+    internal void OnPlayerJoin(IServerPlayer player)
     {
         LoadPlayerData(player.PlayerUID);
     }
@@ -302,12 +302,12 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
         SavePlayerData(player.PlayerUID);
     }
 
-    private void OnSaveGameLoaded()
+    internal void OnSaveGameLoaded()
     {
         LoadAllPlayerData();
     }
 
-    private void OnGameWorldSave()
+    internal void OnGameWorldSave()
     {
         SaveAllPlayerData();
     }
@@ -319,7 +319,7 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
     /// <summary>
     ///     Loads player data from world storage
     /// </summary>
-    private void LoadPlayerData(string playerUID)
+    internal void LoadPlayerData(string playerUID)
     {
         try
         {
@@ -343,7 +343,7 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
     /// <summary>
     ///     Saves player data to world storage
     /// </summary>
-    private void SavePlayerData(string playerUID)
+    internal void SavePlayerData(string playerUID)
     {
         try
         {
@@ -363,7 +363,7 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
     /// <summary>
     ///     Loads all player data (called on server start)
     /// </summary>
-    private void LoadAllPlayerData()
+    internal void LoadAllPlayerData()
     {
         _sapi.Logger.Notification("[PantheonWars] Loading all player religion data...");
         // Player data will be loaded individually as players join
@@ -373,7 +373,7 @@ public class PlayerReligionDataManager : IPlayerReligionDataManager
     /// <summary>
     ///     Saves all player data (called on server save)
     /// </summary>
-    private void SaveAllPlayerData()
+    internal void SaveAllPlayerData()
     {
         _sapi.Logger.Notification("[PantheonWars] Saving all player religion data...");
         foreach (var playerUID in _playerData.Keys) SavePlayerData(playerUID);

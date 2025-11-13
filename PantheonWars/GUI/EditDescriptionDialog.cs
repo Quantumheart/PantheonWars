@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using PantheonWars.Network;
 using Vintagestory.API.Client;
 
@@ -6,6 +7,7 @@ namespace PantheonWars.GUI;
 /// <summary>
 ///     Dialog for editing religion description
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class EditDescriptionDialog : GuiDialog
 {
     private readonly ICoreClientAPI _capi;

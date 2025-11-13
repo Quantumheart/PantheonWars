@@ -6,10 +6,10 @@ namespace PantheonWars.Tests.Systems;
 public class RankRequirementsTests
 {
     [Theory]
-    [InlineData(0, 100)]  // Initiate → Devoted
-    [InlineData(1, 250)]  // Devoted → Zealot
-    [InlineData(2, 500)]  // Zealot → Champion
-    [InlineData(3, 1000)] // Champion → Exalted
+    [InlineData(0, 500)]  // Initiate → Devoted
+    [InlineData(1, 2000)]  // Devoted → Zealot
+    [InlineData(2, 5000)]  // Zealot → Champion
+    [InlineData(3, 10000)] // Champion → Exalted
     [InlineData(4, 0)]    // Max rank
     public void GetRequiredFavorForNextRank_ReturnsCorrectValue(int currentRank, int expectedFavor)
     {
@@ -63,10 +63,10 @@ public class RankRequirementsTests
 
     [Theory]
     [InlineData(0, "Initiate")]
-    [InlineData(1, "Devoted")]
+    [InlineData(1, "Disciple")]
     [InlineData(2, "Zealot")]
     [InlineData(3, "Champion")]
-    [InlineData(4, "Exalted")]
+    [InlineData(4, "Avatar")]
     public void GetFavorRankName_ReturnsCorrectName(int rank, string expectedName)
     {
         // Act

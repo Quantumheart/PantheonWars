@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 
 namespace PantheonWars.GUI.UI.Utilities;
@@ -7,6 +8,7 @@ namespace PantheonWars.GUI.UI.Utilities;
 ///     Centralized color palette for all UI components
 ///     Ensures consistent theming across all overlays and dialogs
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class ColorPalette
 {
     // Primary Colors

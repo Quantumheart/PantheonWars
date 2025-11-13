@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Components.Lists;
@@ -13,6 +14,7 @@ namespace PantheonWars.GUI.UI.Renderers.Components;
 /// <summary>
 ///     Renders a scrollable religion list for religion browser
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class ReligionListRenderer
 {
     /// <summary>

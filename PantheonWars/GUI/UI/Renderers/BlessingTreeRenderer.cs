@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -13,6 +14,7 @@ namespace PantheonWars.GUI.UI.Renderers;
 ///     Right panel: Religion blessings (50% width)
 ///     Both panels are independently scrollable
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class BlessingTreeRenderer
 {
     // Color constants

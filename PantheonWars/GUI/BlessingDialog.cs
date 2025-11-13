@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Numerics;
 using ImGuiNET;
@@ -20,6 +21,7 @@ namespace PantheonWars.GUI;
 ///     Main ImGui-based Blessing Dialog for viewing and unlocking blessings
 ///     Follows XSkillsGilded pattern with VSImGui integration
 /// </summary>
+[ExcludeFromCodeCoverage]
 public partial class BlessingDialog : ModSystem
 {
     private const int CheckDataInterval = 1000; // Check for data every 1 second

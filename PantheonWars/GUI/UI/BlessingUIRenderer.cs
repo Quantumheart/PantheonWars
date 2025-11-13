@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Renderers;
 using Vintagestory.API.Client;
@@ -9,6 +10,7 @@ namespace PantheonWars.GUI.UI;
 ///     Central coordinator that orchestrates all blessing UI renderers
 ///     Follows XSkillsGilded pattern - calls renderers in correct order with proper layout
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class BlessingUIRenderer
 {
     /// <summary>

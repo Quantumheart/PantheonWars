@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using PantheonWars.GUI.Interfaces;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using PantheonWars.Systems;
@@ -9,7 +10,7 @@ namespace PantheonWars.GUI;
 /// <summary>
 ///     Manages state for the Blessing Dialog UI
 /// </summary>
-public class BlessingDialogManager
+public class BlessingDialogManager : IBlessingDialogManager
 {
     private readonly ICoreClientAPI _capi;
 

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using PantheonWars.Constants;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
@@ -10,6 +11,7 @@ namespace PantheonWars.Systems;
 ///     Contains all blessing definitions for all deities (Phase 3.4)
 ///     Total: 80 blessings (8 deities × 10 blessings each)
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class BlessingDefinitions
 {
     /// <summary>

@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using PantheonWars.Systems.BuffSystem;
+using PantheonWars.Systems.BuffSystem.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
@@ -30,7 +31,7 @@ public class SwiftFeetAbility : Ability
         MinimumRank = DevotionRank.Initiate;
     }
 
-    public override bool Execute(IServerPlayer caster, ICoreServerAPI sapi, BuffManager? buffManager = null)
+    public override bool Execute(IServerPlayer caster, ICoreServerAPI sapi, IBuffManager? buffManager = null)
     {
         var casterEntity = caster.Entity;
         if (casterEntity == null) return false;

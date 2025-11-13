@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Components.Buttons;
@@ -14,6 +15,7 @@ namespace PantheonWars.GUI.UI.Renderers.Components;
 /// <summary>
 ///     Renders a scrollable member list for religion management
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class MemberListRenderer
 {
     /// <summary>

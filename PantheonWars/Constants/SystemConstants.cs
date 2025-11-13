@@ -1,9 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace PantheonWars.Constants;
 
 /// <summary>
 ///     System-wide constants for modifier IDs, log prefixes, and cache keys.
 ///     Use these constants instead of hardcoded strings to maintain consistency.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class SystemConstants
 {
     #region Modifier IDs

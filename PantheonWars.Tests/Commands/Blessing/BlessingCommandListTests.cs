@@ -93,7 +93,7 @@ public class BlessingCommandListTests : BlessingCommandsTestHelpers
             .Returns(playerData);
 
         // Act
-        var result = _sut!.OnBlessingsList(args);
+        var result = _sut!.OnList(args);
 
         // Assert
         Assert.Contains(string.Format(FormatStringConstants.HeaderBlessingsForDeity, DeityType.Aethra),
@@ -115,7 +115,7 @@ public class BlessingCommandListTests : BlessingCommandsTestHelpers
         };
 
         // Act
-        var result = _sut!.OnBlessingsList(args);
+        var result = _sut!.OnList(args);
 
         // Assert
         Assert.Equal(ErrorMessageConstants.ErrorPlayerNotFound, result.StatusMessage);
@@ -137,7 +137,7 @@ public class BlessingCommandListTests : BlessingCommandsTestHelpers
             .Returns(new PlayerReligionData { ActiveDeity = DeityType.None });
 
         // Act
-        var result = _sut!.OnBlessingsList(args);
+        var result = _sut!.OnList(args);
 
         // Assert
         Assert.Equal(ErrorMessageConstants.ErrorMustJoinReligion, result.StatusMessage);
@@ -170,7 +170,7 @@ public class BlessingCommandListTests : BlessingCommandsTestHelpers
             .Returns(new List<PantheonWars.Models.Blessing>());
 
         // Act
-        var result = _sut!.OnBlessingsList(args);
+        var result = _sut!.OnList(args);
 
         // Assert
         Assert.Contains(string.Format(FormatStringConstants.HeaderBlessingsForDeity, DeityType.Aethra),
@@ -207,7 +207,7 @@ public class BlessingCommandListTests : BlessingCommandsTestHelpers
             .Returns(new List<PantheonWars.Models.Blessing>());
 
         // Act
-        var result = _sut!.OnBlessingsList(args);
+        var result = _sut!.OnList(args);
 
         // Assert
         Assert.Contains(string.Format(FormatStringConstants.HeaderBlessingsForDeity, DeityType.Aethra),
@@ -268,7 +268,7 @@ public class BlessingCommandListTests : BlessingCommandsTestHelpers
             .Returns(religion);
 
         // Act
-        var result = _sut!.OnBlessingsList(args);
+        var result = _sut!.OnList(args);
 
         // Assert
         Assert.Contains(string.Format(FormatStringConstants.HeaderBlessingsForDeity, DeityType.Aethra),
@@ -316,7 +316,7 @@ public class BlessingCommandListTests : BlessingCommandsTestHelpers
             .Returns(new List<PantheonWars.Models.Blessing>());
 
         // Act
-        var result = _sut!.OnBlessingsList(args);
+        var result = _sut!.OnList(args);
 
         // Assert
         Assert.Contains("Zealot Blessing", result.StatusMessage);
@@ -372,7 +372,7 @@ public class BlessingCommandListTests : BlessingCommandsTestHelpers
             .Returns(religion);
 
         // Act
-        var result = _sut!.OnBlessingsList(args);
+        var result = _sut!.OnList(args);
 
         // Assert
         Assert.Contains("Established Blessing", result.StatusMessage);
@@ -419,7 +419,7 @@ public class BlessingCommandListTests : BlessingCommandsTestHelpers
             .Returns(new List<PantheonWars.Models.Blessing>());
 
         // Act
-        var result = _sut!.OnBlessingsList(args);
+        var result = _sut!.OnList(args);
 
         // Assert
         Assert.Contains("Test Blessing", result.StatusMessage);
@@ -488,7 +488,7 @@ public class BlessingCommandListTests : BlessingCommandsTestHelpers
             .Returns(religion);
 
         // Act
-        var result = _sut!.OnBlessingsList(args);
+        var result = _sut!.OnList(args);
 
         // Assert - Verify all expected sections are present
         var message = result.StatusMessage;

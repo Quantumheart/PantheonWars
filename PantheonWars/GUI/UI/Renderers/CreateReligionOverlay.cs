@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Components.Buttons;
@@ -13,6 +14,7 @@ namespace PantheonWars.GUI.UI.Renderers;
 ///     Overlay for creating a new religion
 ///     Displays as modal form on top of browser
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class CreateReligionOverlay
 {
     // State

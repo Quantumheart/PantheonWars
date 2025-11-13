@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Utilities;
@@ -12,6 +13,7 @@ namespace PantheonWars.GUI.UI.Renderers;
 ///     Renders the selected blessing details panel at the bottom of the dialog
 ///     Shows: Name, description, requirements, stats, effects
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class BlessingInfoRenderer
 {
     /// <summary>

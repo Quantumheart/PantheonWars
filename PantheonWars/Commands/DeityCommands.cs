@@ -13,12 +13,12 @@ namespace PantheonWars.Commands;
 /// </summary>
 public class DeityCommands
 {
-    private readonly DeityRegistry _deityRegistry;
+    private readonly IDeityRegistry _deityRegistry;
     private readonly PlayerDataManager _playerDataManager;
     private readonly IPlayerReligionDataManager _religionDataManager;
     private readonly ICoreServerAPI _sapi;
 
-    public DeityCommands(ICoreServerAPI sapi, DeityRegistry deityRegistry, PlayerDataManager playerDataManager, IPlayerReligionDataManager religionDataManager)
+    public DeityCommands(ICoreServerAPI sapi, IDeityRegistry deityRegistry, PlayerDataManager playerDataManager, IPlayerReligionDataManager religionDataManager)
     {
         _sapi = sapi;
         _deityRegistry = deityRegistry;

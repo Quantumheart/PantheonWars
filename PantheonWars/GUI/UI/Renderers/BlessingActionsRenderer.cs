@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using Vintagestory.API.Client;
@@ -9,6 +10,7 @@ namespace PantheonWars.GUI.UI.Renderers;
 ///     Renders action buttons (Unlock, Close) at the bottom-right of the dialog
 ///     Handles button states and click events
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class BlessingActionsRenderer
 {
     private const float ButtonWidth = 120f;

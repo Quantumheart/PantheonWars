@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Cairo;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
-using PantheonWars.Systems;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Client;
 
 namespace PantheonWars.GUI;
@@ -12,13 +13,14 @@ namespace PantheonWars.GUI;
 /// <summary>
 ///     Dialog for selecting a deity to pledge to
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class DeitySelectionDialog : GuiDialog
 {
-    private readonly DeityRegistry _deityRegistry;
+    private readonly IDeityRegistry _deityRegistry;
     private readonly Action<DeityType> _onDeitySelected;
     private DeityType _selectedDeity = DeityType.None;
 
-    public DeitySelectionDialog(ICoreClientAPI capi, DeityRegistry deityRegistry, Action<DeityType> onDeitySelected)
+    public DeitySelectionDialog(ICoreClientAPI capi, IDeityRegistry deityRegistry, Action<DeityType> onDeitySelected)
         : base(capi)
     {
         _deityRegistry = deityRegistry;

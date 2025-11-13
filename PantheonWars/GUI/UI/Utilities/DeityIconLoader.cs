@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
 using ImGuiNET;
 using PantheonWars.Models.Enum;
@@ -11,6 +12,7 @@ namespace PantheonWars.GUI.UI.Utilities;
 ///     Manages loading and caching of deity icon textures for ImGui rendering
 ///     Provides texture IDs for use with ImGui.Image() calls
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class DeityIconLoader
 {
     private static readonly Dictionary<DeityType, LoadedTexture?> _deityTextures = new();

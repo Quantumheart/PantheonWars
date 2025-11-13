@@ -18,20 +18,20 @@ public class BlessingEffectSystem : IBlessingEffectSystem
 {
     // Track applied modifiers per player for cleanup
     private readonly Dictionary<string, HashSet<string>> _appliedModifiers = new();
-    private readonly BlessingRegistry _blessingRegistry;
+    private readonly IBlessingRegistry _blessingRegistry;
 
     // Cache for stat modifiers to reduce computation
     private readonly Dictionary<string, Dictionary<string, float>> _playerModifierCache = new();
     private readonly IPlayerReligionDataManager _playerReligionDataManager;
-    private readonly ReligionManager _religionManager;
+    private readonly IReligionManager _religionManager;
     private readonly Dictionary<string, Dictionary<string, float>> _religionModifierCache = new();
     private readonly ICoreServerAPI _sapi;
 
     public BlessingEffectSystem(
         ICoreServerAPI sapi,
-        BlessingRegistry blessingRegistry,
+        IBlessingRegistry blessingRegistry,
         IPlayerReligionDataManager playerReligionDataManager,
-        ReligionManager religionManager)
+        IReligionManager religionManager)
     {
         _sapi = sapi;
         _blessingRegistry = blessingRegistry;
@@ -333,13 +333,13 @@ public class BlessingEffectSystem : IBlessingEffectSystem
         return string.Join("\n", lines);
     }
 
-    private void OnPlayerLeavesReligion(IServerPlayer player, string religionUID)
+    internal void OnPlayerLeavesReligion(IServerPlayer player, string religionUID)
     {
         RemoveBlessingsFromPlayer(player);
         RefreshBlessings(player.PlayerUID, religionUID);
     }
 
-    private void RefreshBlessings(string playerUid, string religionUID)
+    internal void RefreshBlessings(string playerUid, string religionUID)
     {
         RefreshPlayerBlessings(playerUid);
         RefreshReligionBlessings(religionUID);
@@ -348,7 +348,7 @@ public class BlessingEffectSystem : IBlessingEffectSystem
     /// <summary>
     ///     Handles player join to apply blessings
     /// </summary>
-    private void OnPlayerJoin(IServerPlayer player)
+    internal void OnPlayerJoin(IServerPlayer player)
     {
         RefreshPlayerBlessings(player.PlayerUID);
     }
@@ -356,7 +356,7 @@ public class BlessingEffectSystem : IBlessingEffectSystem
     /// <summary>
     ///     Removes all blessing modifiers from a player
     /// </summary>
-    private void RemoveBlessingsFromPlayer(IServerPlayer player)
+    internal void RemoveBlessingsFromPlayer(IServerPlayer player)
     {
         if (player?.Entity == null) return;
 
@@ -395,7 +395,7 @@ public class BlessingEffectSystem : IBlessingEffectSystem
     /// <summary>
     ///     Helper method to combine modifiers (additive)
     /// </summary>
-    private void CombineModifiers(Dictionary<string, float> target, Dictionary<string, float> source)
+    internal void CombineModifiers(Dictionary<string, float> target, Dictionary<string, float> source)
     {
         foreach (var kvp in source)
             if (target.ContainsKey(kvp.Key))
@@ -407,7 +407,7 @@ public class BlessingEffectSystem : IBlessingEffectSystem
     /// <summary>
     ///     Formats stat names for display
     /// </summary>
-    private string FormatStatName(string statKey)
+    internal string FormatStatName(string statKey)
     {
         return statKey switch
         {

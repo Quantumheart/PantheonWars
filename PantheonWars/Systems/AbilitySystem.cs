@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using PantheonWars.Models;
-using PantheonWars.Systems.BuffSystem;
+using PantheonWars.Systems.BuffSystem.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
@@ -24,7 +24,7 @@ public class AbilitySystem
         AbilityRegistry abilityRegistry,
         PlayerDataManager playerDataManager,
         AbilityCooldownManager cooldownManager,
-        BuffManager? buffManager = null)
+        IBuffManager? buffManager = null)
     {
         _sapi = sapi;
         _abilityRegistry = abilityRegistry;
@@ -36,7 +36,7 @@ public class AbilitySystem
     /// <summary>
     ///     Gets the BuffManager instance (for abilities to use)
     /// </summary>
-    public BuffManager? BuffManager { get; }
+    public IBuffManager? BuffManager { get; }
 
     /// <summary>
     ///     Initializes the ability system

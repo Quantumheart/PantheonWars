@@ -12,21 +12,21 @@ namespace PantheonWars.Systems;
 /// <summary>
 ///     Manages divine favor rewards and penalties
 /// </summary>
-public class FavorSystem
+public class FavorSystem : IFavorSystem
 {
     private const int BASE_KILL_FAVOR = 10;
     private const int DEATH_PENALTY_FAVOR = 5;
     private const float BASE_FAVOR_PER_HOUR = 2.0f; // Passive favor generation rate
     private const int PASSIVE_TICK_INTERVAL_MS = 1000; // 1 second ticks
 
-    private readonly DeityRegistry _deityRegistry;
+    private readonly IDeityRegistry _deityRegistry;
     private readonly IPlayerDataManager _playerDataManager;
     private readonly IPlayerReligionDataManager _playerReligionDataManager;
-    private readonly ReligionManager _religionManager;
+    private readonly IReligionManager _religionManager;
 
     private readonly ICoreServerAPI _sapi;
 
-    public FavorSystem(ICoreServerAPI sapi, IPlayerDataManager playerDataManager, IPlayerReligionDataManager playerReligionDataManager, DeityRegistry deityRegistry, ReligionManager religionManager)
+    public FavorSystem(ICoreServerAPI sapi, IPlayerDataManager playerDataManager, IPlayerReligionDataManager playerReligionDataManager, IDeityRegistry deityRegistry, IReligionManager religionManager)
     {
         _sapi = sapi;
         _playerDataManager = playerDataManager;
@@ -175,7 +175,7 @@ public class FavorSystem
     /// <summary>
     ///     Game tick handler for passive favor generation
     /// </summary>
-    private void OnGameTick(float dt)
+    internal void OnGameTick(float dt)
     {
         // Award passive favor to all online players with deities
         foreach (var player in _sapi.World.AllOnlinePlayers)
@@ -190,7 +190,7 @@ public class FavorSystem
     /// <summary>
     ///     Awards passive favor to a player based on their devotion and time played
     /// </summary>
-    private void AwardPassiveFavor(IServerPlayer player, float dt)
+    internal void AwardPassiveFavor(IServerPlayer player, float dt)
     {
         var religionData = _playerReligionDataManager.GetOrCreatePlayerData(player.PlayerUID);
 
@@ -216,7 +216,7 @@ public class FavorSystem
     /// <summary>
     ///     Calculates the total multiplier for passive favor generation
     /// </summary>
-    private float CalculatePassiveFavorMultiplier(IServerPlayer player, PlayerReligionData religionData)
+    internal float CalculatePassiveFavorMultiplier(IServerPlayer player, PlayerReligionData religionData)
     {
         float multiplier = 1.0f;
 

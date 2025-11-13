@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Utilities;
@@ -10,6 +11,7 @@ namespace PantheonWars.GUI.UI.Components.Lists;
 ///     Generic scrollable list component with item renderer callback
 ///     Handles scrolling, clipping, mouse wheel, and scrollbar rendering
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class ScrollableList
 {
     /// <summary>

@@ -1,9 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace PantheonWars.Constants;
 
 /// <summary>
 ///     Constants for all blessing identifiers across all deities.
 ///     Use these constants instead of hardcoded strings to prevent typos and enable refactoring.
 /// </summary>
+[ExcludeFromCodeCoverage]
 public static class BlessingIds
 {
     #region Khoras (War) - 10 Blessings

@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Utilities;
 
@@ -8,6 +9,7 @@ namespace PantheonWars.GUI.UI.Components.Buttons;
 ///     Reusable button rendering component
 ///     Provides consistent button styles across all UI overlays
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class ButtonRenderer
 {
     /// <summary>

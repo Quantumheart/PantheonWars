@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PantheonWars.Models;
 using PantheonWars.Models.Enum;
+using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
 using Vintagestory.API.Server;
@@ -11,7 +12,7 @@ namespace PantheonWars.Systems;
 /// <summary>
 ///     Manages religion prestige progression and religion-wide blessings
 /// </summary>
-public class ReligionPrestigeManager
+public class ReligionPrestigeManager : IReligionPrestigeManager
 {
     // Prestige rank thresholds
     private const int FLEDGLING_THRESHOLD = 0;
@@ -19,12 +20,12 @@ public class ReligionPrestigeManager
     private const int RENOWNED_THRESHOLD = 2000;
     private const int LEGENDARY_THRESHOLD = 5000;
     private const int MYTHIC_THRESHOLD = 10000;
-    private readonly ReligionManager _religionManager;
+    private readonly IReligionManager _religionManager;
     private readonly ICoreServerAPI _sapi;
-    private BlessingEffectSystem? _blessingEffectSystem;
-    private BlessingRegistry? _blessingRegistry;
+    private IBlessingEffectSystem? _blessingEffectSystem;
+    private IBlessingRegistry? _blessingRegistry;
 
-    public ReligionPrestigeManager(ICoreServerAPI sapi, ReligionManager religionManager)
+    public ReligionPrestigeManager(ICoreServerAPI sapi, IReligionManager religionManager)
     {
         _sapi = sapi;
         _religionManager = religionManager;
@@ -33,7 +34,7 @@ public class ReligionPrestigeManager
     /// <summary>
     ///     Sets the blessing registry and effect system (called after they're initialized)
     /// </summary>
-    public void SetBlessingSystems(BlessingRegistry blessingRegistry, BlessingEffectSystem blessingEffectSystem)
+    public void SetBlessingSystems(IBlessingRegistry blessingRegistry, IBlessingEffectSystem blessingEffectSystem)
     {
         _blessingRegistry = blessingRegistry;
         _blessingEffectSystem = blessingEffectSystem;
