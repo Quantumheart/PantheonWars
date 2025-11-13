@@ -375,6 +375,97 @@ public class PantheonWarsSystem : ModSystem
 
                     break;
 
+                case "ban":
+                    var religionForBan = _religionManager!.GetPlayerReligion(fromPlayer.PlayerUID);
+                    if (religionForBan != null && religionForBan.IsFounder(fromPlayer.PlayerUID))
+                    {
+                        if (packet.TargetPlayerUID != fromPlayer.PlayerUID)
+                        {
+                            // Extract ban parameters from packet data
+                            string reason = "No reason provided";
+                            int? expiryDays = null;
+
+                            if (packet.Data != null)
+                            {
+                                if (packet.Data.ContainsKey("Reason"))
+                                    reason = packet.Data["Reason"]?.ToString() ?? "No reason provided";
+
+                                if (packet.Data.ContainsKey("ExpiryDays"))
+                                {
+                                    var expiryValue = packet.Data["ExpiryDays"]?.ToString();
+                                    if (!string.IsNullOrEmpty(expiryValue) && int.TryParse(expiryValue, out var days) &&
+                                        days > 0) expiryDays = days;
+                                }
+                            }
+
+                            // Kick the player if they're still a member
+                            if (religionForBan.IsMember(packet.TargetPlayerUID))
+                                _playerReligionDataManager!.LeaveReligion(packet.TargetPlayerUID);
+
+                            // Ban the player
+                            _religionManager.BanPlayer(
+                                religionForBan.ReligionUID,
+                                packet.TargetPlayerUID,
+                                fromPlayer.PlayerUID,
+                                reason,
+                                expiryDays
+                            );
+
+                            var expiryText = expiryDays.HasValue ? $" for {expiryDays} days" : " permanently";
+                            message = $"Player has been banned from the religion{expiryText}. Reason: {reason}";
+                            success = true;
+
+                            // Notify banned player if online
+                            var bannedPlayer = _sapi!.World.PlayerByUid(packet.TargetPlayerUID) as IServerPlayer;
+                            if (bannedPlayer != null)
+                            {
+                                bannedPlayer.SendMessage(0,
+                                    $"You have been banned from {religionForBan.ReligionName}. Reason: {reason}",
+                                    EnumChatType.Notification);
+                                SendPlayerDataToClient(bannedPlayer);
+
+                                // Send religion state changed packet
+                                var statePacket = new ReligionStateChangedPacket
+                                {
+                                    Reason = $"You have been banned from {religionForBan.ReligionName}. Reason: {reason}",
+                                    HasReligion = false
+                                };
+                                _serverChannel!.SendPacket(statePacket, bannedPlayer);
+                            }
+                        }
+                        else
+                        {
+                            message = "You cannot ban yourself.";
+                        }
+                    }
+                    else
+                    {
+                        message = "Only the founder can ban members.";
+                    }
+
+                    break;
+
+                case "unban":
+                    var religionForUnban = _religionManager!.GetPlayerReligion(fromPlayer.PlayerUID);
+                    if (religionForUnban != null && religionForUnban.IsFounder(fromPlayer.PlayerUID))
+                    {
+                        if (_religionManager.UnbanPlayer(religionForUnban.ReligionUID, packet.TargetPlayerUID))
+                        {
+                            message = "Player has been unbanned from the religion.";
+                            success = true;
+                        }
+                        else
+                        {
+                            message = "Failed to unban player. They may not be banned.";
+                        }
+                    }
+                    else
+                    {
+                        message = "Only the founder can unban players.";
+                    }
+
+                    break;
+
                 case "invite":
                     var religionForInvite = _religionManager!.GetPlayerReligion(fromPlayer.PlayerUID);
                     if (religionForInvite != null)

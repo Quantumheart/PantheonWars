@@ -79,6 +79,22 @@ public class ReligionCommands
             .WithArgs(_sapi.ChatCommands.Parsers.Word("playername"))
             .HandleWith(OnKickPlayer)
             .EndSubCommand()
+            .BeginSubCommand("ban")
+            .WithDescription("Ban a player from your religion (founder only)")
+            .WithArgs(_sapi.ChatCommands.Parsers.Word("playername"),
+                _sapi.ChatCommands.Parsers.OptionalAll("reason"),
+                _sapi.ChatCommands.Parsers.OptionalInt("days"))
+            .HandleWith(OnBanPlayer)
+            .EndSubCommand()
+            .BeginSubCommand("unban")
+            .WithDescription("Unban a player from your religion (founder only)")
+            .WithArgs(_sapi.ChatCommands.Parsers.Word("playername"))
+            .HandleWith(OnUnbanPlayer)
+            .EndSubCommand()
+            .BeginSubCommand("banlist")
+            .WithDescription("List all banned players (founder only)")
+            .HandleWith(OnListBannedPlayers)
+            .EndSubCommand()
             .BeginSubCommand("disband")
             .WithDescription("Disband your religion (founder only)")
             .HandleWith(OnDisbandReligion)
@@ -393,6 +409,147 @@ public class ReligionCommands
             );
 
         return TextCommandResult.Success($"{targetPlayerName} has been removed from {religion.ReligionName}");
+    }
+
+    /// <summary>
+    ///     Handler for /religion ban <playername> [reason] [days]
+    /// </summary>
+    private TextCommandResult OnBanPlayer(TextCommandCallingArgs args)
+    {
+        var targetPlayerName = (string)args[0];
+        var reason = args.Parsers.Count > 1 ? (string?)args[1] : "No reason provided";
+        int? expiryDays = args.Parsers.Count > 2 ? (int?)args[2] : null;
+
+        var player = args.Caller.Player as IServerPlayer;
+        if (player == null) return TextCommandResult.Error("Command can only be used by players");
+
+        // Check if player is in a religion
+        var playerData = _playerReligionDataManager.GetOrCreatePlayerData(player.PlayerUID);
+        if (!playerData.HasReligion()) return TextCommandResult.Error("You are not in any religion");
+
+        var religion = _religionManager.GetReligion(playerData.ReligionUID!);
+        if (religion == null) return TextCommandResult.Error("Could not find your religion data");
+
+        // Check if player is founder
+        if (!religion.IsFounder(player.PlayerUID)) return TextCommandResult.Error("Only the founder can ban members");
+
+        // Find target player by name
+        var targetPlayer = _sapi.World.AllPlayers
+            .FirstOrDefault(p => p.PlayerName.Equals(targetPlayerName, StringComparison.OrdinalIgnoreCase));
+
+        if (targetPlayer == null) return TextCommandResult.Error($"Player '{targetPlayerName}' not found");
+
+        // Cannot ban yourself
+        if (targetPlayer.PlayerUID == player.PlayerUID)
+            return TextCommandResult.Error("You cannot ban yourself.");
+
+        // Kick the player if they're still a member
+        if (religion.IsMember(targetPlayer.PlayerUID))
+        {
+            _playerReligionDataManager.LeaveReligion(targetPlayer.PlayerUID);
+        }
+
+        // Ban the player
+        _religionManager.BanPlayer(
+            religion.ReligionUID,
+            targetPlayer.PlayerUID,
+            player.PlayerUID,
+            reason ?? "No reason provided",
+            expiryDays
+        );
+
+        // Notify target if online
+        var targetServerPlayer = targetPlayer as IServerPlayer;
+        if (targetServerPlayer != null)
+            targetServerPlayer.SendMessage(
+                GlobalConstants.GeneralChatGroup,
+                $"You have been banned from {religion.ReligionName}. Reason: {reason}",
+                EnumChatType.Notification
+            );
+
+        var expiryText = expiryDays.HasValue ? $" for {expiryDays} days" : " permanently";
+        return TextCommandResult.Success(
+            $"{targetPlayerName} has been banned from {religion.ReligionName}{expiryText}");
+    }
+
+    /// <summary>
+    ///     Handler for /religion unban <playername>
+    /// </summary>
+    private TextCommandResult OnUnbanPlayer(TextCommandCallingArgs args)
+    {
+        var targetPlayerName = (string)args[0];
+
+        var player = args.Caller.Player as IServerPlayer;
+        if (player == null) return TextCommandResult.Error("Command can only be used by players");
+
+        // Check if player is in a religion
+        var playerData = _playerReligionDataManager.GetOrCreatePlayerData(player.PlayerUID);
+        if (!playerData.HasReligion()) return TextCommandResult.Error("You are not in any religion");
+
+        var religion = _religionManager.GetReligion(playerData.ReligionUID!);
+        if (religion == null) return TextCommandResult.Error("Could not find your religion data");
+
+        // Check if player is founder
+        if (!religion.IsFounder(player.PlayerUID))
+            return TextCommandResult.Error("Only the founder can unban players");
+
+        // Find target player by name
+        var targetPlayer = _sapi.World.AllPlayers
+            .FirstOrDefault(p => p.PlayerName.Equals(targetPlayerName, StringComparison.OrdinalIgnoreCase));
+
+        if (targetPlayer == null) return TextCommandResult.Error($"Player '{targetPlayerName}' not found");
+
+        // Unban the player
+        if (_religionManager.UnbanPlayer(religion.ReligionUID, targetPlayer.PlayerUID))
+            return TextCommandResult.Success($"{targetPlayerName} has been unbanned from {religion.ReligionName}");
+        else
+            return TextCommandResult.Error($"{targetPlayerName} is not banned from {religion.ReligionName}");
+    }
+
+    /// <summary>
+    ///     Handler for /religion banlist
+    /// </summary>
+    private TextCommandResult OnListBannedPlayers(TextCommandCallingArgs args)
+    {
+        var player = args.Caller.Player as IServerPlayer;
+        if (player == null) return TextCommandResult.Error("Command can only be used by players");
+
+        // Check if player is in a religion
+        var playerData = _playerReligionDataManager.GetOrCreatePlayerData(player.PlayerUID);
+        if (!playerData.HasReligion()) return TextCommandResult.Error("You are not in any religion");
+
+        var religion = _religionManager.GetReligion(playerData.ReligionUID!);
+        if (religion == null) return TextCommandResult.Error("Could not find your religion data");
+
+        // Check if player is founder
+        if (!religion.IsFounder(player.PlayerUID))
+            return TextCommandResult.Error("Only the founder can view the ban list");
+
+        var bannedPlayers = _religionManager.GetBannedPlayers(religion.ReligionUID);
+
+        if (bannedPlayers.Count == 0)
+            return TextCommandResult.Success("No players are currently banned from your religion");
+
+        var sb = new StringBuilder();
+        sb.AppendLine($"Banned players in {religion.ReligionName}:");
+        sb.AppendLine();
+
+        foreach (var ban in bannedPlayers)
+        {
+            var playerName = _sapi.World.PlayerByUid(ban.PlayerUID)?.PlayerName ?? "Unknown";
+            var bannedBy = _sapi.World.PlayerByUid(ban.BannedByUID)?.PlayerName ?? "Unknown";
+            var expiry = ban.ExpiresAt.HasValue
+                ? $"expires on {ban.ExpiresAt.Value:yyyy-MM-dd HH:mm}"
+                : "permanent";
+
+            sb.AppendLine($"  • {playerName}");
+            sb.AppendLine($"    Reason: {ban.Reason}");
+            sb.AppendLine($"    Banned by: {bannedBy} on {ban.BannedAt:yyyy-MM-dd HH:mm}");
+            sb.AppendLine($"    Status: {expiry}");
+            sb.AppendLine();
+        }
+
+        return TextCommandResult.Success(sb.ToString());
     }
 
     /// <summary>

@@ -91,6 +91,32 @@ public interface IReligionManager
     /// </summary>
     bool DeleteReligion(string religionUID, string requesterUID);
 
+    /// <summary>
+    ///     Bans a player from a religion
+    /// </summary>
+    bool BanPlayer(string religionUID, string playerUID, string bannedByUID, string reason = "",
+        int? expiryDays = null);
+
+    /// <summary>
+    ///     Unbans a player from a religion
+    /// </summary>
+    bool UnbanPlayer(string religionUID, string playerUID);
+
+    /// <summary>
+    ///     Checks if a player is banned from a religion
+    /// </summary>
+    bool IsBanned(string religionUID, string playerUID);
+
+    /// <summary>
+    ///     Gets the ban details for a player
+    /// </summary>
+    BanEntry? GetBanDetails(string religionUID, string playerUID);
+
+    /// <summary>
+    ///     Gets all banned players for a religion
+    /// </summary>
+    List<BanEntry> GetBannedPlayers(string religionUID);
+
     void OnSaveGameLoaded();
     void OnGameWorldSave();
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using PantheonWars.Models.Enum;
 using ProtoBuf;
 
@@ -105,6 +106,13 @@ public class ReligionData
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
+    ///     Dictionary of banned players
+    ///     Key: player UID, Value: ban entry with details
+    /// </summary>
+    [ProtoMember(13)]
+    public Dictionary<string, BanEntry> BannedPlayers { get; set; } = new();
+
+    /// <summary>
     ///     Adds a member to the religion
     /// </summary>
     public void AddMember(string playerUID)
@@ -187,4 +195,131 @@ public class ReligionData
     {
         return UnlockedBlessings.TryGetValue(blessingId, out var unlocked) && unlocked;
     }
+
+    /// <summary>
+    ///     Adds a banned player to the religion's ban list
+    /// </summary>
+    public void AddBannedPlayer(string playerUID, BanEntry entry)
+    {
+        BannedPlayers[playerUID] = entry;
+    }
+
+    /// <summary>
+    ///     Removes a banned player from the religion's ban list
+    /// </summary>
+    public bool RemoveBannedPlayer(string playerUID)
+    {
+        return BannedPlayers.Remove(playerUID);
+    }
+
+    /// <summary>
+    ///     Checks if a player is banned from this religion (including expired bans)
+    /// </summary>
+    public bool IsBanned(string playerUID)
+    {
+        if (!BannedPlayers.TryGetValue(playerUID, out var banEntry))
+            return false;
+
+        // Check if ban has expired
+        if (banEntry.ExpiresAt.HasValue && banEntry.ExpiresAt.Value <= DateTime.UtcNow)
+            return false;
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Gets the ban entry for a specific player
+    /// </summary>
+    public BanEntry? GetBannedPlayer(string playerUID)
+    {
+        if (BannedPlayers.TryGetValue(playerUID, out var banEntry))
+        {
+            // Check if expired
+            if (banEntry.ExpiresAt.HasValue && banEntry.ExpiresAt.Value <= DateTime.UtcNow)
+                return null;
+
+            return banEntry;
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    ///     Gets all active (non-expired) bans
+    /// </summary>
+    public List<BanEntry> GetActiveBans()
+    {
+        CleanupExpiredBans();
+        return BannedPlayers.Values.ToList();
+    }
+
+    /// <summary>
+    ///     Removes expired bans from the ban list
+    /// </summary>
+    public void CleanupExpiredBans()
+    {
+        var now = DateTime.UtcNow;
+        var expiredBans = BannedPlayers
+            .Where(kvp => kvp.Value.ExpiresAt.HasValue && kvp.Value.ExpiresAt.Value <= now)
+            .Select(kvp => kvp.Key)
+            .ToList();
+
+        foreach (var playerUID in expiredBans) BannedPlayers.Remove(playerUID);
+    }
+}
+
+/// <summary>
+///     Represents a ban entry for a player banned from a religion
+/// </summary>
+[ProtoContract]
+public class BanEntry
+{
+    /// <summary>
+    ///     Parameterless constructor for serialization
+    /// </summary>
+    public BanEntry()
+    {
+    }
+
+    /// <summary>
+    ///     Creates a new ban entry
+    /// </summary>
+    public BanEntry(string playerUID, string bannedByUID, string reason = "", DateTime? expiresAt = null)
+    {
+        PlayerUID = playerUID;
+        BannedByUID = bannedByUID;
+        Reason = reason;
+        BannedAt = DateTime.UtcNow;
+        ExpiresAt = expiresAt;
+    }
+
+    /// <summary>
+    ///     The UID of the banned player
+    /// </summary>
+    [ProtoMember(1)]
+    public string PlayerUID { get; set; } = string.Empty;
+
+    /// <summary>
+    ///     Reason for the ban
+    /// </summary>
+    [ProtoMember(2)]
+    public string Reason { get; set; } = "No reason provided";
+
+    /// <summary>
+    ///     When the ban was issued
+    /// </summary>
+    [ProtoMember(3)]
+    public DateTime BannedAt { get; set; } = DateTime.UtcNow;
+
+    /// <summary>
+    ///     When the ban expires (null = permanent)
+    /// </summary>
+    [ProtoMember(4)]
+    public DateTime? ExpiresAt { get; set; }
+
+    /// <summary>
+    ///     UID of the player who issued the ban (typically the founder)
+    /// </summary>
+    [ProtoMember(5)]
+    public string BannedByUID { get; set; } = string.Empty;
 }
