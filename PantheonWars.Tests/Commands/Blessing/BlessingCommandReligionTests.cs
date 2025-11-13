@@ -27,7 +27,7 @@ public class BlessingCommandReligionTests : BlessingCommandsTestHelpers
         };
 
         // Act
-        var result = _sut!.OnBlessingsReligion(args);
+        var result = _sut!.OnReligion(args);
 
         // Assert
         Assert.Equal(ErrorMessageConstants.ErrorPlayerNotFound, result.StatusMessage);
@@ -52,7 +52,7 @@ public class BlessingCommandReligionTests : BlessingCommandsTestHelpers
             .Returns(playerData);
 
         // Act
-        var result = _sut!.OnBlessingsReligion(args);
+        var result = _sut!.OnReligion(args);
 
         // Assert
         Assert.Equal(ErrorMessageConstants.ErrorNoReligion, result.StatusMessage);
@@ -88,7 +88,7 @@ public class BlessingCommandReligionTests : BlessingCommandsTestHelpers
             .Returns((new List<PantheonWars.Models.Blessing>(), new List<PantheonWars.Models.Blessing>()));
 
         // Act
-        var result = _sut!.OnBlessingsReligion(args);
+        var result = _sut!.OnReligion(args);
 
         // Assert
         Assert.Equal(InfoMessageConstants.InfoNoReligionBlessings, result.StatusMessage);
@@ -130,7 +130,7 @@ public class BlessingCommandReligionTests : BlessingCommandsTestHelpers
             .Returns((new List<PantheonWars.Models.Blessing>(), religionBlessings));
 
         // Act
-        var result = _sut!.OnBlessingsReligion(args);
+        var result = _sut!.OnReligion(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -183,7 +183,7 @@ public class BlessingCommandReligionTests : BlessingCommandsTestHelpers
             .Returns((new List<PantheonWars.Models.Blessing>(), religionBlessings));
 
         // Act
-        var result = _sut!.OnBlessingsReligion(args);
+        var result = _sut!.OnReligion(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -234,7 +234,7 @@ public class BlessingCommandReligionTests : BlessingCommandsTestHelpers
             .Returns((new List<PantheonWars.Models.Blessing>(), religionBlessings));
 
         // Act
-        var result = _sut!.OnBlessingsReligion(args);
+        var result = _sut!.OnReligion(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -278,7 +278,7 @@ public class BlessingCommandReligionTests : BlessingCommandsTestHelpers
             .Returns((new List<PantheonWars.Models.Blessing>(), religionBlessings));
 
         // Act
-        var result = _sut!.OnBlessingsReligion(args);
+        var result = _sut!.OnReligion(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -329,7 +329,7 @@ public class BlessingCommandReligionTests : BlessingCommandsTestHelpers
             .Returns((new List<PantheonWars.Models.Blessing>(), religionBlessings));
 
         // Act
-        var result = _sut!.OnBlessingsReligion(args);
+        var result = _sut!.OnReligion(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -383,7 +383,7 @@ public class BlessingCommandReligionTests : BlessingCommandsTestHelpers
             .Returns((new List<PantheonWars.Models.Blessing>(), religionBlessings));
 
         // Act
-        var result = _sut!.OnBlessingsReligion(args);
+        var result = _sut!.OnReligion(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -435,7 +435,7 @@ public class BlessingCommandReligionTests : BlessingCommandsTestHelpers
             .Returns((new List<PantheonWars.Models.Blessing>(), religionBlessings));
 
         // Act
-        var result = _sut!.OnBlessingsReligion(args);
+        var result = _sut!.OnReligion(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -489,7 +489,7 @@ public class BlessingCommandReligionTests : BlessingCommandsTestHelpers
             .Returns((new List<PantheonWars.Models.Blessing>(), religionBlessings));
 
         // Act
-        var result = _sut!.OnBlessingsReligion(args);
+        var result = _sut!.OnReligion(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -539,7 +539,7 @@ public class BlessingCommandReligionTests : BlessingCommandsTestHelpers
             .Returns((playerBlessings, religionBlessings));
 
         // Act
-        var result = _sut!.OnBlessingsReligion(args);
+        var result = _sut!.OnReligion(args);
 
         // Assert
         var message = result.StatusMessage;

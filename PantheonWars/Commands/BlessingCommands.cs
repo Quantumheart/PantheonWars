@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using PantheonWars.Constants;
@@ -21,15 +22,15 @@ public class BlessingCommands(
     IBlessingEffectSystem? blessingEffectSystem)
 {
     private readonly IBlessingEffectSystem _blessingEffectSystem =
-        blessingEffectSystem ?? throw new ArgumentNullException($"{nameof(sapi)}");
+        blessingEffectSystem ?? throw new ArgumentNullException($"{nameof(blessingEffectSystem)}");
 
-    private readonly IBlessingRegistry _blessingRegistry = blessingRegistry ?? throw new ArgumentNullException($"{nameof(sapi)}");
+    private readonly IBlessingRegistry _blessingRegistry = blessingRegistry ?? throw new ArgumentNullException($"{nameof(blessingRegistry)}");
 
     private readonly IPlayerReligionDataManager _playerReligionDataManager =
-        playerReligionDataManager ?? throw new ArgumentNullException($"{nameof(sapi)}");
+        playerReligionDataManager ?? throw new ArgumentNullException($"{nameof(playerReligionDataManager)}");
 
     private readonly IReligionManager _religionManager =
-        religionManager ?? throw new ArgumentNullException($"{nameof(sapi)}");
+        religionManager ?? throw new ArgumentNullException($"{nameof(religionManager)}");
 
     private readonly ICoreServerAPI _sapi = sapi ?? throw new ArgumentNullException($"{nameof(sapi)}");
 
@@ -44,34 +45,34 @@ public class BlessingCommands(
             .RequiresPrivilege(Privilege.chat)
             .BeginSubCommand(BlessingCommandConstants.SubCommandList)
             .WithDescription(BlessingDescriptionConstants.DescriptionList)
-            .HandleWith(OnBlessingsList)
+            .HandleWith(OnList)
             .EndSubCommand()
             .BeginSubCommand(BlessingCommandConstants.SubCommandPlayer)
             .WithDescription(BlessingDescriptionConstants.DescriptionPlayer)
-            .HandleWith(OnBlessingsPlayer)
+            .HandleWith(OnPlayer)
             .EndSubCommand()
             .BeginSubCommand(BlessingCommandConstants.SubCommandReligion)
             .WithDescription(BlessingDescriptionConstants.DescriptionReligion)
-            .HandleWith(OnBlessingsReligion)
+            .HandleWith(OnReligion)
             .EndSubCommand()
             .BeginSubCommand(BlessingCommandConstants.SubCommandInfo)
             .WithDescription(BlessingDescriptionConstants.DescriptionInfo)
             .WithArgs(_sapi.ChatCommands.Parsers.OptionalWord(ParameterConstants.ParamBlessingId))
-            .HandleWith(OnBlessingsInfo)
+            .HandleWith(OnInfo)
             .EndSubCommand()
             .BeginSubCommand(BlessingCommandConstants.SubCommandTree)
             .WithDescription(BlessingDescriptionConstants.DescriptionTree)
             .WithArgs(_sapi.ChatCommands.Parsers.Word(ParameterConstants.ParamType))
-            .HandleWith(OnBlessingsTree)
+            .HandleWith(OnTree)
             .EndSubCommand()
             .BeginSubCommand(BlessingCommandConstants.SubCommandUnlock)
             .WithDescription(BlessingDescriptionConstants.DescriptionUnlock)
             .WithArgs(_sapi.ChatCommands.Parsers.Word(ParameterConstants.ParamBlessingId))
-            .HandleWith(OnBlessingsUnlock)
+            .HandleWith(OnUnlock)
             .EndSubCommand()
             .BeginSubCommand(BlessingCommandConstants.SubCommandActive)
             .WithDescription(BlessingDescriptionConstants.DescriptionActive)
-            .HandleWith(OnBlessingsActive)
+            .HandleWith(OnActive)
             .EndSubCommand();
 
         _sapi.Logger.Notification(LogMessageConstants.LogBlessingCommandsRegistered);
@@ -80,7 +81,7 @@ public class BlessingCommands(
     /// <summary>
     ///     /blessings list - Lists all available blessings for player's deity
     /// </summary>
-    internal TextCommandResult OnBlessingsList(TextCommandCallingArgs args)
+    internal TextCommandResult OnList(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error(ErrorMessageConstants.ErrorPlayerNotFound);
@@ -129,7 +130,7 @@ public class BlessingCommands(
     /// <summary>
     ///     /blessings player - Shows unlocked player blessings
     /// </summary>
-    internal TextCommandResult OnBlessingsPlayer(TextCommandCallingArgs args)
+    internal TextCommandResult OnPlayer(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error(ErrorMessageConstants.ErrorPlayerNotFound);
@@ -164,7 +165,7 @@ public class BlessingCommands(
     /// <summary>
     ///     /blessings religion - Shows religion's unlocked blessings
     /// </summary>
-    internal TextCommandResult OnBlessingsReligion(TextCommandCallingArgs args)
+    internal TextCommandResult OnReligion(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error(ErrorMessageConstants.ErrorPlayerNotFound);
@@ -204,9 +205,17 @@ public class BlessingCommands(
     /// <summary>
     ///     /blessings info <blessingid /> - Shows detailed blessing information
     /// </summary>
-    internal TextCommandResult OnBlessingsInfo(TextCommandCallingArgs args)
+    private TextCommandResult OnInfo(TextCommandCallingArgs args)
     {
         var blessingId = args[0] as string;
+        return GetInfo(blessingId);
+    }
+
+    /// <summary>
+    ///     Core logic for getting blessing info - extracted for testability
+    /// </summary>
+    internal TextCommandResult GetInfo(string? blessingId)
+    {
         if (string.IsNullOrEmpty(blessingId)) return TextCommandResult.Error(UsageMessageConstants.UsageBlessingsInfo);
 
         var blessing = _blessingRegistry.GetBlessing(blessingId);
@@ -238,7 +247,7 @@ public class BlessingCommands(
                 requiredRank));
         }
 
-        if (blessing.PrerequisiteBlessings.Count > 0)
+        if (blessing.PrerequisiteBlessings is { Count: > 0 })
         {
             sb.AppendLine(FormatStringConstants.LabelPrerequisites);
             foreach (var prereqId in blessing.PrerequisiteBlessings)
@@ -273,16 +282,27 @@ public class BlessingCommands(
     /// <summary>
     ///     /blessings tree [player/religion] - Displays blessing tree
     /// </summary>
-    internal TextCommandResult OnBlessingsTree(TextCommandCallingArgs args)
+    [ExcludeFromCodeCoverage(Justification = "Arg parsing difficult")]
+    private TextCommandResult OnTree(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error(ErrorMessageConstants.ErrorPlayerNotFound);
 
-        var playerData = _playerReligionDataManager.GetOrCreatePlayerData(player.PlayerUID);
+        var type = args[0] as string;
+        return GetTree(player.PlayerUID, type);
+    }
+
+    /// <summary>
+    ///     Core logic for getting blessing tree - extracted for testability
+    /// </summary>
+    [ExcludeFromCodeCoverage(Justification = "Arg parsing difficult")]
+    private TextCommandResult GetTree(string playerUid, string? type)
+    {
+        var playerData = _playerReligionDataManager.GetOrCreatePlayerData(playerUid);
         if (playerData.ActiveDeity == DeityType.None)
             return TextCommandResult.Error(ErrorMessageConstants.ErrorMustJoinReligionForTree);
 
-        var type = args[0] as string ?? FormatStringConstants.TypePlayer;
+        type = type ?? FormatStringConstants.TypePlayer;
         type = type.ToLower();
 
         var blessingKind = type == FormatStringConstants.TypeReligion
@@ -319,7 +339,7 @@ public class BlessingCommands(
                         : FormatStringConstants.LabelUnchecked;
                     sb.AppendLine($"{status} {blessing.Name}");
 
-                    if (blessing.PrerequisiteBlessings.Count > 0)
+                    if (blessing.PrerequisiteBlessings is { Count: > 0 })
                     {
                         sb.Append(FormatStringConstants.LabelRequires);
                         var prereqNames = blessing.PrerequisiteBlessings
@@ -353,7 +373,7 @@ public class BlessingCommands(
                         : FormatStringConstants.LabelUnchecked;
                     sb.AppendLine($"{status} {blessing.Name}");
 
-                    if (blessing.PrerequisiteBlessings.Count > 0)
+                    if (blessing.PrerequisiteBlessings is { Count: > 0 })
                     {
                         sb.Append(FormatStringConstants.LabelRequires);
                         var prereqNames = blessing.PrerequisiteBlessings
@@ -375,18 +395,28 @@ public class BlessingCommands(
     /// <summary>
     ///     /blessings unlock <blessingid /> - Unlocks a blessing
     /// </summary>
-    internal TextCommandResult OnBlessingsUnlock(TextCommandCallingArgs args)
+    [ExcludeFromCodeCoverage(Justification = "Arg parsing difficult")]
+    private TextCommandResult OnUnlock(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error(ErrorMessageConstants.ErrorPlayerNotFound);
         var blessingId = args[0] as string;
+        return Unlock(player.PlayerUID, blessingId);
+    }
+
+    /// <summary>
+    ///     Core logic for unlocking a blessing - extracted for testability
+    /// </summary>
+    [ExcludeFromCodeCoverage(Justification = "Arg parsing difficult")]
+    private TextCommandResult Unlock(string playerUid, string? blessingId)
+    {
         if (string.IsNullOrEmpty(blessingId)) return TextCommandResult.Error(UsageMessageConstants.UsageBlessingsUnlock);
 
         var blessing = _blessingRegistry.GetBlessing(blessingId);
         if (blessing == null)
             return TextCommandResult.Error(string.Format(ErrorMessageConstants.ErrorBlessingNotFound, blessingId));
 
-        var playerData = _playerReligionDataManager.GetOrCreatePlayerData(player.PlayerUID);
+        var playerData = _playerReligionDataManager.GetOrCreatePlayerData(playerUid);
         var religion = playerData.ReligionUID != null ? _religionManager.GetReligion(playerData.ReligionUID) : null;
 
         var (canUnlock, reason) = _blessingRegistry.CanUnlockBlessing(playerData, religion, blessing);
@@ -398,10 +428,10 @@ public class BlessingCommands(
         {
             if (religion == null) return TextCommandResult.Error(ErrorMessageConstants.ErrorMustBeInReligionToUnlock);
 
-            var success = _playerReligionDataManager.UnlockPlayerBlessing(player.PlayerUID, blessingId);
+            var success = _playerReligionDataManager.UnlockPlayerBlessing(playerUid, blessingId);
             if (!success) return TextCommandResult.Error(ErrorMessageConstants.ErrorFailedToUnlock);
 
-            _blessingEffectSystem.RefreshPlayerBlessings(player.PlayerUID);
+            _blessingEffectSystem.RefreshPlayerBlessings(playerUid);
             return TextCommandResult.Success(string.Format(SuccessMessageConstants.SuccessUnlockedPlayerBlessing,
                 blessing.Name));
         }
@@ -410,7 +440,7 @@ public class BlessingCommands(
         if (religion == null) return TextCommandResult.Error(ErrorMessageConstants.ErrorMustBeInReligionToUnlock);
 
         // Only founder can unlock religion blessings (optional restriction)
-        if (!religion.IsFounder(player.PlayerUID))
+        if (!religion.IsFounder(playerUid))
             return TextCommandResult.Error(ErrorMessageConstants.ErrorOnlyFounderCanUnlock);
 
         religion.UnlockedBlessings[blessingId] = true;
@@ -433,7 +463,7 @@ public class BlessingCommands(
     /// <summary>
     ///     /blessings active - Shows all active blessings and combined modifiers
     /// </summary>
-    internal TextCommandResult OnBlessingsActive(TextCommandCallingArgs args)
+    internal TextCommandResult OnActive(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error(ErrorMessageConstants.ErrorPlayerNotFound);
@@ -464,10 +494,9 @@ public class BlessingCommands(
         sb.AppendLine();
 
         sb.AppendLine(FormatStringConstants.LabelCombinedStatModifiers);
-        if (combinedModifiers.Count == 0)
-            sb.AppendLine(FormatStringConstants.LabelNoActiveModifiers);
-        else
-            sb.AppendLine(_blessingEffectSystem.FormatStatModifiers(combinedModifiers));
+        sb.AppendLine(combinedModifiers.Count == 0
+            ? FormatStringConstants.LabelNoActiveModifiers
+            : _blessingEffectSystem.FormatStatModifiers(combinedModifiers));
 
         return TextCommandResult.Success(sb.ToString());
     }

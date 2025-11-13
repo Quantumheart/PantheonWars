@@ -28,7 +28,7 @@ public class BlessingCommandPlayerTests : BlessingCommandsTestHelpers
         };
 
         // Act
-        var result = _sut!.OnBlessingsPlayer(args);
+        var result = _sut!.OnPlayer(args);
 
         // Assert
         Assert.Equal(ErrorMessageConstants.ErrorPlayerNotFound, result.StatusMessage);
@@ -55,7 +55,7 @@ public class BlessingCommandPlayerTests : BlessingCommandsTestHelpers
 
 
         // Act
-        var result = _sut!.OnBlessingsPlayer(args);
+        var result = _sut!.OnPlayer(args);
 
         // Assert
         Assert.Equal(InfoMessageConstants.InfoNoPlayerBlessings, result.StatusMessage);
@@ -101,7 +101,7 @@ public class BlessingCommandPlayerTests : BlessingCommandsTestHelpers
             _blessingEffectSystem.Object);
 
         // Act
-        var result = sut.OnBlessingsPlayer(args);
+        var result = sut.OnPlayer(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -146,7 +146,7 @@ public class BlessingCommandPlayerTests : BlessingCommandsTestHelpers
             _blessingEffectSystem.Object);
 
         // Act
-        var result = sut.OnBlessingsPlayer(args);
+        var result = sut.OnPlayer(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -194,7 +194,7 @@ public class BlessingCommandPlayerTests : BlessingCommandsTestHelpers
             mockBlessingEffectSystem.Object);
 
         // Act
-        var result = sut.OnBlessingsPlayer(args);
+        var result = sut.OnPlayer(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -239,7 +239,7 @@ public class BlessingCommandPlayerTests : BlessingCommandsTestHelpers
             _blessingEffectSystem.Object);
 
         // Act
-        var result = sut.OnBlessingsPlayer(args);
+        var result = sut.OnPlayer(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -287,7 +287,7 @@ public class BlessingCommandPlayerTests : BlessingCommandsTestHelpers
             _blessingEffectSystem.Object);
 
         // Act
-        var result = sut.OnBlessingsPlayer(args);
+        var result = sut.OnPlayer(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -331,7 +331,7 @@ public class BlessingCommandPlayerTests : BlessingCommandsTestHelpers
             mockBlessingEffectSystem.Object);
 
         // Act
-        var result = sut.OnBlessingsPlayer(args);
+        var result = sut.OnPlayer(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -373,7 +373,7 @@ public class BlessingCommandPlayerTests : BlessingCommandsTestHelpers
 
 
         // Act
-        var result = _sut!.OnBlessingsPlayer(args);
+        var result = _sut!.OnPlayer(args);
 
         // Assert
         var message = result.StatusMessage;
@@ -413,7 +413,7 @@ public class BlessingCommandPlayerTests : BlessingCommandsTestHelpers
 
 
         // Act
-        var result = _sut!.OnBlessingsPlayer(args);
+        var result = _sut!.OnPlayer(args);
 
         // Assert
         var message = result.StatusMessage;
