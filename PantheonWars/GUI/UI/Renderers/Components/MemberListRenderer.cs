@@ -30,6 +30,7 @@ public static class MemberListRenderer
     /// <param name="members">List of members to display</param>
     /// <param name="scrollY">Current scroll position (will be modified)</param>
     /// <param name="onKickMember">Callback when kick button is clicked (memberUID)</param>
+    /// <param name="onBanMember">Callback when ban button is clicked (memberUID)</param>
     /// <returns>Updated scroll position</returns>
     public static float Draw(
         ImDrawListPtr drawList,
@@ -40,7 +41,8 @@ public static class MemberListRenderer
         float height,
         List<PlayerReligionInfoResponsePacket.MemberInfo> members,
         float scrollY,
-        Action<string> onKickMember)
+        Action<string> onKickMember,
+        Action<string>? onBanMember = null)
     {
         const float itemHeight = 30f;
         const float itemSpacing = 4f;
@@ -96,7 +98,7 @@ public static class MemberListRenderer
             }
 
             DrawMemberItem(drawList, api, member, x, itemY, width - scrollbarWidth - 4f, itemHeight,
-                currentPlayerUID, onKickMember);
+                currentPlayerUID, onKickMember, onBanMember);
             itemY += itemHeight + itemSpacing;
         }
 
@@ -123,10 +125,12 @@ public static class MemberListRenderer
         float width,
         float height,
         string currentPlayerUID,
-        Action<string> onKickMember)
+        Action<string> onKickMember,
+        Action<string>? onBanMember)
     {
         const float padding = 8f;
-        const float kickButtonWidth = 60f;
+        const float buttonWidth = 50f;
+        const float buttonSpacing = 5f;
 
         // Draw background
         var itemStart = new Vector2(x, y);
@@ -143,16 +147,35 @@ public static class MemberListRenderer
         // Favor rank
         var rankText = $"{member.FavorRank} ({member.Favor})";
         var rankSize = ImGui.CalcTextSize(rankText);
-        var rankPos = new Vector2(x + width - padding - kickButtonWidth - 10f - rankSize.X, y + (height - 14f) / 2);
+
+        // Calculate button area width (kick + ban buttons if both callbacks provided)
+        var hasBanButton = onBanMember != null;
+        var buttonAreaWidth = hasBanButton ? (buttonWidth * 2 + buttonSpacing + padding) : (buttonWidth + padding);
+
+        var rankPos = new Vector2(x + width - buttonAreaWidth - 10f - rankSize.X, y + (height - 14f) / 2);
         var rankColor = ImGui.ColorConvertFloat4ToU32(ColorPalette.Grey);
         drawList.AddText(rankPos, rankColor, rankText);
 
-        // Kick button (only if not founder and not self)
+        // Action buttons (only if not founder and not self)
         if (!member.IsFounder && member.PlayerUID != currentPlayerUID)
         {
-            var kickButtonX = x + width - kickButtonWidth - padding;
-            var kickButtonY = y + (height - 22f) / 2;
-            if (ButtonRenderer.DrawSmallButton(drawList, "Kick", kickButtonX, kickButtonY, kickButtonWidth, 22f))
+            var buttonY = y + (height - 22f) / 2;
+
+            // Ban button (leftmost if both buttons present)
+            if (hasBanButton)
+            {
+                var banButtonX = x + width - (buttonWidth * 2 + buttonSpacing + padding);
+                if (ButtonRenderer.DrawSmallButton(drawList, "Ban", banButtonX, buttonY, buttonWidth, 22f))
+                {
+                    api.World.PlaySoundAt(new AssetLocation("pantheonwars:sounds/click"),
+                        api.World.Player.Entity, null, false, 8f, 0.5f);
+                    onBanMember.Invoke(member.PlayerUID);
+                }
+            }
+
+            // Kick button (rightmost)
+            var kickButtonX = x + width - buttonWidth - padding;
+            if (ButtonRenderer.DrawSmallButton(drawList, "Kick", kickButtonX, buttonY, buttonWidth, 22f))
             {
                 api.World.PlaySoundAt(new AssetLocation("pantheonwars:sounds/click"),
                     api.World.Player.Entity, null, false, 8f, 0.5f);

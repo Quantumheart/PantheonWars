@@ -23,6 +23,7 @@ public class ReligionManagementDialog : GuiDialog
     private bool _dataLoaded;
     private EditDescriptionDialog? _editDescriptionDialog;
     private InvitePlayerDialog? _inviteDialog;
+    private BanPlayerDialog? _banDialog;
     private PlayerReligionInfoResponsePacket? _playerReligionInfo;
     private DeityType _selectedDeityFilter = DeityType.None; // For browse tab filtering
 
@@ -356,17 +357,23 @@ public class ReligionManagementDialog : GuiDialog
     {
         var roleText = member.IsFounder ? " [Founder]" : "";
 
-        var nameBounds = ElementBounds.Fixed(x, y, width - 100, 20);
+        var nameBounds = ElementBounds.Fixed(x, y, width - 180, 20);
         composer.AddStaticText(
             $"{member.PlayerName}{roleText} - {member.FavorRank} ({member.Favor} favor)",
             CairoFont.WhiteSmallText(),
             nameBounds
         );
 
-        // Kick button (only for founder, not for self or other founders)
+        // Action buttons (only for founder, not for self or other founders)
         if (_playerReligionInfo != null && _playerReligionInfo.IsFounder && !member.IsFounder &&
             member.PlayerUID != _capi.World.Player.PlayerUID)
         {
+            // Ban button (leftmost)
+            var banButtonBounds = ElementBounds.Fixed(x + width - 170, y - 2, 75, 22);
+            composer.AddSmallButton("Ban", () => OnBanMemberClicked(member.PlayerUID, member.PlayerName),
+                banButtonBounds);
+
+            // Kick button (rightmost)
             var kickButtonBounds = ElementBounds.Fixed(x + width - 90, y - 2, 80, 22);
             composer.AddSmallButton("Kick", () => OnKickMemberClicked(member.PlayerUID), kickButtonBounds);
         }
@@ -444,6 +451,20 @@ public class ReligionManagementDialog : GuiDialog
         // Send kick request to server
         _channel.SendPacket(new ReligionActionRequestPacket("kick", _playerReligionInfo?.ReligionUID ?? "", memberUID));
         RefreshData();
+        return true;
+    }
+
+    private bool OnBanMemberClicked(string memberUID, string memberName)
+    {
+        if (_playerReligionInfo != null && _playerReligionInfo.HasReligion)
+        {
+            // Dispose old dialog if it exists
+            _banDialog?.Dispose();
+            // Create and open ban player dialog
+            _banDialog = new BanPlayerDialog(_capi, _channel, _playerReligionInfo.ReligionUID, memberUID, memberName);
+            _banDialog.TryOpen();
+        }
+
         return true;
     }
 
