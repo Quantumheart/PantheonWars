@@ -430,7 +430,28 @@ public class BuffManagerTests
         Assert.Equal(1.2f, multiplier);
     }
 
+    [Fact]
+    public void GetReceivedDamageMultiplier_WithNoBuffTracker_Returns1Point0()
+    {
+        // Arrange
+        var mockEntity = TestFixtures.CreateMockEntity();
+        mockEntity
+            .Setup(e => e.GetBehavior<EntityBehaviorBuffTracker>())
+            .Returns((EntityBehaviorBuffTracker)null!);
+
+        // Act
+        var multiplier = _buffManager.GetReceivedDamageMultiplier(mockEntity.Object);
+
+        // Assert
+        Assert.Equal(1.0f, multiplier);
+    }
+
     #endregion
+
+    // NOTE: ApplyAoEBuff tests omitted - this method requires complex world interaction mocking
+    // (GetNearestEntity, EntityPlayer types, IServerWorldAccessor) that is difficult to test in unit tests.
+    // ApplyAoEBuff logic is better tested through integration or end-to-end tests with a real game world.
+    // The method currently has 66% coverage from indirect testing through other methods.
 
     #region Logging Tests
 
