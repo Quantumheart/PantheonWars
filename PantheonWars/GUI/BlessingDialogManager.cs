@@ -80,6 +80,8 @@ public class BlessingDialogManager : IBlessingDialogManager
         CurrentReligionUID = null;
         CurrentDeity = DeityType.None;
         CurrentReligionName = null;
+        ReligionMemberCount = 0;
+        PlayerRoleInReligion = null;
         SelectedBlessingId = null;
         HoveringBlessingId = null;
         PlayerTreeScrollX = 0f;

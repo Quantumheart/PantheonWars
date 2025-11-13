@@ -275,6 +275,27 @@ public class PantheonWarsSystem : ModSystem
                     IsFounder = memberUID == religion.FounderUID
                 });
             }
+
+            // Build banned players list (only for founder)
+            if (response.IsFounder)
+            {
+                var bannedPlayers = _religionManager!.GetBannedPlayers(religion.ReligionUID);
+                foreach (var banEntry in bannedPlayers)
+                {
+                    var bannedPlayer = _sapi!.World.PlayerByUid(banEntry.PlayerUID);
+                    var bannedName = bannedPlayer?.PlayerName ?? banEntry.PlayerUID;
+
+                    response.BannedPlayers.Add(new PlayerReligionInfoResponsePacket.BanInfo
+                    {
+                        PlayerUID = banEntry.PlayerUID,
+                        PlayerName = bannedName,
+                        Reason = banEntry.Reason,
+                        BannedAt = banEntry.BannedAt.ToString("yyyy-MM-dd HH:mm"),
+                        ExpiresAt = banEntry.ExpiresAt?.ToString("yyyy-MM-dd HH:mm") ?? "Never",
+                        IsPermanent = banEntry.ExpiresAt == null
+                    });
+                }
+            }
         }
         else
         {
@@ -294,7 +315,24 @@ public class PantheonWarsSystem : ModSystem
             switch (packet.Action.ToLower())
             {
                 case "join":
-                    if (_religionManager!.CanJoinReligion(packet.ReligionUID, fromPlayer.PlayerUID))
+                    // Check if player is banned before attempting to join
+                    if (_religionManager!.IsBanned(packet.ReligionUID, fromPlayer.PlayerUID))
+                    {
+                        var banDetails = _religionManager.GetBanDetails(packet.ReligionUID, fromPlayer.PlayerUID);
+                        if (banDetails != null)
+                        {
+                            var expiryText = banDetails.ExpiresAt == null
+                                ? "Permanent ban"
+                                : $"Expires: {banDetails.ExpiresAt:yyyy-MM-dd HH:mm}";
+                            message =
+                                $"You are banned from this religion. Reason: {banDetails.Reason}. {expiryText}";
+                        }
+                        else
+                        {
+                            message = "You are banned from this religion.";
+                        }
+                    }
+                    else if (_religionManager.CanJoinReligion(packet.ReligionUID, fromPlayer.PlayerUID))
                     {
                         _playerReligionDataManager!.JoinReligion(fromPlayer.PlayerUID, packet.ReligionUID);
                         var religion = _religionManager.GetReligion(packet.ReligionUID);

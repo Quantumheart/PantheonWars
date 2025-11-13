@@ -66,6 +66,8 @@ public interface IOverlayCoordinator
         Action onCreateReligionClicked,
         Action<string, string, bool> onCreateReligionSubmit,
         Action<string> onKickMemberClicked,
+        Action<string> onBanMemberClicked,
+        Action<string> onUnbanMemberClicked,
         Action<string> onInvitePlayerClicked,
         Action<string> onEditDescriptionClicked,
         Action onDisbandReligionClicked,

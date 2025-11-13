@@ -245,6 +245,8 @@ public partial class BlessingDialog : ModSystem
             OnCreateReligionClicked,
             OnCreateReligionSubmit,
             OnKickMemberClicked,
+            OnBanMemberClicked,
+            OnUnbanMemberClicked,
             OnInvitePlayerClicked,
             OnEditDescriptionClicked,
             OnDisbandReligionClicked,

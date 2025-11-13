@@ -28,6 +28,11 @@ public class ReligionManagementState
     public float MemberScrollY { get; set; }
 
     /// <summary>
+    ///     Current scroll position in banned players list
+    /// </summary>
+    public float BanListScrollY { get; set; }
+
+    /// <summary>
     ///     Error message to display (if any)
     /// </summary>
     public string? ErrorMessage { get; set; }
@@ -46,6 +51,7 @@ public class ReligionManagementState
         InvitePlayerName = "";
         Description = "";
         MemberScrollY = 0f;
+        BanListScrollY = 0f;
         ErrorMessage = null;
         ShowDisbandConfirm = false;
     }
