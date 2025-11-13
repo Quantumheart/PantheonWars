@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Utilities;
@@ -11,6 +12,7 @@ namespace PantheonWars.GUI.UI.Renderers;
 ///     Renders rich tooltips when hovering over blessing nodes
 ///     Displays blessing details, requirements, stats, and unlock status
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class TooltipRenderer
 {
     private const float TOOLTIP_MAX_WIDTH = 320f;

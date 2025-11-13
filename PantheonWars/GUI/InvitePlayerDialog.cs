@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using PantheonWars.Network;
 using Vintagestory.API.Client;
@@ -8,6 +9,7 @@ namespace PantheonWars.GUI;
 /// <summary>
 ///     Dialog for inviting a player to the religion
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class InvitePlayerDialog : GuiDialog
 {
     private readonly ICoreClientAPI _capi;

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Utilities;
@@ -8,6 +9,7 @@ namespace PantheonWars.GUI.UI.Renderers.Components;
 /// <summary>
 ///     Renders progress bars for favor and prestige tracking
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class ProgressBarRenderer
 {
     /// <summary>

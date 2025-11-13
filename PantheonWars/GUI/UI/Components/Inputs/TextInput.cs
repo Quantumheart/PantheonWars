@@ -1,4 +1,5 @@
 using System.Numerics;
+using System.Diagnostics.CodeAnalysis;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Utilities;
 
@@ -8,6 +9,7 @@ namespace PantheonWars.GUI.UI.Components.Inputs;
 ///     Reusable text input component
 ///     Provides consistent single-line text input styling across all UI overlays
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class TextInput
 {
     /// <summary>

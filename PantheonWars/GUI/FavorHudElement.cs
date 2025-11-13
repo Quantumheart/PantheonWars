@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using PantheonWars.Models.Enum;
 using Vintagestory.API.Client;
 
@@ -8,6 +9,7 @@ namespace PantheonWars.GUI;
 ///     HUD element that displays player's current deity, favor, and religion information (Phase 3.2)
 /// </summary>
 [Obsolete("FavorHudElement is deprecated. Use the ImGui-based BlessingDialog (P key) instead. This will be removed in v2.0.0")]
+[ExcludeFromCodeCoverage]
 public class FavorHudElement : HudElement
 {
     private int _currentFavor;

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using PantheonWars.Models.Enum;
 using PantheonWars.Network;
@@ -9,6 +10,7 @@ namespace PantheonWars.GUI;
 /// <summary>
 ///     Dialog for creating a new religion
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class CreateReligionDialog : GuiDialog
 {
     private readonly ICoreClientAPI _capi;

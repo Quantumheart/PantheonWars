@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Cairo;
 using PantheonWars.Models.Enum;
@@ -11,6 +12,7 @@ namespace PantheonWars.GUI;
 /// <summary>
 ///     Dialog for managing religions - browsing, creating, joining, and managing members (Phase 3.5)
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class ReligionManagementDialog : GuiDialog
 {
     private readonly ICoreClientAPI _capi;

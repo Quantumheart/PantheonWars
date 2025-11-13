@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
@@ -16,6 +17,7 @@ namespace PantheonWars.GUI.UI.Renderers;
 ///     Overlay for browsing and joining religions
 ///     Displays as modal panel on top of Blessing Dialog
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class ReligionBrowserOverlay
 {
     // State

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Cairo;
 using PantheonWars.Models;
@@ -12,6 +13,7 @@ namespace PantheonWars.GUI;
 /// <summary>
 ///     Dialog for selecting a deity to pledge to
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class DeitySelectionDialog : GuiDialog
 {
     private readonly IDeityRegistry _deityRegistry;

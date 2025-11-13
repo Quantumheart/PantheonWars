@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Collections.Generic;
 using System.Numerics;
 using ImGuiNET;
@@ -16,6 +17,7 @@ namespace PantheonWars.GUI.UI.Renderers;
 ///     Overlay for managing religion (leader only)
 ///     Displays member list, kick, invite, edit description, disband
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class ReligionManagementOverlay
 {
     // State

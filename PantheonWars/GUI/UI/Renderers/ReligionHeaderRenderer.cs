@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Renderers.Components;
@@ -13,6 +14,7 @@ namespace PantheonWars.GUI.UI.Renderers;
 ///     Renders the religion/deity header banner at the top of the blessing dialog
 ///     Shows: Religion name, deity icon/name, favor/prestige ranks
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class ReligionHeaderRenderer
 {
     /// <summary>

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Components.Buttons;
@@ -10,6 +11,7 @@ namespace PantheonWars.GUI.UI.Renderers;
 /// <summary>
 ///     Confirmation overlay for leaving a religion
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class LeaveReligionConfirmOverlay
 {
     /// <summary>

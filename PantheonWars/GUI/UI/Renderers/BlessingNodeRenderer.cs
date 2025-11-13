@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.Models;
@@ -10,6 +11,7 @@ namespace PantheonWars.GUI.UI.Renderers;
 ///     Renders individual blessing nodes in the tree
 ///     Displays states: locked, unlockable (glowing), unlocked (gold)
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class BlessingNodeRenderer
 {
     private static readonly Vector4 ColorLocked = new(0.573f, 0.502f, 0.416f, 1.0f); // #92806a grey

@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using PantheonWars.GUI.Interfaces;
 using Vintagestory.API.Client;
 
@@ -7,6 +8,7 @@ namespace PantheonWars.GUI;
 /// <summary>
 ///     Manages the visibility and coordination of overlay windows (Religion Browser, Management, etc.)
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class OverlayCoordinator : IOverlayCoordinator
 {
     private bool _showReligionBrowser;

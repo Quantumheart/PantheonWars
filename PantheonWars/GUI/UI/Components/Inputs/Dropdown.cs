@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using ImGuiNET;
 using PantheonWars.GUI.UI.Utilities;
@@ -10,6 +11,7 @@ namespace PantheonWars.GUI.UI.Components.Inputs;
 ///     Reusable dropdown component
 ///     Provides consistent dropdown styling across all UI overlays
 /// </summary>
+[ExcludeFromCodeCoverage]
 internal static class Dropdown
 {
     /// <summary>
