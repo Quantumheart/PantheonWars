@@ -56,15 +56,12 @@ public class ReligionCommandsTests : ReligionCommandsTestHelpers
     [Fact]
     public void Constructor_AcceptsNullServerChannel()
     {
-        // Act
-        var exception = Record.Exception(() => new ReligionCommands(
+        // Act & Assert
+        Assert.Throws<ArgumentNullException>(() => new ReligionCommands(
             _mockSapi.Object,
             _religionManager.Object,
             _playerReligionDataManager.Object,
-            null));
-
-        // Assert
-        Assert.Null(exception);
+            null!));
     }
 
     [Fact]
