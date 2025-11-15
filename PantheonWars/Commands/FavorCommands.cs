@@ -23,9 +23,9 @@ public class FavorCommands
         IDeityRegistry deityRegistry,
         IPlayerReligionDataManager playerReligionDataManager)
     {
-        _sapi = sapi;
-        _deityRegistry = deityRegistry;
-        _playerReligionDataManager = playerReligionDataManager;
+        _sapi = sapi ?? throw new ArgumentNullException(nameof(sapi));
+        _deityRegistry = deityRegistry ?? throw new ArgumentNullException(nameof(deityRegistry));
+        _playerReligionDataManager = playerReligionDataManager ?? throw new ArgumentNullException(nameof(playerReligionDataManager));
     }
 
     /// <summary>
@@ -99,7 +99,7 @@ public class FavorCommands
     /// <summary>
     ///     Get player's religion data and validate they have a deity
     /// </summary>
-    private (Data.PlayerReligionData? religionData, string? religionName, TextCommandResult? errorResult) ValidatePlayerHasDeity(IServerPlayer player)
+    internal (Data.PlayerReligionData? religionData, string? religionName, TextCommandResult? errorResult) ValidatePlayerHasDeity(IServerPlayer player)
     {
         var religionData = _playerReligionDataManager.GetOrCreatePlayerData(player.PlayerUID);
 
@@ -137,7 +137,7 @@ public class FavorCommands
     /// <summary>
     ///     Shows current favor amount - default command and /favor get
     /// </summary>
-    private TextCommandResult OnCheckFavor(TextCommandCallingArgs args)
+    internal TextCommandResult OnCheckFavor(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
@@ -156,7 +156,7 @@ public class FavorCommands
     /// <summary>
     ///     Shows detailed favor information and rank progression
     /// </summary>
-    private TextCommandResult OnFavorInfo(TextCommandCallingArgs args)
+    internal TextCommandResult OnFavorInfo(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
@@ -202,7 +202,7 @@ public class FavorCommands
     /// <summary>
     ///     Shows comprehensive favor statistics
     /// </summary>
-    private TextCommandResult OnFavorStats(TextCommandCallingArgs args)
+    internal TextCommandResult OnFavorStats(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
@@ -252,7 +252,7 @@ public class FavorCommands
     ///     Lists all devotion ranks and their requirements
     ///     Does NOT require deity pledge - informational only
     /// </summary>
-    private TextCommandResult OnListRanks(TextCommandCallingArgs args)
+    internal TextCommandResult OnListRanks(TextCommandCallingArgs args)
     {
         var sb = new StringBuilder();
         sb.AppendLine("=== Favor Ranks ===");
@@ -278,7 +278,7 @@ public class FavorCommands
     /// <summary>
     ///     Sets favor to a specific amount (Admin only)
     /// </summary>
-    private TextCommandResult OnSetFavor(TextCommandCallingArgs args)
+    internal TextCommandResult OnSetFavor(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
@@ -301,7 +301,7 @@ public class FavorCommands
     /// <summary>
     ///     Adds favor (Admin only)
     /// </summary>
-    private TextCommandResult OnAddFavor(TextCommandCallingArgs args)
+    internal TextCommandResult OnAddFavor(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
@@ -325,7 +325,7 @@ public class FavorCommands
     /// <summary>
     ///     Removes favor (Admin only)
     /// </summary>
-    private TextCommandResult OnRemoveFavor(TextCommandCallingArgs args)
+    internal TextCommandResult OnRemoveFavor(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
@@ -351,7 +351,7 @@ public class FavorCommands
     /// <summary>
     ///     Resets favor to 0 (Admin only)
     /// </summary>
-    private TextCommandResult OnResetFavor(TextCommandCallingArgs args)
+    internal TextCommandResult OnResetFavor(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
@@ -368,7 +368,7 @@ public class FavorCommands
     /// <summary>
     ///     Sets favor to maximum (Admin only)
     /// </summary>
-    private TextCommandResult OnMaxFavor(TextCommandCallingArgs args)
+    internal TextCommandResult OnMaxFavor(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");
@@ -385,7 +385,7 @@ public class FavorCommands
     /// <summary>
     ///     Sets total favor earned and updates devotion rank (Admin only)
     /// </summary>
-    private TextCommandResult OnSetTotalFavor(TextCommandCallingArgs args)
+    internal TextCommandResult OnSetTotalFavor(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command must be used by a player");

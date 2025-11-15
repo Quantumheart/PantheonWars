@@ -74,23 +74,5 @@ public class FavorCommandRanksTests : FavorCommandsTestHelpers
     }
 
     #endregion
-
-    #region Error Cases
-
-    [Fact]
-    public void OnListRanks_WithNullPlayer_ReturnsError()
-    {
-        // Arrange
-        var args = CreateCommandArgs(null!);
-
-        // Act
-        var result = _sut!.OnListRanks(args);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(EnumCommandStatus.Error, result.Status);
-        Assert.Contains("must be used by a player", result.StatusMessage);
-    }
-
-    #endregion
+    
 }

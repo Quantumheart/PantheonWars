@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Moq;
+using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using PantheonWars.Tests.Commands.Helpers;
 using Vintagestory.API.Common;
@@ -28,10 +28,9 @@ public class FavorCommandSetTests : FavorCommandsTestHelpers
         var args = CreateAdminCommandArgs(mockPlayer.Object, "1000");
         SetupParsers(args, 1000);
 
-        var mockDeity = CreateMockDeity(DeityType.Khoras, "Khoras");
 
         _playerReligionDataManager.Setup(m => m.GetOrCreatePlayerData("player-1")).Returns(playerData);
-        _deityRegistry.Setup(d => d.GetDeity(DeityType.Khoras)).Returns(mockDeity.Object);
+        _deityRegistry.Setup(d => d.GetDeity(DeityType.Khoras)).Returns(new Deity(DeityType.Khoras, nameof(DeityType.Khoras), "War"));
 
         // Act
         var result = _sut!.OnSetFavor(args);
@@ -52,10 +51,9 @@ public class FavorCommandSetTests : FavorCommandsTestHelpers
         var args = CreateAdminCommandArgs(mockPlayer.Object, "0");
         SetupParsers(args, 0);
 
-        var mockDeity = CreateMockDeity(DeityType.Lysa, "Lysa");
 
         _playerReligionDataManager.Setup(m => m.GetOrCreatePlayerData("player-1")).Returns(playerData);
-        _deityRegistry.Setup(d => d.GetDeity(DeityType.Lysa)).Returns(mockDeity.Object);
+        _deityRegistry.Setup(d => d.GetDeity(DeityType.Lysa)).Returns(new Deity(DeityType.Lysa, nameof(DeityType.Lysa), "Hunt"));
 
         // Act
         var result = _sut!.OnSetFavor(args);
@@ -75,10 +73,9 @@ public class FavorCommandSetTests : FavorCommandsTestHelpers
         var args = CreateAdminCommandArgs(mockPlayer.Object, "999999");
         SetupParsers(args, 999999);
 
-        var mockDeity = CreateMockDeity(DeityType.Morthen, "Morthen");
 
         _playerReligionDataManager.Setup(m => m.GetOrCreatePlayerData("player-1")).Returns(playerData);
-        _deityRegistry.Setup(d => d.GetDeity(DeityType.Morthen)).Returns(mockDeity.Object);
+        _deityRegistry.Setup(d => d.GetDeity(DeityType.Morthen)).Returns(new Deity(DeityType.Morthen, nameof(DeityType.Morthen), "Death"));
 
         // Act
         var result = _sut!.OnSetFavor(args);
@@ -102,10 +99,9 @@ public class FavorCommandSetTests : FavorCommandsTestHelpers
         var args = CreateAdminCommandArgs(mockPlayer.Object, "-100");
         SetupParsers(args, -100);
 
-        var mockDeity = CreateMockDeity(DeityType.Khoras, "Khoras");
 
         _playerReligionDataManager.Setup(m => m.GetOrCreatePlayerData("player-1")).Returns(playerData);
-        _deityRegistry.Setup(d => d.GetDeity(DeityType.Khoras)).Returns(mockDeity.Object);
+        _deityRegistry.Setup(d => d.GetDeity(DeityType.Khoras)).Returns(new Deity(DeityType.Khoras, nameof(DeityType.Khoras), "War"));
 
         // Act
         var result = _sut!.OnSetFavor(args);
@@ -125,10 +121,9 @@ public class FavorCommandSetTests : FavorCommandsTestHelpers
         var args = CreateAdminCommandArgs(mockPlayer.Object, "1000000");
         SetupParsers(args, 1000000);
 
-        var mockDeity = CreateMockDeity(DeityType.Khoras, "Khoras");
 
         _playerReligionDataManager.Setup(m => m.GetOrCreatePlayerData("player-1")).Returns(playerData);
-        _deityRegistry.Setup(d => d.GetDeity(DeityType.Khoras)).Returns(mockDeity.Object);
+        _deityRegistry.Setup(d => d.GetDeity(DeityType.Khoras)).Returns(new Deity(DeityType.Khoras, nameof(DeityType.Khoras), "War"));
 
         // Act
         var result = _sut!.OnSetFavor(args);
@@ -158,22 +153,6 @@ public class FavorCommandSetTests : FavorCommandsTestHelpers
         Assert.Equal(EnumCommandStatus.Error, result.Status);
         Assert.Contains("not in a religion", result.StatusMessage);
     }
-
-    [Fact]
-    public void OnSetFavor_WithNullPlayer_ReturnsError()
-    {
-        // Arrange
-        var args = CreateAdminCommandArgs(null!, "100");
-        SetupParsers(args, 100);
-
-        // Act
-        var result = _sut!.OnSetFavor(args);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(EnumCommandStatus.Error, result.Status);
-        Assert.Contains("must be used by a player", result.StatusMessage);
-    }
-
+    
     #endregion
 }

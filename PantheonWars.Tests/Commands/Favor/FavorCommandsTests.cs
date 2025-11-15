@@ -1,6 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using Moq;
+using PantheonWars.Models;
+using PantheonWars.Models.Enum;
 using PantheonWars.Tests.Commands.Helpers;
+using Vintagestory.API.Common;
 
 namespace PantheonWars.Tests.Commands.Favor;
 
@@ -62,30 +65,28 @@ public class FavorCommandsTests : FavorCommandsTestHelpers
     #region Command Registration Tests
 
     [Fact]
-    public void RegisterCommands_Always_CallsChatCommandsCreate()
+    public void RegisterCommands_ExecutesWithoutException()
     {
         // Arrange
-        var mockCommandBuilder = new Mock<IChatCommandBuilder>();
-        mockCommandBuilder.Setup(b => b.WithDescription(It.IsAny<string>())).Returns(mockCommandBuilder.Object);
-        mockCommandBuilder.Setup(b => b.RequiresPlayer()).Returns(mockCommandBuilder.Object);
-        mockCommandBuilder.Setup(b => b.RequiresPrivilege(It.IsAny<string>())).Returns(mockCommandBuilder.Object);
-        mockCommandBuilder.Setup(b => b.HandleWith(It.IsAny<CommandDelegate>())).Returns(mockCommandBuilder.Object);
-        mockCommandBuilder.Setup(b => b.BeginSubCommand(It.IsAny<string>())).Returns(mockCommandBuilder.Object);
-        mockCommandBuilder.Setup(b => b.EndSubCommand()).Returns(mockCommandBuilder.Object);
-        mockCommandBuilder.Setup(b => b.WithArgs(It.IsAny<ICommandArgumentParser>())).Returns(mockCommandBuilder.Object);
+        var mockCommandBuilder = new Mock<IChatCommand>();
+        mockCommandBuilder.Setup(c => c.WithDescription(It.IsAny<string>())).Returns(mockCommandBuilder.Object);
+        mockCommandBuilder.Setup(c => c.RequiresPlayer()).Returns(mockCommandBuilder.Object);
+        mockCommandBuilder.Setup(c => c.RequiresPrivilege(It.IsAny<string>())).Returns(mockCommandBuilder.Object);
+        mockCommandBuilder.Setup(c => c.BeginSubCommand(It.IsAny<string>())).Returns(mockCommandBuilder.Object);
+        mockCommandBuilder.Setup(c => c.WithArgs(It.IsAny<ICommandArgumentParser[]>())).Returns(mockCommandBuilder.Object);
+        mockCommandBuilder.Setup(c => c.HandleWith(It.IsAny<OnCommandDelegate>())).Returns(mockCommandBuilder.Object);
+        mockCommandBuilder.Setup(c => c.EndSubCommand()).Returns(mockCommandBuilder.Object);
+        
+        _mockChatCommands.Setup(c => c.Create(It.IsAny<string>())).Returns(mockCommandBuilder.Object);
 
-        _mockChatCommands.Setup(c => c.Create("favor")).Returns(mockCommandBuilder.Object);
-        _mockChatCommands.Setup(c => c.Parsers).Returns(new Mock<IChatCommandArgumentParsers>().Object);
-
-        var mockParsers = new Mock<IChatCommandArgumentParsers>();
-        var mockIntParser = new Mock<ICommandArgumentParser>();
-        mockParsers.Setup(p => p.Int(It.IsAny<string>())).Returns(mockIntParser.Object);
-        _mockChatCommands.Setup(c => c.Parsers).Returns(mockParsers.Object);
+        var realParsers = new CommandArgumentParsers(_mockSapi.Object);
+        _mockChatCommands.Setup(c => c.Parsers).Returns(realParsers);
 
         // Act
-        _sut!.RegisterCommands();
+        var exception = Record.Exception(() => _sut!.RegisterCommands());
 
         // Assert
+        Assert.Null(exception);
         _mockChatCommands.Verify(c => c.Create("favor"), Times.Once);
         _mockLogger.Verify(l => l.Notification(It.Is<string>(s => s.Contains("Favor commands registered"))), Times.Once);
     }
@@ -104,11 +105,9 @@ public class FavorCommandsTests : FavorCommandsTestHelpers
         var mockPlayer = CreateMockPlayer("player-1", "TestPlayer");
         var playerData = CreatePlayerData("player-1", favor: 0, totalFavor: 0, rank: FavorRank.Initiate);
         var args = CreateCommandArgs(mockPlayer.Object);
-
-        var mockDeity = CreateMockDeity(Models.Enum.DeityType.Khoras, "Khoras");
-
+        
         _playerReligionDataManager.Setup(m => m.GetOrCreatePlayerData("player-1")).Returns(playerData);
-        _deityRegistry.Setup(d => d.GetDeity(Models.Enum.DeityType.Khoras)).Returns(mockDeity.Object);
+        _deityRegistry.Setup(d => d.GetDeity(DeityType.Khoras)).Returns(new Deity(DeityType.Khoras, nameof(DeityType.Khoras), "War"));
 
         // Act
         var result = _sut!.OnFavorInfo(args);
@@ -126,10 +125,9 @@ public class FavorCommandsTests : FavorCommandsTestHelpers
         var playerData = CreatePlayerData("player-1", favor: 600, totalFavor: 600, rank: FavorRank.Disciple);
         var args = CreateCommandArgs(mockPlayer.Object);
 
-        var mockDeity = CreateMockDeity(Models.Enum.DeityType.Khoras, "Khoras");
 
         _playerReligionDataManager.Setup(m => m.GetOrCreatePlayerData("player-1")).Returns(playerData);
-        _deityRegistry.Setup(d => d.GetDeity(Models.Enum.DeityType.Khoras)).Returns(mockDeity.Object);
+        _deityRegistry.Setup(d => d.GetDeity(DeityType.Khoras)).Returns(new Deity(DeityType.Khoras, nameof(DeityType.Khoras), "War"));
 
         // Act
         var result = _sut!.OnFavorInfo(args);
@@ -147,10 +145,9 @@ public class FavorCommandsTests : FavorCommandsTestHelpers
         var playerData = CreatePlayerData("player-1", favor: 3000, totalFavor: 3000, rank: FavorRank.Zealot);
         var args = CreateCommandArgs(mockPlayer.Object);
 
-        var mockDeity = CreateMockDeity(Models.Enum.DeityType.Khoras, "Khoras");
 
         _playerReligionDataManager.Setup(m => m.GetOrCreatePlayerData("player-1")).Returns(playerData);
-        _deityRegistry.Setup(d => d.GetDeity(Models.Enum.DeityType.Khoras)).Returns(mockDeity.Object);
+        _deityRegistry.Setup(d => d.GetDeity(DeityType.Khoras)).Returns(new Deity(DeityType.Khoras, nameof(DeityType.Khoras), "War"));
 
         // Act
         var result = _sut!.OnFavorInfo(args);
@@ -168,10 +165,9 @@ public class FavorCommandsTests : FavorCommandsTestHelpers
         var playerData = CreatePlayerData("player-1", favor: 7000, totalFavor: 7000, rank: FavorRank.Champion);
         var args = CreateCommandArgs(mockPlayer.Object);
 
-        var mockDeity = CreateMockDeity(Models.Enum.DeityType.Khoras, "Khoras");
 
         _playerReligionDataManager.Setup(m => m.GetOrCreatePlayerData("player-1")).Returns(playerData);
-        _deityRegistry.Setup(d => d.GetDeity(Models.Enum.DeityType.Khoras)).Returns(mockDeity.Object);
+        _deityRegistry.Setup(d => d.GetDeity(DeityType.Khoras)).Returns(new Deity(DeityType.Khoras, nameof(DeityType.Khoras), "War"));
 
         // Act
         var result = _sut!.OnFavorInfo(args);
@@ -188,11 +184,9 @@ public class FavorCommandsTests : FavorCommandsTestHelpers
         var mockPlayer = CreateMockPlayer("player-1", "TestPlayer");
         var playerData = CreatePlayerData("player-1", favor: 15000, totalFavor: 15000, rank: FavorRank.Avatar);
         var args = CreateCommandArgs(mockPlayer.Object);
-
-        var mockDeity = CreateMockDeity(Models.Enum.DeityType.Khoras, "Khoras");
-
+        
         _playerReligionDataManager.Setup(m => m.GetOrCreatePlayerData("player-1")).Returns(playerData);
-        _deityRegistry.Setup(d => d.GetDeity(Models.Enum.DeityType.Khoras)).Returns(mockDeity.Object);
+        _deityRegistry.Setup(d => d.GetDeity(DeityType.Khoras)).Returns(new Deity(DeityType.Khoras, nameof(DeityType.Khoras), "War"));
 
         // Act
         var result = _sut!.OnFavorInfo(args);

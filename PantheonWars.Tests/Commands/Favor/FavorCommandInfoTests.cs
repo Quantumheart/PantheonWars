@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Moq;
+using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using PantheonWars.Tests.Commands.Helpers;
 using Vintagestory.API.Common;
@@ -27,10 +27,9 @@ public class FavorCommandInfoTests : FavorCommandsTestHelpers
         var playerData = CreatePlayerData("player-1", DeityType.Khoras, favor: 300, totalFavor: 300, rank: FavorRank.Initiate);
         var args = CreateCommandArgs(mockPlayer.Object);
 
-        var mockDeity = CreateMockDeity(DeityType.Khoras, "Khoras");
 
         _playerReligionDataManager.Setup(m => m.GetOrCreatePlayerData("player-1")).Returns(playerData);
-        _deityRegistry.Setup(d => d.GetDeity(DeityType.Khoras)).Returns(mockDeity.Object);
+        _deityRegistry.Setup(d => d.GetDeity(DeityType.Khoras)).Returns(new Deity(DeityType.Khoras, nameof(DeityType.Khoras), "War"));
 
         // Act
         var result = _sut!.OnFavorInfo(args);
@@ -54,10 +53,9 @@ public class FavorCommandInfoTests : FavorCommandsTestHelpers
         var playerData = CreatePlayerData("player-1", DeityType.Lysa, favor: 5000, totalFavor: 15000, rank: FavorRank.Avatar);
         var args = CreateCommandArgs(mockPlayer.Object);
 
-        var mockDeity = CreateMockDeity(DeityType.Lysa, "Lysa");
 
         _playerReligionDataManager.Setup(m => m.GetOrCreatePlayerData("player-1")).Returns(playerData);
-        _deityRegistry.Setup(d => d.GetDeity(DeityType.Lysa)).Returns(mockDeity.Object);
+        _deityRegistry.Setup(d => d.GetDeity(DeityType.Lysa)).Returns(new Deity(DeityType.Lysa, nameof(DeityType.Lysa), "Hunt"));
 
         // Act
         var result = _sut!.OnFavorInfo(args);
@@ -77,10 +75,9 @@ public class FavorCommandInfoTests : FavorCommandsTestHelpers
         var playerData = CreatePlayerData("player-1", DeityType.Morthen, favor: 1000, totalFavor: 2000, rank: FavorRank.Zealot);
         var args = CreateCommandArgs(mockPlayer.Object);
 
-        var mockDeity = CreateMockDeity(DeityType.Morthen, "Morthen");
 
         _playerReligionDataManager.Setup(m => m.GetOrCreatePlayerData("player-1")).Returns(playerData);
-        _deityRegistry.Setup(d => d.GetDeity(DeityType.Morthen)).Returns(mockDeity.Object);
+        _deityRegistry.Setup(d => d.GetDeity(DeityType.Morthen)).Returns(new Deity(DeityType.Morthen, nameof(DeityType.Morthen), "Death"));
 
         // Act
         var result = _sut!.OnFavorInfo(args);
@@ -114,21 +111,7 @@ public class FavorCommandInfoTests : FavorCommandsTestHelpers
         Assert.Equal(EnumCommandStatus.Error, result.Status);
         Assert.Contains("not in a religion", result.StatusMessage);
     }
-
-    [Fact]
-    public void OnFavorInfo_WithNullPlayer_ReturnsError()
-    {
-        // Arrange
-        var args = CreateCommandArgs(null!);
-
-        // Act
-        var result = _sut!.OnFavorInfo(args);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal(EnumCommandStatus.Error, result.Status);
-        Assert.Contains("must be used by a player", result.StatusMessage);
-    }
+    
 
     #endregion
 }

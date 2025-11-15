@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using Moq;
 using PantheonWars.Commands;
 using PantheonWars.Data;
+using PantheonWars.Models;
 using PantheonWars.Models.Enum;
 using PantheonWars.Systems;
 using PantheonWars.Systems.Interfaces;
@@ -123,19 +124,7 @@ public class FavorCommandsTestHelpers
             ReligionUID = "test-religion-uid"
         };
     }
-
-    /// <summary>
-    /// Creates a mock Deity
-    /// </summary>
-    protected Mock<IDeity> CreateMockDeity(DeityType type, string name)
-    {
-        var mockDeity = new Mock<IDeity>();
-        mockDeity.Setup(d => d.Type).Returns(type);
-        mockDeity.Setup(d => d.Name).Returns(name);
-        mockDeity.Setup(d => d.Description).Returns($"The deity {name}");
-        return mockDeity;
-    }
-
+    
     /// <summary>
     /// Sets up the CommandArgumentParsers with arguments
     /// </summary>
