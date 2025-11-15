@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using PantheonWars.Commands;
 using PantheonWars.GUI;
@@ -8,7 +9,6 @@ using PantheonWars.Network;
 using PantheonWars.Systems;
 using PantheonWars.Systems.BuffSystem;
 using PantheonWars.Systems.BuffSystem.Interfaces;
-using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -16,6 +16,7 @@ using Vintagestory.API.Server;
 
 namespace PantheonWars;
 
+[ExcludeFromCodeCoverage]
 public class PantheonWarsSystem : ModSystem
 {
     public const string NETWORK_CHANNEL = "pantheonwars";
@@ -35,7 +36,6 @@ public class PantheonWarsSystem : ModSystem
     private DeityCommands? _deityCommands;
     private DeityRegistry? _deityRegistry;
     private FavorCommands? _favorCommands;
-    private FavorHudElement? _favorHud;
     private FavorSystem? _favorSystem;
     private BlessingCommands? _blessingCommands;
     private BlessingEffectSystem? _blessingEffectSystem;
@@ -144,17 +144,15 @@ public class PantheonWarsSystem : ModSystem
         _religionPrestigeManager.SetBlessingSystems(_blessingRegistry, _blessingEffectSystem);
 
         // Register commands (pass interfaces for loose coupling)
-        _deityCommands = new DeityCommands(api, _deityRegistry, _playerDataManager, _playerReligionDataManager);
-        _deityCommands.RegisterCommands();
+        // _deityCommands = new DeityCommands(api, _deityRegistry, _playerReligionDataManager);
+        // _deityCommands.RegisterCommands();
 
-        _abilityCommands = new AbilityCommands(api, _abilitySystem, _playerDataManager, _playerReligionDataManager);
-        _abilityCommands.RegisterCommands();
+        // _abilityCommands = new AbilityCommands(api, _abilitySystem, _playerDataManager, _playerReligionDataManager);
+        // _abilityCommands.RegisterCommands();
 
         _favorCommands = new FavorCommands(api, _deityRegistry, _playerReligionDataManager);
         _favorCommands.RegisterCommands();
-
-        _religionCommands = new ReligionCommands(api, _religionManager, _playerReligionDataManager, _serverChannel);
-        _religionCommands.RegisterCommands();
+        
 
         _blessingCommands = new BlessingCommands(api, _blessingRegistry, _playerReligionDataManager, _religionManager,
             _blessingEffectSystem);
@@ -164,7 +162,8 @@ public class PantheonWarsSystem : ModSystem
         _serverChannel = api.Network.GetChannel(NETWORK_CHANNEL);
         _serverChannel.SetMessageHandler<PlayerReligionDataPacket>(OnServerMessageReceived);
         SetupServerNetworking(api);
-
+        _religionCommands = new ReligionCommands(api, _religionManager, _playerReligionDataManager, _serverChannel);
+        _religionCommands.RegisterCommands();
         // Hook player join to send initial data
         api.Event.PlayerJoin += OnPlayerJoin;
 
@@ -189,7 +188,6 @@ public class PantheonWarsSystem : ModSystem
         base.Dispose();
 
         // Cleanup
-        _favorHud?.Dispose();
         _religionDialog?.Dispose();
         _createReligionDialog?.Dispose();
     }
@@ -931,17 +929,6 @@ public class PantheonWarsSystem : ModSystem
 
     private void OnServerPlayerDataUpdate(PlayerReligionDataPacket packet)
     {
-        // Update HUD with server data (deprecated)
-        if (_favorHud != null)
-            _favorHud.UpdateReligionDisplay(
-                packet.ReligionName,
-                packet.Deity,
-                packet.Favor,
-                packet.FavorRank,
-                packet.Prestige,
-                packet.PrestigeRank
-            );
-
         // Trigger event for BlessingDialog and other UI components
         PlayerReligionDataUpdated?.Invoke(packet);
     }
