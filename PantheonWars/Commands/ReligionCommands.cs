@@ -15,21 +15,16 @@ namespace PantheonWars.Commands;
 /// <summary>
 ///     Handles all religion-related chat commands
 /// </summary>
-public class ReligionCommands
+public class ReligionCommands(
+    ICoreServerAPI sapi,
+    IReligionManager religionManager,
+    IPlayerReligionDataManager playerReligionDataManager,
+    IServerNetworkChannel serverChannel)
 {
-    private readonly IPlayerReligionDataManager _playerReligionDataManager;
-    private readonly IReligionManager _religionManager;
-    private readonly ICoreServerAPI _sapi;
-    private readonly IServerNetworkChannel? _serverChannel;
-
-    public ReligionCommands(ICoreServerAPI sapi, IReligionManager religionManager,
-        IPlayerReligionDataManager playerReligionDataManager, IServerNetworkChannel? serverChannel = null)
-    {
-        _sapi = sapi ?? throw new ArgumentNullException(nameof(sapi));
-        _religionManager = religionManager ?? throw new ArgumentNullException(nameof(religionManager));
-        _playerReligionDataManager = playerReligionDataManager ?? throw new ArgumentNullException(nameof(playerReligionDataManager));
-        _serverChannel = serverChannel;
-    }
+    private readonly IPlayerReligionDataManager _playerReligionDataManager = playerReligionDataManager ?? throw new ArgumentNullException(nameof(playerReligionDataManager));
+    private readonly IReligionManager _religionManager = religionManager ?? throw new ArgumentNullException(nameof(religionManager));
+    private readonly ICoreServerAPI _sapi = sapi ?? throw new ArgumentNullException(nameof(sapi));
+    private readonly IServerNetworkChannel? _serverChannel = serverChannel ?? throw new ArgumentNullException(nameof(serverChannel));
 
     /// <summary>
     ///     Registers all religion commands
@@ -112,8 +107,8 @@ public class ReligionCommands
 
     /// <summary>
     ///     Handler for /religion create
-    ///     <name>
-    ///         <deity> [public/private]
+    ///     <name></name>
+    ///     <deity> [public/private]</deity>
     /// </summary>
     internal TextCommandResult OnCreateReligion(TextCommandCallingArgs args)
     {
