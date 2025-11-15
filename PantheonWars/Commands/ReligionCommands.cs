@@ -18,16 +18,16 @@ namespace PantheonWars.Commands;
 public class ReligionCommands
 {
     private readonly IPlayerReligionDataManager _playerReligionDataManager;
-    private readonly ReligionManager _religionManager;
+    private readonly IReligionManager _religionManager;
     private readonly ICoreServerAPI _sapi;
     private readonly IServerNetworkChannel? _serverChannel;
 
-    public ReligionCommands(ICoreServerAPI sapi, ReligionManager religionManager,
+    public ReligionCommands(ICoreServerAPI sapi, IReligionManager religionManager,
         IPlayerReligionDataManager playerReligionDataManager, IServerNetworkChannel? serverChannel = null)
     {
-        _sapi = sapi;
-        _religionManager = religionManager;
-        _playerReligionDataManager = playerReligionDataManager;
+        _sapi = sapi ?? throw new ArgumentNullException(nameof(sapi));
+        _religionManager = religionManager ?? throw new ArgumentNullException(nameof(religionManager));
+        _playerReligionDataManager = playerReligionDataManager ?? throw new ArgumentNullException(nameof(playerReligionDataManager));
         _serverChannel = serverChannel;
     }
 
@@ -115,7 +115,7 @@ public class ReligionCommands
     ///     <name>
     ///         <deity> [public/private]
     /// </summary>
-    private TextCommandResult OnCreateReligion(TextCommandCallingArgs args)
+    internal TextCommandResult OnCreateReligion(TextCommandCallingArgs args)
     {
         var religionName = (string)args[0];
         var deityName = (string)args[1];
@@ -156,7 +156,7 @@ public class ReligionCommands
     /// <summary>
     ///     Handler for /religion join <name>
     /// </summary>
-    private TextCommandResult OnJoinReligion(TextCommandCallingArgs args)
+    internal TextCommandResult OnJoinReligion(TextCommandCallingArgs args)
     {
         var religionName = (string)args[0];
 
@@ -195,7 +195,7 @@ public class ReligionCommands
     /// <summary>
     ///     Handler for /religion leave
     /// </summary>
-    private TextCommandResult OnLeaveReligion(TextCommandCallingArgs args)
+    internal TextCommandResult OnLeaveReligion(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command can only be used by players");
@@ -216,7 +216,7 @@ public class ReligionCommands
     /// <summary>
     ///     Handler for /religion list [deity]
     /// </summary>
-    private TextCommandResult OnListReligions(TextCommandCallingArgs args)
+    internal TextCommandResult OnListReligions(TextCommandCallingArgs args)
     {
         var deityFilter = args.Parsers.Count > 0 ? (string?)args[0] : null;
 
@@ -247,7 +247,7 @@ public class ReligionCommands
     /// <summary>
     ///     Handler for /religion info [name]
     /// </summary>
-    private TextCommandResult OnReligionInfo(TextCommandCallingArgs args)
+    internal TextCommandResult OnReligionInfo(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command can only be used by players");
@@ -292,7 +292,7 @@ public class ReligionCommands
     /// <summary>
     ///     Handler for /religion members
     /// </summary>
-    private TextCommandResult OnListMembers(TextCommandCallingArgs args)
+    internal TextCommandResult OnListMembers(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command can only be used by players");
@@ -323,7 +323,7 @@ public class ReligionCommands
     /// <summary>
     ///     Handler for /religion invite <playername>
     /// </summary>
-    private TextCommandResult OnInvitePlayer(TextCommandCallingArgs args)
+    internal TextCommandResult OnInvitePlayer(TextCommandCallingArgs args)
     {
         var targetPlayerName = (string)args[0];
 
@@ -364,7 +364,7 @@ public class ReligionCommands
     /// <summary>
     ///     Handler for /religion kick <playername>
     /// </summary>
-    private TextCommandResult OnKickPlayer(TextCommandCallingArgs args)
+    internal TextCommandResult OnKickPlayer(TextCommandCallingArgs args)
     {
         var targetPlayerName = (string)args[0];
 
@@ -414,7 +414,7 @@ public class ReligionCommands
     /// <summary>
     ///     Handler for /religion ban <playername> [reason] [days]
     /// </summary>
-    private TextCommandResult OnBanPlayer(TextCommandCallingArgs args)
+    internal TextCommandResult OnBanPlayer(TextCommandCallingArgs args)
     {
         var targetPlayerName = (string)args[0];
         var reason = args.Parsers.Count > 1 ? (string?)args[1] : "No reason provided";
@@ -475,7 +475,7 @@ public class ReligionCommands
     /// <summary>
     ///     Handler for /religion unban <playername>
     /// </summary>
-    private TextCommandResult OnUnbanPlayer(TextCommandCallingArgs args)
+    internal TextCommandResult OnUnbanPlayer(TextCommandCallingArgs args)
     {
         var targetPlayerName = (string)args[0];
 
@@ -509,7 +509,7 @@ public class ReligionCommands
     /// <summary>
     ///     Handler for /religion banlist
     /// </summary>
-    private TextCommandResult OnListBannedPlayers(TextCommandCallingArgs args)
+    internal TextCommandResult OnListBannedPlayers(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command can only be used by players");
@@ -555,7 +555,7 @@ public class ReligionCommands
     /// <summary>
     ///     Handler for /religion disband
     /// </summary>
-    private TextCommandResult OnDisbandReligion(TextCommandCallingArgs args)
+    internal TextCommandResult OnDisbandReligion(TextCommandCallingArgs args)
     {
         var player = args.Caller.Player as IServerPlayer;
         if (player == null) return TextCommandResult.Error("Command can only be used by players");
@@ -613,7 +613,7 @@ public class ReligionCommands
     /// <summary>
     ///     Handler for /religion description <text>
     /// </summary>
-    private TextCommandResult OnSetDescription(TextCommandCallingArgs args)
+    internal TextCommandResult OnSetDescription(TextCommandCallingArgs args)
     {
         var description = (string)args[0];
 
