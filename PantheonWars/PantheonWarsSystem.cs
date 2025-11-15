@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using PantheonWars.Commands;
 using PantheonWars.GUI;
@@ -8,7 +9,6 @@ using PantheonWars.Network;
 using PantheonWars.Systems;
 using PantheonWars.Systems.BuffSystem;
 using PantheonWars.Systems.BuffSystem.Interfaces;
-using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Client;
 using Vintagestory.API.Common;
 using Vintagestory.API.Config;
@@ -16,6 +16,7 @@ using Vintagestory.API.Server;
 
 namespace PantheonWars;
 
+[ExcludeFromCodeCoverage]
 public class PantheonWarsSystem : ModSystem
 {
     public const string NETWORK_CHANNEL = "pantheonwars";
@@ -35,7 +36,6 @@ public class PantheonWarsSystem : ModSystem
     private DeityCommands? _deityCommands;
     private DeityRegistry? _deityRegistry;
     private FavorCommands? _favorCommands;
-    private FavorHudElement? _favorHud;
     private FavorSystem? _favorSystem;
     private BlessingCommands? _blessingCommands;
     private BlessingEffectSystem? _blessingEffectSystem;
@@ -144,17 +144,15 @@ public class PantheonWarsSystem : ModSystem
         _religionPrestigeManager.SetBlessingSystems(_blessingRegistry, _blessingEffectSystem);
 
         // Register commands (pass interfaces for loose coupling)
-        _deityCommands = new DeityCommands(api, _deityRegistry, _playerDataManager, _playerReligionDataManager);
-        _deityCommands.RegisterCommands();
+        // _deityCommands = new DeityCommands(api, _deityRegistry, _playerReligionDataManager);
+        // _deityCommands.RegisterCommands();
 
-        _abilityCommands = new AbilityCommands(api, _abilitySystem, _playerDataManager, _playerReligionDataManager);
-        _abilityCommands.RegisterCommands();
+        // _abilityCommands = new AbilityCommands(api, _abilitySystem, _playerDataManager, _playerReligionDataManager);
+        // _abilityCommands.RegisterCommands();
 
         _favorCommands = new FavorCommands(api, _deityRegistry, _playerReligionDataManager);
         _favorCommands.RegisterCommands();
-
-        _religionCommands = new ReligionCommands(api, _religionManager, _playerReligionDataManager, _serverChannel);
-        _religionCommands.RegisterCommands();
+        
 
         _blessingCommands = new BlessingCommands(api, _blessingRegistry, _playerReligionDataManager, _religionManager,
             _blessingEffectSystem);
@@ -164,7 +162,8 @@ public class PantheonWarsSystem : ModSystem
         _serverChannel = api.Network.GetChannel(NETWORK_CHANNEL);
         _serverChannel.SetMessageHandler<PlayerReligionDataPacket>(OnServerMessageReceived);
         SetupServerNetworking(api);
-
+        _religionCommands = new ReligionCommands(api, _religionManager, _playerReligionDataManager, _serverChannel);
+        _religionCommands.RegisterCommands();
         // Hook player join to send initial data
         api.Event.PlayerJoin += OnPlayerJoin;
 
@@ -189,7 +188,6 @@ public class PantheonWarsSystem : ModSystem
         base.Dispose();
 
         // Cleanup
-        _favorHud?.Dispose();
         _religionDialog?.Dispose();
         _createReligionDialog?.Dispose();
     }
@@ -275,6 +273,27 @@ public class PantheonWarsSystem : ModSystem
                     IsFounder = memberUID == religion.FounderUID
                 });
             }
+
+            // Build banned players list (only for founder)
+            if (response.IsFounder)
+            {
+                var bannedPlayers = _religionManager!.GetBannedPlayers(religion.ReligionUID);
+                foreach (var banEntry in bannedPlayers)
+                {
+                    var bannedPlayer = _sapi!.World.PlayerByUid(banEntry.PlayerUID);
+                    var bannedName = bannedPlayer?.PlayerName ?? banEntry.PlayerUID;
+
+                    response.BannedPlayers.Add(new PlayerReligionInfoResponsePacket.BanInfo
+                    {
+                        PlayerUID = banEntry.PlayerUID,
+                        PlayerName = bannedName,
+                        Reason = banEntry.Reason,
+                        BannedAt = banEntry.BannedAt.ToString("yyyy-MM-dd HH:mm"),
+                        ExpiresAt = banEntry.ExpiresAt?.ToString("yyyy-MM-dd HH:mm") ?? "Never",
+                        IsPermanent = banEntry.ExpiresAt == null
+                    });
+                }
+            }
         }
         else
         {
@@ -294,7 +313,24 @@ public class PantheonWarsSystem : ModSystem
             switch (packet.Action.ToLower())
             {
                 case "join":
-                    if (_religionManager!.CanJoinReligion(packet.ReligionUID, fromPlayer.PlayerUID))
+                    // Check if player is banned before attempting to join
+                    if (_religionManager!.IsBanned(packet.ReligionUID, fromPlayer.PlayerUID))
+                    {
+                        var banDetails = _religionManager.GetBanDetails(packet.ReligionUID, fromPlayer.PlayerUID);
+                        if (banDetails != null)
+                        {
+                            var expiryText = banDetails.ExpiresAt == null
+                                ? "Permanent ban"
+                                : $"Expires: {banDetails.ExpiresAt:yyyy-MM-dd HH:mm}";
+                            message =
+                                $"You are banned from this religion. Reason: {banDetails.Reason}. {expiryText}";
+                        }
+                        else
+                        {
+                            message = "You are banned from this religion.";
+                        }
+                    }
+                    else if (_religionManager.CanJoinReligion(packet.ReligionUID, fromPlayer.PlayerUID))
                     {
                         _playerReligionDataManager!.JoinReligion(fromPlayer.PlayerUID, packet.ReligionUID);
                         var religion = _religionManager.GetReligion(packet.ReligionUID);
@@ -371,6 +407,97 @@ public class PantheonWarsSystem : ModSystem
                     else
                     {
                         message = "Only the founder can kick members.";
+                    }
+
+                    break;
+
+                case "ban":
+                    var religionForBan = _religionManager!.GetPlayerReligion(fromPlayer.PlayerUID);
+                    if (religionForBan != null && religionForBan.IsFounder(fromPlayer.PlayerUID))
+                    {
+                        if (packet.TargetPlayerUID != fromPlayer.PlayerUID)
+                        {
+                            // Extract ban parameters from packet data
+                            string reason = "No reason provided";
+                            int? expiryDays = null;
+
+                            if (packet.Data != null)
+                            {
+                                if (packet.Data.ContainsKey("Reason"))
+                                    reason = packet.Data["Reason"]?.ToString() ?? "No reason provided";
+
+                                if (packet.Data.ContainsKey("ExpiryDays"))
+                                {
+                                    var expiryValue = packet.Data["ExpiryDays"]?.ToString();
+                                    if (!string.IsNullOrEmpty(expiryValue) && int.TryParse(expiryValue, out var days) &&
+                                        days > 0) expiryDays = days;
+                                }
+                            }
+
+                            // Kick the player if they're still a member
+                            if (religionForBan.IsMember(packet.TargetPlayerUID))
+                                _playerReligionDataManager!.LeaveReligion(packet.TargetPlayerUID);
+
+                            // Ban the player
+                            _religionManager.BanPlayer(
+                                religionForBan.ReligionUID,
+                                packet.TargetPlayerUID,
+                                fromPlayer.PlayerUID,
+                                reason,
+                                expiryDays
+                            );
+
+                            var expiryText = expiryDays.HasValue ? $" for {expiryDays} days" : " permanently";
+                            message = $"Player has been banned from the religion{expiryText}. Reason: {reason}";
+                            success = true;
+
+                            // Notify banned player if online
+                            var bannedPlayer = _sapi!.World.PlayerByUid(packet.TargetPlayerUID) as IServerPlayer;
+                            if (bannedPlayer != null)
+                            {
+                                bannedPlayer.SendMessage(0,
+                                    $"You have been banned from {religionForBan.ReligionName}. Reason: {reason}",
+                                    EnumChatType.Notification);
+                                SendPlayerDataToClient(bannedPlayer);
+
+                                // Send religion state changed packet
+                                var statePacket = new ReligionStateChangedPacket
+                                {
+                                    Reason = $"You have been banned from {religionForBan.ReligionName}. Reason: {reason}",
+                                    HasReligion = false
+                                };
+                                _serverChannel!.SendPacket(statePacket, bannedPlayer);
+                            }
+                        }
+                        else
+                        {
+                            message = "You cannot ban yourself.";
+                        }
+                    }
+                    else
+                    {
+                        message = "Only the founder can ban members.";
+                    }
+
+                    break;
+
+                case "unban":
+                    var religionForUnban = _religionManager!.GetPlayerReligion(fromPlayer.PlayerUID);
+                    if (religionForUnban != null && religionForUnban.IsFounder(fromPlayer.PlayerUID))
+                    {
+                        if (_religionManager.UnbanPlayer(religionForUnban.ReligionUID, packet.TargetPlayerUID))
+                        {
+                            message = "Player has been unbanned from the religion.";
+                            success = true;
+                        }
+                        else
+                        {
+                            message = "Failed to unban player. They may not be banned.";
+                        }
+                    }
+                    else
+                    {
+                        message = "Only the founder can unban players.";
                     }
 
                     break;
@@ -802,17 +929,6 @@ public class PantheonWarsSystem : ModSystem
 
     private void OnServerPlayerDataUpdate(PlayerReligionDataPacket packet)
     {
-        // Update HUD with server data (deprecated)
-        if (_favorHud != null)
-            _favorHud.UpdateReligionDisplay(
-                packet.ReligionName,
-                packet.Deity,
-                packet.Favor,
-                packet.FavorRank,
-                packet.Prestige,
-                packet.PrestigeRank
-            );
-
         // Trigger event for BlessingDialog and other UI components
         PlayerReligionDataUpdated?.Invoke(packet);
     }

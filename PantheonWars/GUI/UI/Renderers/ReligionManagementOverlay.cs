@@ -47,6 +47,8 @@ internal static class ReligionManagementOverlay
     /// <param name="windowHeight">Parent window height</param>
     /// <param name="onClose">Callback when close clicked</param>
     /// <param name="onKickMember">Callback when kick clicked (memberUID)</param>
+    /// <param name="onBanMember">Callback when ban clicked (memberUID)</param>
+    /// <param name="onUnbanMember">Callback when unban clicked (playerUID)</param>
     /// <param name="onInvitePlayer">Callback when invite clicked (playerName)</param>
     /// <param name="onEditDescription">Callback when save description clicked (description)</param>
     /// <param name="onDisband">Callback when disband confirmed</param>
@@ -58,6 +60,8 @@ internal static class ReligionManagementOverlay
         int windowHeight,
         Action onClose,
         Action<string> onKickMember,
+        Action<string> onBanMember,
+        Action<string> onUnbanMember,
         Action<string> onInvitePlayer,
         Action<string> onEditDescription,
         Action onDisband,
@@ -146,8 +150,18 @@ internal static class ReligionManagementOverlay
         const float memberListHeight = 200f;
         var members = _state.ReligionInfo?.Members ?? new List<PlayerReligionInfoResponsePacket.MemberInfo>();
         _state.MemberScrollY = MemberListRenderer.Draw(drawList, api, overlayX + padding, currentY,
-            overlayWidth - padding * 2, memberListHeight, members, _state.MemberScrollY, onKickMember);
+            overlayWidth - padding * 2, memberListHeight, members, _state.MemberScrollY, onKickMember, onBanMember);
         currentY += memberListHeight + padding;
+
+        // === BANNED PLAYERS LIST ===
+        DrawSectionLabel(drawList, "Banned Players", overlayX + padding, currentY);
+        currentY += 25f;
+
+        const float banListHeight = 150f;
+        var bannedPlayers = _state.ReligionInfo?.BannedPlayers ?? new List<PlayerReligionInfoResponsePacket.BanInfo>();
+        _state.BanListScrollY = BanListRenderer.Draw(drawList, api, overlayX + padding, currentY,
+            overlayWidth - padding * 2, banListHeight, bannedPlayers, _state.BanListScrollY, onUnbanMember);
+        currentY += banListHeight + padding;
 
         // === INVITE PLAYER ===
         DrawSectionLabel(drawList, "Invite Player", overlayX + padding, currentY);

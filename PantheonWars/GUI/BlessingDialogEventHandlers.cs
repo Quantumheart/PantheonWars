@@ -241,6 +241,12 @@ public partial class BlessingDialog
 
             // Request fresh blessing data (religion may have changed)
             _pantheonWarsSystem?.RequestBlessingData();
+
+            // Request updated religion info to refresh member count (for join/kick/ban/invite actions)
+            if (packet.Action == "join" || packet.Action == "kick" || packet.Action == "ban" || packet.Action == "invite")
+            {
+                _pantheonWarsSystem?.RequestPlayerReligionInfo();
+            }
         }
         else
         {
@@ -346,11 +352,13 @@ public partial class BlessingDialog
         if (packet.HasReligion)
         {
             _manager!.PlayerRoleInReligion = packet.IsFounder ? "Leader" : "Member";
-            _capi!.Logger.Debug($"[PantheonWars] Set PlayerRoleInReligion to: {_manager.PlayerRoleInReligion}");
+            _manager.ReligionMemberCount = packet.Members.Count;
+            _capi!.Logger.Debug($"[PantheonWars] Set PlayerRoleInReligion to: {_manager.PlayerRoleInReligion}, MemberCount: {_manager.ReligionMemberCount}");
         }
         else
         {
             _manager!.PlayerRoleInReligion = null;
+            _manager.ReligionMemberCount = 0;
             _capi!.Logger.Debug("[PantheonWars] Cleared PlayerRoleInReligion (no religion)");
         }
 
@@ -373,6 +381,27 @@ public partial class BlessingDialog
     {
         _capi!.Logger.Debug($"[PantheonWars] Kicking member: {memberUID}");
         _pantheonWarsSystem?.RequestReligionAction("kick", _manager!.CurrentReligionUID ?? "", memberUID);
+    }
+
+    /// <summary>
+    ///     Handle Ban Member action
+    /// </summary>
+    private void OnBanMemberClicked(string memberUID)
+    {
+        _capi!.Logger.Debug($"[PantheonWars] Banning member: {memberUID}");
+        // Note: The ban dialog will be shown by the ImGui renderer, which will handle the actual ban request
+        // This is just a placeholder - the actual ban flow goes through BanPlayerDialog in the standard GUI
+        // For ImGui, we need to implement a similar flow or trigger the BanPlayerDialog
+        _pantheonWarsSystem?.RequestReligionAction("ban", _manager!.CurrentReligionUID ?? "", memberUID);
+    }
+
+    /// <summary>
+    ///     Handle Unban Member action
+    /// </summary>
+    private void OnUnbanMemberClicked(string playerUID)
+    {
+        _capi!.Logger.Debug($"[PantheonWars] Unbanning player: {playerUID}");
+        _pantheonWarsSystem?.RequestReligionAction("unban", _manager!.CurrentReligionUID ?? "", playerUID);
     }
 
     /// <summary>

@@ -153,6 +153,9 @@ public class ReligionManager : IReligionManager
         // Check if already a member
         if (religion.IsMember(playerUID)) return false;
 
+        // Check if player is banned
+        if (IsBanned(religionUID, playerUID)) return false;
+
         // Check if public or has invitation
         if (religion.IsPublic) return true;
 
@@ -248,6 +251,86 @@ public class ReligionManager : IReligionManager
         _religions.Remove(religionUID);
         _sapi.Logger.Notification($"[PantheonWars] Religion {religion.ReligionName} disbanded by founder");
         return true;
+    }
+
+    /// <summary>
+    ///     Bans a player from a religion
+    /// </summary>
+    public bool BanPlayer(string religionUID, string playerUID, string bannedByUID, string reason = "",
+        int? expiryDays = null)
+    {
+        if (!_religions.TryGetValue(religionUID, out var religion))
+        {
+            _sapi.Logger.Error($"[PantheonWars] Cannot ban player from non-existent religion: {religionUID}");
+            return false;
+        }
+
+        var banEntry = new BanEntry(
+            playerUID,
+            bannedByUID,
+            reason,
+            expiryDays.HasValue ? DateTime.UtcNow.AddDays(expiryDays.Value) : null
+        );
+
+        religion.AddBannedPlayer(playerUID, banEntry);
+
+        var expiryText = expiryDays.HasValue ? $" for {expiryDays} days" : " permanently";
+        _sapi.Logger.Notification(
+            $"[PantheonWars] Player {playerUID} banned from {religion.ReligionName}{expiryText}. Reason: {reason}");
+
+        return true;
+    }
+
+    /// <summary>
+    ///     Unbans a player from a religion
+    /// </summary>
+    public bool UnbanPlayer(string religionUID, string playerUID)
+    {
+        if (!_religions.TryGetValue(religionUID, out var religion))
+        {
+            _sapi.Logger.Error($"[PantheonWars] Cannot unban player from non-existent religion: {religionUID}");
+            return false;
+        }
+
+        var removed = religion.RemoveBannedPlayer(playerUID);
+
+        if (removed)
+            _sapi.Logger.Notification($"[PantheonWars] Player {playerUID} unbanned from {religion.ReligionName}");
+
+        return removed;
+    }
+
+    /// <summary>
+    ///     Checks if a player is banned from a religion
+    /// </summary>
+    public bool IsBanned(string religionUID, string playerUID)
+    {
+        if (!_religions.TryGetValue(religionUID, out var religion)) return false;
+
+        religion.CleanupExpiredBans();
+        return religion.IsBanned(playerUID);
+    }
+
+    /// <summary>
+    ///     Gets the ban details for a player
+    /// </summary>
+    public BanEntry? GetBanDetails(string religionUID, string playerUID)
+    {
+        if (!_religions.TryGetValue(religionUID, out var religion)) return null;
+
+        religion.CleanupExpiredBans();
+        return religion.GetBannedPlayer(playerUID);
+    }
+
+    /// <summary>
+    ///     Gets all banned players for a religion
+    /// </summary>
+    public List<BanEntry> GetBannedPlayers(string religionUID)
+    {
+        if (!_religions.TryGetValue(religionUID, out var religion)) return new List<BanEntry>();
+
+        religion.CleanupExpiredBans();
+        return religion.GetActiveBans();
     }
 
     /// <summary>

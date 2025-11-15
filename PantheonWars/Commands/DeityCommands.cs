@@ -1,7 +1,7 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
-using PantheonWars.Systems;
 using PantheonWars.Systems.Interfaces;
 using Vintagestory.API.Common;
 using Vintagestory.API.Server;
@@ -11,18 +11,17 @@ namespace PantheonWars.Commands;
 /// <summary>
 ///     Chat commands for deity management
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class DeityCommands
 {
     private readonly IDeityRegistry _deityRegistry;
-    private readonly PlayerDataManager _playerDataManager;
     private readonly IPlayerReligionDataManager _religionDataManager;
     private readonly ICoreServerAPI _sapi;
 
-    public DeityCommands(ICoreServerAPI sapi, IDeityRegistry deityRegistry, PlayerDataManager playerDataManager, IPlayerReligionDataManager religionDataManager)
+    public DeityCommands(ICoreServerAPI sapi, IDeityRegistry deityRegistry, IPlayerReligionDataManager religionDataManager)
     {
         _sapi = sapi;
         _deityRegistry = deityRegistry;
-        _playerDataManager = playerDataManager;
         _religionDataManager = religionDataManager;
     }
 

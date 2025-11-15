@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using PantheonWars.Models.Enum;
@@ -11,6 +12,7 @@ namespace PantheonWars.Commands;
 /// <summary>
 ///     Chat commands for ability management
 /// </summary>
+[ExcludeFromCodeCoverage]
 public class AbilityCommands
 {
     private readonly AbilitySystem _abilitySystem;
